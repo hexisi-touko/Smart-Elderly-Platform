@@ -1,0 +1,42 @@
+﻿Total tables: 18
+
+=== Table 0 ===
+Plain Text
+老人触发预警（设备自动监测/手动呼叫）→ 系统采集预警信息（位置、健康数据）→ 同步推送至紧急联系人、服务提供商、急救中心 → 服务提供商响应（≤15分钟）→ 上门处置/急救联动 → 上传处置结果 → 系统记录归档 → 同步结果至相关方	
+=== Table 1 ===
+Plain Text
+用户（老人/子女）发起服务预约 → 选择服务类型、时间、需求 → 系统大数据匹配服务商 → 服务商接单确认 → 生成服务订单并同步 → 服务人员上门服务 → 上传服务记录与照片 → 用户评价 → 系统结算费用 → 订单归档	
+=== Table 2 ===
+Plain Text
+智能设备采集健康数据 → 数据传输至平台 → 大数据模块清洗、整合、加密 → 实时展示至多端 → 分析数据趋势/异常 → 正常数据留存 → 异常数据触发预警 → 推送提醒与干预建议 → 生成健康报告	
+=== Table 3 ===
+Plain Text
+用户发起注册 → 选择角色 → 填写基本信息 → 实名认证（身份证/人脸识别）→ 注册成功 → 老人账号可绑定子女账号（授权确认）→ 完善设备绑定、紧急联系人信息 → 正常使用系统	
+=== Table 4 ===
+实体类别	实体名称	核心说明	关联业务模块	用户维度	老人（Elderly）	存储老人基础信息、健康状态、隐私数据（加密），为核心服务对象	全模块	用户维度	监护人（Guardian）	存储老人家属/监护人信息，关联老人账号，接收预警、服务通知	安全应急、健康管理	用户维度	服务人员（ServiceStaff）	存储护理员、社工等服务人员信息，关联服务订单与执行记录	生活照料、精神慰藉	用户维度	系统用户（SystemUser）	存储运营、监管人员账号信息，关联操作权限与审计日志	系统管理、权限管控	服务维度	服务商（ServiceProvider）	存储入驻服务商信息、资质审核状态，关联服务订单与结算数据	服务管理、订单结算	服务维度	服务项目（ServiceItem）	存储标准化服务内容、价格、时长，为订单创建的基础	服务预约、订单管理	服务维度	线下活动（OfflineActivity）	存储线下文娱、社交活动信息，关联报名与核销记录	精神慰藉	设备维度	智能设备（SmartDevice）	存储设备基础信息、绑定状态、维护记录，采集健康与安全数据	健康管理、安全应急	设备维度	设备阈值（HealthThreshold）	存储个性化健康预警阈值，支撑差异化预警规则配置	健康管理、安全应急	设备维度	线上课程（OnlineCourse）	存储线上兴趣班、健康讲座信息，关联报名与学习记录	精神慰藉	数据维度	健康记录（HealthRecord）	存储多渠道采集的健康数据，关联设备与采集方式	健康管理	数据维度	安全预警（SafetyAlert）	存储设备触发的安全预警信息，关联处置流程与服务人员	安全应急	数据维度	服务订单（ServiceOrder）	存储订单基础信息、状态流转，关联服务项目与结算数据	订单管理、服务结算	数据维度	支付记录（PaymentRecord）	存储订单支付、退款信息，关联第三方支付流水，支撑对账	订单结算、财务管控	数据维度	服务评价（ServiceEvaluation）	存储老人/监护人对服务的评价，关联订单与服务人员	服务管理、质量管控	数据维度	用药提醒（MedicationReminder）	存储慢病用药提醒信息，关联服药确认状态	健康管理	数据维度	体检预约（PhysicalExamReservation）	存储体检预约信息、报告状态，关联第三方体检机构	健康管理	数据维度	系统日志（SystemLog）	存储系统操作记录，关联操作人员与权限，支撑审计追溯	系统管理、安全管控	
+=== Table 5 ===
+字段名	数据类型	约束	核心说明	elderly_id	VARCHAR(36)	PK、UUID	老人唯一标识	name	VARCHAR(50)	NOT NULL	老人姓名	id_card	VARCHAR(100)	NOT NULL、AES加密	身份证号，隐私加密存储	phone	VARCHAR(50)	AES加密	老人手机号，隐私加密存储	health_status	TINYINT	NOT NULL、枚举	健康状态（0-健康、1-慢病、2-失能）	address	VARCHAR(200)	-	居住地址	backup_flag	TINYINT	DEFAULT 0	备份标记（0-未备份、1-已备份），避免重复备份	
+=== Table 6 ===
+字段名	数据类型	约束	核心说明	id	VARCHAR(36)	PK、UUID	唯一标识	elderly_id	VARCHAR(36)	FK、NOT NULL	关联老人表主键	chronic_type	VARCHAR(50)	NOT NULL	慢病类型（如高血压、糖尿病）	
+=== Table 7 ===
+字段名	数据类型	约束	核心说明	device_id	VARCHAR(36)	PK、UUID	设备唯一标识	device_code	VARCHAR(50)	NOT NULL、唯一	设备硬件编码	device_type	VARCHAR(50)	NOT NULL	设备类型（如血压计、红外探测器）	elderly_id	VARCHAR(36)	FK	关联老人ID，支持设备换绑	device_brand	VARCHAR(50)	-	设备品牌，支撑维护排查	device_model	VARCHAR(50)	-	设备型号，适配固件升级	maintenance_time	DATETIME	-	上次维护时间，提醒定期检修	push_status	TINYINT	DEFAULT 1	推送状态（0-关闭、1-开启），支持个性化设置	
+=== Table 8 ===
+字段名	数据类型	约束	核心说明	record_id	VARCHAR(36)	PK、UUID	记录唯一标识	elderly_id	VARCHAR(36)	FK、NOT NULL	关联老人ID	device_id	VARCHAR(36)	FK	关联采集设备ID，手动录入时为空	collect_time	DATETIME	NOT NULL	数据采集时间	record_type	VARCHAR(50)	NOT NULL	记录类型（如血压、血糖）	collect_method	TINYINT	NOT NULL	采集方式（0-智能设备、1-手动录入）	data_source	VARCHAR(20)	NOT NULL	数据来源（设备/手动/医院同步），适配诊疗数据对接	systolic_bp	INT	-	收缩压，仅血压类型记录填写	diastolic_bp	INT	-	舒张压，仅血压类型记录填写	blood_sugar	DECIMAL(5,2)	-	血糖值，完善老人健康档案数据维度	backup_flag	TINYINT	DEFAULT 0	备份标记，保障健康数据安全留存	
+=== Table 9 ===
+字段名	数据类型	约束	核心说明	alert_id	VARCHAR(36)	PK、UUID	预警唯一标识	elderly_id	VARCHAR(36)	FK、NOT NULL	关联老人ID	device_id	VARCHAR(36)	FK、NOT NULL	关联触发预警的设备ID	alert_type	VARCHAR(50)	NOT NULL	预警类型（如跌倒、血压异常）	alert_time	DATETIME	NOT NULL	预警触发时间	response_time	DATETIME	-	服务商接单时间，用于计算15分钟响应时长	urge_count	TINYINT	DEFAULT 0	子女一键催促次数，用于服务商考核	handler_id	VARCHAR(36)	-	处理人ID，逻辑关联服务商/运营人员账号	handler_role	VARCHAR(20)	NOT NULL、枚举	处理人角色（服务商/运营），明确责任主体	alert_lng	DECIMAL(10,6)	NOT NULL	预警地点经度，精准定位	alert_lat	DECIMAL(10,6)	NOT NULL	预警地点纬度，精准定位	alert_address	VARCHAR(100)	NOT NULL	预警地点文字描述，便于展示	alert_status	TINYINT	NOT NULL	预警状态（0-未处理、1-处理中、2-已完成）	emergency_order_id	VARCHAR(50)	-	急救系统订单号，对接第三方急救接口	
+=== Table 10 ===
+字段名	数据类型	约束	核心说明	order_id	VARCHAR(36)	PK、UUID	订单唯一标识	elderly_id	VARCHAR(36)	FK、NOT NULL	关联老人ID	provider_id	VARCHAR(36)	FK、NOT NULL	关联服务商ID	service_item_id	VARCHAR(36)	FK、NOT NULL	关联服务项目ID	order_amount	DECIMAL(10,2)	NOT NULL	订单金额	service_time	DATETIME	NOT NULL	约定服务时间	order_status	TINYINT	NOT NULL、枚举	订单状态（0-待支付、1-待接单、2-服务中、3-已完成、4-已取消、5-退款中、6-已退款）	
+=== Table 11 ===
+字段名	数据类型	约束	核心说明	payment_id	VARCHAR(36)	PK、UUID	支付记录唯一标识	order_id	VARCHAR(36)	FK、NOT NULL、唯一	关联服务订单ID，1:1对应	payment_amount	DECIMAL(10,2)	NOT NULL	支付金额，与订单金额一致	payment_time	DATETIME	NOT NULL	支付时间	payment_status	TINYINT	NOT NULL	支付状态（0-未支付、1-已支付）	transaction_id	VARCHAR(100)	-	第三方支付流水号，支撑对账	refund_flag	TINYINT	DEFAULT 0	退款标记（0-未退款、1-已退款）	refund_time	DATETIME	-	退款时间，仅退款时填写	
+=== Table 12 ===
+字段名	数据类型	约束	核心说明	role_id	VARCHAR(36)	PK、UUID	角色唯一标识	role_name	VARCHAR(50)	NOT NULL、唯一	角色名称（如运营人员、监管人员、服务商）	role_desc	VARCHAR(200)	-	角色权限描述	
+=== Table 13 ===
+字段名	数据类型	约束	核心说明	id	VARCHAR(36)	PK、UUID	唯一标识	role_id	VARCHAR(36)	FK、NOT NULL	关联角色表主键	permission_code	VARCHAR(50)	NOT NULL	权限编码（如order:query、elderly:edit）	
+=== Table 14 ===
+字段名	数据类型	约束	核心说明	provider_id	VARCHAR(36)	PK、UUID	服务商唯一标识	provider_name	VARCHAR(100)	NOT NULL、唯一	服务商名称	license_code	VARCHAR(100)	NOT NULL、唯一	资质许可证号，用于资质审核	contact_person	VARCHAR(50)	NOT NULL	联系人姓名	contact_phone	VARCHAR(50)	NOT NULL、AES加密	联系人手机号，隐私加密存储	address	VARCHAR(200)	NOT NULL	服务商办公地址	audit_status	TINYINT	NOT NULL、枚举	审核状态（0-待审核、1-已通过、2-已驳回）	service_scope	VARCHAR(200)	NOT NULL	服务范围（如生活照料、应急救援）	score	DECIMAL(3,2)	DEFAULT 5.00	服务商综合评分，用于考核评级	
+=== Table 15 ===
+字段名	数据类型	约束	核心说明	staff_id	VARCHAR(36)	PK、UUID	服务人员唯一标识	staff_name	VARCHAR(50)	NOT NULL	服务人员姓名	provider_id	VARCHAR(36)	FK、NOT NULL	关联所属服务商ID	phone	VARCHAR(50)	NOT NULL、AES加密	服务人员手机号，隐私加密存储	certificate	VARCHAR(100)	-	职业资格证书编号（如护理证）	status	TINYINT	NOT NULL、枚举	工作状态（0-休息、1-在岗、2-请假）	
+=== Table 16 ===
+字段名	数据类型	约束	核心说明	evaluation_id	VARCHAR(36)	PK、UUID	评价唯一标识	order_id	VARCHAR(36)	FK、NOT NULL、唯一	关联服务订单ID，1:1对应	elderly_id	VARCHAR(36)	FK、NOT NULL	评价人（老人/监护人）ID	star_level	TINYINT	NOT NULL	星级评分（1-5分），支撑“先评价后支付”逻辑	evaluation_content	TEXT	-	评价内容，支持长文本描述	proof_photos	TEXT	-	照片凭证，存储阿里云OSS链接（多链接用逗号分隔），TEXT类型避免字符溢出	evaluation_time	DATETIME	NOT NULL	评价提交时间	
+=== Table 17 ===
+字段名	数据类型	约束	核心说明	threshold_id	VARCHAR(36)	PK、UUID	阈值唯一标识	elderly_id	VARCHAR(36)	FK、NOT NULL、唯一	关联老人ID，一人一套个性化阈值	sys_bp_max	INT	NOT NULL	收缩压上限阈值（默认140）	sys_bp_min	INT	NOT NULL	收缩压下限阈值（默认90）	dia_bp_max	INT	NOT NULL	舒张压上限阈值（默认90）	dia_bp_min	INT	NOT NULL	舒张压下限阈值（默认60）	heart_rate_max	INT	NOT NULL	心率上限阈值（默认100）	heart_rate_min	INT	NOT NULL	心率下限阈值（默认60）	blood_sugar_max	DECIMAL(5,2)	NOT NULL	血糖上限阈值（默认7.0）	blood_sugar_min	DECIMAL(5,2)	NOT NULL	血糖下限阈值（默认3.9）	update_time	DATETIME	NOT NULL	阈值更新时间，同步至Redis缓存	

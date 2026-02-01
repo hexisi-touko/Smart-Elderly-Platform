@@ -1,0 +1,57 @@
+# 创建 .gitignore 文件，排除不需要版本控制的文件
+@"
+# IDE 配置
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 依赖文件
+**/node_modules/
+**/target/
+**/dist/
+**/build/
+**/bin/
+**/out/
+**/.gradle/
+
+# 日志文件
+**/*.log
+**/logs/
+
+# 环境配置文件（包含敏感信息）
+**/.env
+**/.env.local
+**/.env.*.local
+**/application*.yml
+**/application*.properties
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 临时文件
+*.tmp
+*.temp
+
+# 数据库文件
+*.db
+*.sqlite
+
+# 上传文件
+**/uploadPath/
+
+# 编译产物
+*.class
+*.jar
+*.war
+*.ear
+
+# 若依特定文件
+**/ruoyi-admin/logs/
+**/ruoyi-admin/target/
+"@ | Out-File .gitignore -Encoding UTF8
+
+# 查看创建的 .gitignore
+cat .gitignore
