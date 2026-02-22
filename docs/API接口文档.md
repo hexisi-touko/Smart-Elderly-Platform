@@ -1,8 +1,8 @@
 # 智慧居家养老服务平台 API 接口文档
 
 > **版本**: v1.0.0  
-> **更新时间**: 2026-02-02  
-> **基础路径**: `/api/v1`
+> **更新时间**: 2026-02-11  
+> **基础路径**: 无全局前缀（与 RuoYi 默认一致，业务模块通过路径自行区分）
 
 ---
 
@@ -31,7 +31,7 @@
 |------------|----------------|----------|
 | `/auth/register` | 无（需新增） | 在 `ruoyi-admin` 新增注册接口 |
 | `/login` | `/login` | ✅ 已对齐 |
-| `/auth/logout` | `/logout` | 建议改为 `/logout` 对齐 |
+| `/logout` | `/logout` | ✅ 已对齐 |
 | `/auth/sms/send` | 无（需新增） | 新增短信验证码接口 |
 
 **权限白名单配置**（`SecurityConfig.java`）：
@@ -167,6 +167,12 @@ Authorization: Bearer {token}
 |------|------|------|------|
 | file | file | 是 | 上传的文件 |
 | bizType | string | 是 | 业务类型：`avatar`/`evaluation`/`license`/`service_record`/`report` |
+| maxSize | int | 否 | 最大文件大小（KB），默认图片5MB、其他20MB |
+
+> **格式限制**
+> - 图片文件：最大 5MB，支持 `jpg/jpeg/png/gif`
+> - 其他文件：最大 20MB，支持 `pdf/doc/docx/xls/xlsx`
+> - 不符合格式要求时返回 `400` 错误：`{"code": 400, "msg": "文件格式不支持"}`
 
 **响应示例**
 
@@ -222,6 +228,16 @@ async function retryWithBackoff(fn, maxRetries = 5) {
   }
 }
 ```
+
+### 1.9 接口版本管理
+
+当前为 v1.0.0 版本。后续若接口发生不兼容变更，将通过以下方式兼容：
+
+| 策略 | 说明 |
+|------|------|
+| **路径版本** | 新版本接口加 `/v2/` 前缀，旧版本保持不变 |
+| **请求头版本** | 通过 `Accept-Version: v2` 请求头指定版本 |
+| **过渡期** | 旧版本至少保留 6 个月并标记 Deprecated |
 
 ---
 
@@ -295,9 +311,8 @@ async function retryWithBackoff(fn, maxRetries = 5) {
   "code": 200,
   "msg": "登录成功",
   "data": {
-    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
-    "expiresIn": 7200,
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "expiresIn": 1800000,
     "userInfo": {
       "userId": "550e8400-e29b-41d4-a716-446655440000",
       "phone": "138****8888",
@@ -309,29 +324,19 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 }
 ```
 
----
-
-### 2.4 刷新Token
-
-**POST** `/auth/token/refresh`
-
-**请求参数**
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| refreshToken | string | 是 | 刷新令牌 |
+> 📌 采用 RuoYi 原生单 Token 机制（accessToken + 自动续期），无需前端管理 refreshToken
 
 ---
 
-### 2.5 退出登录
+### 2.4 退出登录
 
-**POST** `/auth/logout`
+**POST** `/logout`
 
 **请求参数**: 无
 
 ---
 
-### 2.6 修改密码
+### 2.5 修改密码
 
 **PUT** `/auth/password`
 
@@ -344,7 +349,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 ---
 
-### 2.7 重置密码
+### 2.6 重置密码
 
 **POST** `/auth/password/reset`
 
@@ -577,7 +582,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 4.1.1 绑定设备
 
-**POST** `/device/bind`
+**POST** `/devices/bind`
 
 **请求参数**
 
@@ -605,7 +610,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 4.1.2 解绑设备
 
-**POST** `/device/unbind`
+**POST** `/devices/unbind`
 
 **请求参数**
 
@@ -623,7 +628,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 4.1.4 更新设备推送设置
 
-**PUT** `/device/{deviceId}/push-setting`
+**PUT** `/devices/{deviceId}/push-setting`
 
 **请求参数**
 
@@ -660,6 +665,62 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 > - 若触发 `429 Too Many Requests` 错误，**前端应采用指数退避重试策略**（参见 1.8 节）
 > - 数据会先写入 Redis 缓存队列，异步批量入库，确保高吞吐量
 > - 异常数据（如收缩压 > 200 或 < 50）会被标记为 `data_status=2`（异常待处理）并触发预警
+
+---
+
+#### 4.2.1b 批量上报健康数据（高并发设备场景）
+
+**POST** `/health/records/batch`
+
+> 适用于智能设备网关批量上报数据，单次最多 100 条
+
+**请求参数**
+
+```json
+{
+  "records": [
+    {
+      "elderlyId": "xxx",
+      "deviceId": "xxx",
+      "recordType": "血压",
+      "collectMethod": 0,
+      "collectTime": "2026-02-11 14:30:00",
+      "systolicBp": 125,
+      "diastolicBp": 80
+    },
+    {
+      "elderlyId": "xxx",
+      "deviceId": "xxx",
+      "recordType": "心率",
+      "collectMethod": 0,
+      "collectTime": "2026-02-11 14:30:00",
+      "heartRate": 72
+    }
+  ]
+}
+```
+
+**响应示例**
+
+```json
+{
+  "code": 200,
+  "msg": "批量上报成功",
+  "data": {
+    "total": 100,
+    "success": 98,
+    "failed": 2,
+    "failedRecords": [
+      {
+        "index": 15,
+        "reason": "收缩压超出合理范围（50-250）"
+      }
+    ]
+  }
+}
+```
+
+> ⚠️ 批量接口同样受限流保护，触发 429 时请使用指数退避重试（参见 1.8 节）
 
 ---
 
@@ -908,7 +969,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 5.2.2 获取预警详情
 
-**GET** `/alert/{alertId}`
+**GET** `/alerts/{alertId}`
 
 **响应示例**
 
@@ -1002,7 +1063,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 6.1.2 获取服务项目详情
 
-**GET** `/service-item/{itemId}`
+**GET** `/service-items/{itemId}`
 
 ---
 
@@ -1025,13 +1086,13 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 6.1.4 更新服务项目
 
-**PUT** `/service-item/{itemId}`
+**PUT** `/service-items/{itemId}`
 
 ---
 
 #### 6.1.5 上下架服务项目
 
-**PUT** `/service-item/{itemId}/status`
+**PUT** `/service-items/{itemId}/status`
 
 **请求参数**
 
@@ -1095,7 +1156,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 6.2.3 获取订单详情
 
-**GET** `/order/{orderId}`
+**GET** `/orders/{orderId}`
 
 **响应示例**
 
@@ -1142,7 +1203,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 6.2.4 服务商接单
 
-**PUT** `/order/{orderId}/accept`
+**PUT** `/orders/{orderId}/accept`
 
 **请求参数**
 
@@ -1155,13 +1216,13 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 6.2.5 开始服务
 
-**PUT** `/order/{orderId}/start`
+**PUT** `/orders/{orderId}/start`
 
 ---
 
 #### 6.2.6 完成服务
 
-**PUT** `/order/{orderId}/complete`
+**PUT** `/orders/{orderId}/complete`
 
 **请求参数**
 
@@ -1174,7 +1235,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 6.2.7 取消订单
 
-**PUT** `/order/{orderId}/cancel`
+**PUT** `/orders/{orderId}/cancel`
 
 **请求参数**
 
@@ -1186,7 +1247,21 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 6.2.8 获取服务人员实时位置
 
-**GET** `/order/{orderId}/staff-location`
+**GET** `/orders/{orderId}/staff-location`
+
+---
+
+#### 6.2.9 服务人员上报位置
+
+**PUT** `/staff/{staffId}/location`
+
+**请求参数**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| lng | decimal | 是 | 经度 |
+| lat | decimal | 是 | 纬度 |
+| address | string | 否 | 地址描述 |
 
 ---
 
@@ -1194,7 +1269,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 6.3.1 提交服务评价
 
-**POST** `/order/{orderId}/evaluation`
+**POST** `/orders/{orderId}/evaluation`
 
 **请求参数**
 
@@ -1208,7 +1283,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 6.3.2 获取订单评价
 
-**GET** `/order/{orderId}/evaluation`
+**GET** `/orders/{orderId}/evaluation`
 
 ---
 
@@ -1450,7 +1525,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 8.2.1 申请退款
 
-**POST** `/order/{orderId}/refund`
+**POST** `/orders/{orderId}/refund`
 
 **请求参数**
 
@@ -1493,21 +1568,25 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 8.3.2 获取结算单详情
 
-**GET** `/settlement/{settlementId}`
+**GET** `/settlements/{settlementId}`
 
 ---
 
 #### 8.3.3 申请提现
 
-**POST** `/settlement/{settlementId}/withdraw`
+**POST** `/settlements/{settlementId}/withdraw`
 
-> ⚠️ 需遵循 T+7 结算周期
+> ⚠️ **T+7 结算规则说明**
+> - T+7 从订单关联的 `t_service_evaluation.evaluation_time`（评价完成时间）开始计算
+> - 即订单完成且评价提交各7个自然日后，方可申请提现
+> - 若订单超过 7 天未评价，视为默认好评，从订单完成时间开始计算 T+7
+> - 未円5 T+7 周期时返回错误：`{"code": 4031, "msg": "未达到T+7结算周期，最早可提现日期：YYYY-MM-DD"}`
 
 ---
 
 #### 8.3.4 审核提现（运营端）
 
-**PUT** `/admin/settlement/{settlementId}/audit`
+**PUT** `/admin/settlements/{settlementId}/audit`
 
 **请求参数**
 
@@ -1520,7 +1599,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 8.3.5 确认转账完成（运营端）
 
-**PUT** `/admin/settlement/{settlementId}/transfer`
+**PUT** `/admin/settlements/{settlementId}/transfer`
 
 **请求参数**
 
@@ -1557,13 +1636,13 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 9.1.3 更新角色
 
-**PUT** `/admin/role/{roleId}`
+**PUT** `/admin/roles/{roleId}`
 
 ---
 
 #### 9.1.4 删除角色
 
-**DELETE** `/admin/role/{roleId}`
+**DELETE** `/admin/roles/{roleId}`
 
 ---
 
@@ -1601,13 +1680,13 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 9.2.3 更新系统用户
 
-**PUT** `/admin/user/{userId}`
+**PUT** `/admin/users/{userId}`
 
 ---
 
 #### 9.2.4 禁用/启用用户
 
-**PUT** `/admin/user/{userId}/status`
+**PUT** `/admin/users/{userId}/status`
 
 **请求参数**
 
@@ -1619,7 +1698,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 9.2.5 重置用户密码
 
-**PUT** `/admin/user/{userId}/password/reset`
+**PUT** `/admin/users/{userId}/password/reset`
 
 ---
 
@@ -1633,7 +1712,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 9.3.2 审核服务商
 
-**PUT** `/admin/provider/{providerId}/audit`
+**PUT** `/admin/providers/{providerId}/audit`
 
 **请求参数**
 
@@ -1666,7 +1745,7 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
 #### 9.4.2 获取日志详情
 
-**GET** `/admin/log/{logId}`
+**GET** `/admin/logs/{logId}`
 
 ---
 

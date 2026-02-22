@@ -1,12 +1,14 @@
 -- ============================================================================
 -- 智慧居家养老服务平台 - 数据库初始化脚本
 -- 数据库版本: MySQL 8.0
--- 生成时间: 2026-02-01
+-- 更新时间: 2026-02-11
 -- 说明: 
 --   1. 所有主键使用 VARCHAR(36) 存储 UUID
 --   2. 敏感字段（身份证号、手机号、银行卡号）需使用 AES 加密
 --   3. 所有业务表包含逻辑删除字段 is_deleted
 --   4. 所有表包含审计字段：create_time, update_time
+--   5. 后台管理端权限体系复用 RuoYi 自带的 sys_user/sys_role/sys_menu
+--   6. C端用户（老人/监护人/服务商）通过 t_app_user 统一管理登录态
 -- ============================================================================
 
 -- 创建数据库
@@ -18,10 +20,32 @@ USE smart_elderly_platform;
 -- 一、用户维度核心表
 -- ============================================================================
 
--- 1. 老人表
+-- 1. C端用户账号表（统一管理老人/监护人/服务商的登录态）
+DROP TABLE IF EXISTS t_app_user;
+CREATE TABLE t_app_user (
+    user_id VARCHAR(36) PRIMARY KEY COMMENT '用户唯一标识（UUID）',
+    phone VARCHAR(50) NOT NULL COMMENT '手机号（登录账号，需 AES 加密）',
+    password VARCHAR(100) NOT NULL COMMENT '密码（BCrypt 加密）',
+    real_name VARCHAR(50) NOT NULL COMMENT '真实姓名',
+    user_type VARCHAR(20) NOT NULL COMMENT '用户类型（elderly-老人、guardian-监护人、provider-服务商）',
+    avatar VARCHAR(200) COMMENT '头像URL',
+    status TINYINT DEFAULT 1 COMMENT '账号状态（0-禁用、1-正常）',
+    last_login_time DATETIME COMMENT '最后登录时间',
+    last_login_ip VARCHAR(50) COMMENT '最后登录IP',
+    is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_phone (phone),
+    INDEX idx_user_type (user_type),
+    INDEX idx_status (status),
+    INDEX idx_is_deleted (is_deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='C端用户账号表';
+
+-- 2. 老人表
 DROP TABLE IF EXISTS t_elderly;
 CREATE TABLE t_elderly (
     elderly_id VARCHAR(36) PRIMARY KEY COMMENT '老人唯一标识（UUID）',
+    user_id VARCHAR(36) NOT NULL COMMENT '关联C端用户ID（t_app_user.user_id）',
     name VARCHAR(50) NOT NULL COMMENT '老人姓名',
     id_card VARCHAR(100) NOT NULL COMMENT '身份证号（需 AES 加密）',
     phone VARCHAR(50) COMMENT '老人手机号（需 AES 加密）',
@@ -35,12 +59,13 @@ CREATE TABLE t_elderly (
     is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_user_id (user_id),
     INDEX idx_phone (phone),
     INDEX idx_health_status (health_status),
     INDEX idx_is_deleted (is_deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='老人基础信息表';
 
--- 2. 老人慢病关联表
+-- 3. 老人慢病关联表
 DROP TABLE IF EXISTS t_elderly_chronic;
 CREATE TABLE t_elderly_chronic (
     id VARCHAR(36) PRIMARY KEY COMMENT '唯一标识（UUID）',
@@ -55,10 +80,11 @@ CREATE TABLE t_elderly_chronic (
     INDEX idx_is_deleted (is_deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='老人慢病关联表';
 
--- 3. 监护人表
+-- 4. 监护人表
 DROP TABLE IF EXISTS t_guardian;
 CREATE TABLE t_guardian (
     guardian_id VARCHAR(36) PRIMARY KEY COMMENT '监护人唯一标识（UUID）',
+    user_id VARCHAR(36) NOT NULL COMMENT '关联C端用户ID（t_app_user.user_id）',
     name VARCHAR(50) NOT NULL COMMENT '监护人姓名',
     id_card VARCHAR(100) NOT NULL COMMENT '身份证号（需 AES 加密）',
     phone VARCHAR(50) NOT NULL COMMENT '监护人手机号（需 AES 加密）',
@@ -67,11 +93,12 @@ CREATE TABLE t_guardian (
     is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_user_id (user_id),
     INDEX idx_phone (phone),
     INDEX idx_is_deleted (is_deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='监护人信息表';
 
--- 4. 老人-监护人关联表（N:M中间表）
+-- 5. 老人-监护人关联表（N:M中间表）
 DROP TABLE IF EXISTS t_elderly_guardian;
 CREATE TABLE t_elderly_guardian (
     id VARCHAR(36) PRIMARY KEY COMMENT '唯一标识（UUID）',
@@ -87,7 +114,7 @@ CREATE TABLE t_elderly_guardian (
     UNIQUE KEY uk_elderly_guardian (elderly_id, guardian_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='老人-监护人关联表';
 
--- 5. 服务人员表
+-- 6. 服务人员表
 DROP TABLE IF EXISTS t_service_staff;
 CREATE TABLE t_service_staff (
     staff_id VARCHAR(36) PRIMARY KEY COMMENT '服务人员唯一标识（UUID）',
@@ -107,29 +134,6 @@ CREATE TABLE t_service_staff (
     INDEX idx_is_deleted (is_deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='服务人员信息表';
 
--- 6. 系统用户表（运营、监管人员）
-DROP TABLE IF EXISTS t_system_user;
-CREATE TABLE t_system_user (
-    user_id VARCHAR(36) PRIMARY KEY COMMENT '用户唯一标识（UUID）',
-    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名（登录账号）',
-    password VARCHAR(100) NOT NULL COMMENT '密码（SHA-256哈希）',
-    real_name VARCHAR(50) NOT NULL COMMENT '真实姓名',
-    phone VARCHAR(50) COMMENT '手机号（需 AES 加密）',
-    email VARCHAR(100) COMMENT '电子邮箱',
-    role_id VARCHAR(36) NOT NULL COMMENT '关联角色ID',
-    user_type VARCHAR(20) NOT NULL COMMENT '用户类型（运营人员、监管人员、系统管理员）',
-    status TINYINT DEFAULT 1 COMMENT '账号状态（0-禁用、1-正常）',
-    last_login_time DATETIME COMMENT '最后登录时间',
-    last_login_ip VARCHAR(50) COMMENT '最后登录IP',
-    is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_username (username),
-    INDEX idx_role_id (role_id),
-    INDEX idx_phone (phone),
-    INDEX idx_is_deleted (is_deleted)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统用户表';
-
 -- ============================================================================
 -- 二、服务维度核心表
 -- ============================================================================
@@ -138,6 +142,7 @@ CREATE TABLE t_system_user (
 DROP TABLE IF EXISTS t_service_provider;
 CREATE TABLE t_service_provider (
     provider_id VARCHAR(36) PRIMARY KEY COMMENT '服务商唯一标识（UUID）',
+    user_id VARCHAR(36) NOT NULL COMMENT '关联C端用户ID（t_app_user.user_id）',
     provider_name VARCHAR(100) NOT NULL UNIQUE COMMENT '服务商名称',
     license_code VARCHAR(100) NOT NULL UNIQUE COMMENT '资质许可证号',
     contact_person VARCHAR(50) NOT NULL COMMENT '联系人姓名',
@@ -151,6 +156,7 @@ CREATE TABLE t_service_provider (
     is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_user_id (user_id),
     INDEX idx_provider_name (provider_name),
     INDEX idx_audit_status (audit_status),
     INDEX idx_score (score),
@@ -296,6 +302,7 @@ CREATE TABLE t_smart_device (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='智能设备表';
 
 -- 14. 健康记录表（建议按年度分表，如 t_health_record_2026）
+-- 已移除冗余字段 data_source，由 collect_method 统一表示数据来源
 DROP TABLE IF EXISTS t_health_record;
 CREATE TABLE t_health_record (
     record_id VARCHAR(36) PRIMARY KEY COMMENT '记录唯一标识（UUID）',
@@ -304,7 +311,6 @@ CREATE TABLE t_health_record (
     collect_time DATETIME NOT NULL COMMENT '数据采集时间',
     record_type VARCHAR(50) NOT NULL COMMENT '记录类型（血压、血糖、心率、体温、血氧等）',
     collect_method TINYINT NOT NULL COMMENT '采集方式（0-智能设备、1-手动录入、2-医院同步）',
-    data_source VARCHAR(20) NOT NULL COMMENT '数据来源（设备、手动、医院）',
     systolic_bp INT COMMENT '收缩压（mmHg），仅血压类型记录填写',
     diastolic_bp INT COMMENT '舒张压（mmHg），仅血压类型记录填写',
     blood_sugar DECIMAL(5,2) COMMENT '血糖值（mmol/L）',
@@ -318,7 +324,6 @@ CREATE TABLE t_health_record (
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_elderly_collect_type (elderly_id, collect_time, record_type),
-    INDEX idx_data_source (data_source),
     INDEX idx_collect_time (collect_time),
     INDEX idx_data_status (data_status),
     INDEX idx_is_deleted (is_deleted)
@@ -347,6 +352,7 @@ CREATE TABLE t_health_threshold (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='健康阈值表';
 
 -- 16. 安全预警记录表（建议按年度分表，如 t_safety_alert_2026）
+-- handler_role 由 VARCHAR 改为 TINYINT 枚举，避免魔法字符串
 DROP TABLE IF EXISTS t_safety_alert;
 CREATE TABLE t_safety_alert (
     alert_id VARCHAR(36) PRIMARY KEY COMMENT '预警唯一标识（UUID）',
@@ -358,7 +364,7 @@ CREATE TABLE t_safety_alert (
     complete_time DATETIME COMMENT '处置完成时间',
     urge_count TINYINT DEFAULT 0 COMMENT '子女一键催促次数',
     handler_id VARCHAR(36) COMMENT '处理人ID（服务商/运营人员账号）',
-    handler_role VARCHAR(20) NOT NULL COMMENT '处理人角色（服务商、运营）',
+    handler_role TINYINT COMMENT '处理人角色（0-服务商、1-运营人员、2-系统自动）',
     alert_lng DECIMAL(10,6) NOT NULL COMMENT '预警地点经度',
     alert_lat DECIMAL(10,6) NOT NULL COMMENT '预警地点纬度',
     alert_address VARCHAR(100) NOT NULL COMMENT '预警地点文字描述',
@@ -375,7 +381,27 @@ CREATE TABLE t_safety_alert (
     INDEX idx_is_deleted (is_deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='安全预警记录表';
 
--- 17. 用药提醒表
+-- 17. 安全区域/地理围栏表（支持"离开安全区域"预警类型）
+DROP TABLE IF EXISTS t_safety_zone;
+CREATE TABLE t_safety_zone (
+    zone_id VARCHAR(36) PRIMARY KEY COMMENT '安全区域唯一标识（UUID）',
+    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
+    zone_name VARCHAR(50) NOT NULL COMMENT '区域名称（如"家"、"社区"）',
+    center_lng DECIMAL(10,6) NOT NULL COMMENT '区域中心经度',
+    center_lat DECIMAL(10,6) NOT NULL COMMENT '区域中心纬度',
+    radius INT NOT NULL DEFAULT 500 COMMENT '区域半径（米）',
+    zone_address VARCHAR(200) COMMENT '区域地址描述',
+    is_active TINYINT DEFAULT 1 COMMENT '是否启用（0-停用、1-启用）',
+    is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_elderly_id (elderly_id),
+    INDEX idx_is_active (is_active),
+    INDEX idx_is_deleted (is_deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='安全区域/地理围栏表';
+
+-- 18. 用药提醒表
+-- 已移除 is_taken 和 last_taken_time，服药记录由 t_medication_log 表管理
 DROP TABLE IF EXISTS t_medication_reminder;
 CREATE TABLE t_medication_reminder (
     reminder_id VARCHAR(36) PRIMARY KEY COMMENT '提醒唯一标识（UUID）',
@@ -387,8 +413,6 @@ CREATE TABLE t_medication_reminder (
     reminder_time TIME NOT NULL COMMENT '提醒时间',
     start_date DATE NOT NULL COMMENT '开始日期',
     end_date DATE COMMENT '结束日期',
-    is_taken TINYINT DEFAULT 0 COMMENT '今日是否已服药（0-未服药、1-已服药）',
-    last_taken_time DATETIME COMMENT '最后服药确认时间',
     note TEXT COMMENT '备注说明',
     status TINYINT DEFAULT 1 COMMENT '提醒状态（0-已停用、1-正常）',
     is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
@@ -400,7 +424,28 @@ CREATE TABLE t_medication_reminder (
     INDEX idx_is_deleted (is_deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用药提醒表';
 
--- 18. 体检预约表
+-- 19. 用药记录表（记录每次服药确认，支持追踪历史服药情况）
+DROP TABLE IF EXISTS t_medication_log;
+CREATE TABLE t_medication_log (
+    log_id VARCHAR(36) PRIMARY KEY COMMENT '记录唯一标识（UUID）',
+    reminder_id VARCHAR(36) NOT NULL COMMENT '关联用药提醒ID',
+    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
+    medication_name VARCHAR(100) NOT NULL COMMENT '药品名称',
+    scheduled_time DATETIME NOT NULL COMMENT '计划服药时间',
+    taken_time DATETIME COMMENT '实际服药确认时间',
+    is_taken TINYINT DEFAULT 0 COMMENT '是否已服药（0-未服药、1-已服药、2-跳过）',
+    skip_reason VARCHAR(200) COMMENT '跳过原因',
+    is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_reminder_id (reminder_id),
+    INDEX idx_elderly_id (elderly_id),
+    INDEX idx_scheduled_time (scheduled_time),
+    INDEX idx_is_taken (is_taken),
+    INDEX idx_is_deleted (is_deleted)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用药记录表';
+
+-- 20. 体检预约表
 DROP TABLE IF EXISTS t_physical_exam_reservation;
 CREATE TABLE t_physical_exam_reservation (
     reservation_id VARCHAR(36) PRIMARY KEY COMMENT '预约唯一标识（UUID）',
@@ -428,7 +473,7 @@ CREATE TABLE t_physical_exam_reservation (
 -- 四、服务与订单核心表
 -- ============================================================================
 
--- 19. 服务订单表
+-- 21. 服务订单表
 DROP TABLE IF EXISTS t_service_order;
 CREATE TABLE t_service_order (
     order_id VARCHAR(36) PRIMARY KEY COMMENT '订单唯一标识（UUID）',
@@ -455,7 +500,7 @@ CREATE TABLE t_service_order (
     INDEX idx_is_deleted (is_deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='服务订单表';
 
--- 20. 订单-服务人员关联表（N:M中间表，支持多人协作服务）
+-- 22. 订单-服务人员关联表（N:M中间表，支持多人协作服务）
 DROP TABLE IF EXISTS t_order_staff;
 CREATE TABLE t_order_staff (
     id VARCHAR(36) PRIMARY KEY COMMENT '唯一标识（UUID）',
@@ -470,7 +515,7 @@ CREATE TABLE t_order_staff (
     INDEX idx_is_deleted (is_deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='订单-服务人员关联表';
 
--- 21. 支付记录表
+-- 23. 支付记录表
 DROP TABLE IF EXISTS t_payment_record;
 CREATE TABLE t_payment_record (
     payment_id VARCHAR(36) PRIMARY KEY COMMENT '支付记录唯一标识（UUID）',
@@ -493,7 +538,8 @@ CREATE TABLE t_payment_record (
     INDEX idx_is_deleted (is_deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='支付记录表';
 
--- 22. 服务评价表
+-- 24. 服务评价表
+-- proof_photos 由逗号分隔字符串改为 JSON 数组，便于查询和管理
 DROP TABLE IF EXISTS t_service_evaluation;
 CREATE TABLE t_service_evaluation (
     evaluation_id VARCHAR(36) PRIMARY KEY COMMENT '评价唯一标识（UUID）',
@@ -501,7 +547,7 @@ CREATE TABLE t_service_evaluation (
     elderly_id VARCHAR(36) NOT NULL COMMENT '评价人ID（老人/监护人）',
     star_level TINYINT NOT NULL COMMENT '星级评分（1-5分）',
     evaluation_content TEXT COMMENT '评价内容',
-    proof_photos TEXT COMMENT '照片凭证（阿里云OSS链接，多链接用逗号分隔）',
+    proof_photos JSON COMMENT '照片凭证（JSON数组，每项为阿里云OSS链接）',
     evaluation_time DATETIME NOT NULL COMMENT '评价提交时间',
     provider_reply TEXT COMMENT '服务商回复',
     reply_time DATETIME COMMENT '回复时间',
@@ -515,42 +561,38 @@ CREATE TABLE t_service_evaluation (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='服务评价表';
 
 -- ============================================================================
--- 五、权限与审计核心表
+-- 五、消息与通知表
 -- ============================================================================
 
--- 23. 角色表
-DROP TABLE IF EXISTS t_role;
-CREATE TABLE t_role (
-    role_id VARCHAR(36) PRIMARY KEY COMMENT '角色唯一标识（UUID）',
-    role_name VARCHAR(50) NOT NULL UNIQUE COMMENT '角色名称（如运营人员、监管人员、服务商管理员）',
-    role_code VARCHAR(50) NOT NULL UNIQUE COMMENT '角色编码（如ROLE_OPERATOR、ROLE_SUPERVISOR）',
-    role_desc VARCHAR(200) COMMENT '角色权限描述',
-    sort_order INT DEFAULT 0 COMMENT '显示排序',
-    status TINYINT DEFAULT 1 COMMENT '角色状态（0-禁用、1-正常）',
+-- 25. 消息通知表（持久化 WebSocket 推送消息，支持离线消息补偿）
+DROP TABLE IF EXISTS t_notification;
+CREATE TABLE t_notification (
+    notification_id VARCHAR(36) PRIMARY KEY COMMENT '通知唯一标识（UUID）',
+    user_id VARCHAR(36) NOT NULL COMMENT '接收用户ID（t_app_user.user_id 或 RuoYi sys_user.user_id）',
+    user_type VARCHAR(20) NOT NULL COMMENT '用户来源（app-C端用户、admin-管理端用户）',
+    notification_type VARCHAR(50) NOT NULL COMMENT '通知类型（alert.new/alert.update/order.status/health.abnormal/medication.remind/activity.remind）',
+    title VARCHAR(100) NOT NULL COMMENT '通知标题',
+    content TEXT NOT NULL COMMENT '通知内容（JSON格式，与WebSocket推送报文data一致）',
+    priority TINYINT DEFAULT 0 COMMENT '优先级（0-普通、1-重要、2-紧急）',
+    is_read TINYINT DEFAULT 0 COMMENT '是否已读（0-未读、1-已读）',
+    read_time DATETIME COMMENT '阅读时间',
+    biz_id VARCHAR(36) COMMENT '关联业务ID（如alertId、orderId等）',
+    biz_type VARCHAR(50) COMMENT '业务类型（alert/order/health/medication/activity）',
     is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_role_code (role_code),
+    INDEX idx_user_read (user_id, is_read),
+    INDEX idx_notification_type (notification_type),
+    INDEX idx_create_time (create_time),
+    INDEX idx_biz_id (biz_id),
     INDEX idx_is_deleted (is_deleted)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='消息通知表';
 
--- 24. 角色权限关联表
-DROP TABLE IF EXISTS t_role_permission;
-CREATE TABLE t_role_permission (
-    id VARCHAR(36) PRIMARY KEY COMMENT '唯一标识（UUID）',
-    role_id VARCHAR(36) NOT NULL COMMENT '关联角色ID',
-    permission_code VARCHAR(50) NOT NULL COMMENT '权限编码（如order:query、elderly:edit、system:manage）',
-    permission_name VARCHAR(100) COMMENT '权限名称',
-    is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_role_id (role_id),
-    INDEX idx_permission_code (permission_code),
-    INDEX idx_is_deleted (is_deleted),
-    UNIQUE KEY uk_role_permission (role_id, permission_code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色权限关联表';
+-- ============================================================================
+-- 六、系统审计表
+-- ============================================================================
 
--- 25. 系统日志表
+-- 26. 系统日志表
 DROP TABLE IF EXISTS t_system_log;
 CREATE TABLE t_system_log (
     log_id VARCHAR(36) PRIMARY KEY COMMENT '日志唯一标识（UUID）',
@@ -577,10 +619,10 @@ CREATE TABLE t_system_log (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统日志表';
 
 -- ============================================================================
--- 六、结算相关表（补充）
+-- 七、结算相关表
 -- ============================================================================
 
--- 26. 服务商结算表
+-- 27. 服务商结算表
 DROP TABLE IF EXISTS t_provider_settlement;
 CREATE TABLE t_provider_settlement (
     settlement_id VARCHAR(36) PRIMARY KEY COMMENT '结算唯一标识（UUID）',
@@ -605,24 +647,21 @@ CREATE TABLE t_provider_settlement (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='服务商结算表';
 
 -- ============================================================================
--- 七、数据初始化（示例）
+-- 八、说明
 -- ============================================================================
-
--- 插入默认角色
-INSERT INTO t_role (role_id, role_name, role_code, role_desc) VALUES
-(UUID(), '系统管理员', 'ROLE_ADMIN', '拥有系统所有权限'),
-(UUID(), '运营人员', 'ROLE_OPERATOR', '负责平台日常运营管理'),
-(UUID(), '监管人员', 'ROLE_SUPERVISOR', '负责平台监管和审计'),
-(UUID(), '服务商管理员', 'ROLE_PROVIDER_ADMIN', '服务商后台管理员');
-
--- ============================================================================
--- 八、分表提示
--- ============================================================================
--- 注意：以下表在生产环境中需要按年度分表，以优化查询性能和存储效率
--- 1. t_health_record -> t_health_record_2026, t_health_record_2027 等
--- 2. t_safety_alert -> t_safety_alert_2026, t_safety_alert_2027 等
--- 分表路由可通过 ShardingSphere 等中间件实现
+-- 1. 后台管理端用户/角色/权限直接复用 RuoYi 框架自带的：
+--    sys_user、sys_role、sys_menu、sys_user_role、sys_role_menu 等表
+--    不再单独创建 t_system_user、t_role、t_role_permission
+--
+-- 2. C端用户（老人/监护人/服务商）统一通过 t_app_user 管理登录态
+--    业务表 t_elderly、t_guardian、t_service_provider 通过 user_id 关联
+--    两套认证链路通过拦截器前缀区分：/admin/* vs /api/*
+--
+-- 3. 以下表在生产环境中需要按年度分表，以优化查询性能和存储效率：
+--    - t_health_record -> t_health_record_2026, t_health_record_2027 等
+--    - t_safety_alert  -> t_safety_alert_2026, t_safety_alert_2027 等
+--    分表路由可通过 ShardingSphere 等中间件实现
 -- ============================================================================
 
 -- 脚本执行完成
-SELECT '数据库初始化完成！' AS message;
+SELECT '数据库初始化完成！共 27 张表' AS message;
