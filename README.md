@@ -1,1 +1,1 @@
-项目需求文档，数据库设计和sql脚本放在docs目录里面，ruoyi后端需要的sql脚本在RuoYi-Vue/sql中
+api接口文档、项目需求文档，数据库设计和sql脚本放在docs目录里面，ruoyi后端需要的sql脚本在RuoYi-Vue/sql中
