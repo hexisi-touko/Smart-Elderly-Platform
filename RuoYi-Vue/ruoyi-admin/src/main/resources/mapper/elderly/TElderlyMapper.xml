@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.elderly.mapper.TElderlyMapper">
+    
+    <resultMap type="TElderly" id="TElderlyResult">
+        <result property="elderlyId"    column="elderly_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="name"    column="name"    />
+        <result property="idCard"    column="id_card"    />
+        <result property="phone"    column="phone"    />
+        <result property="gender"    column="gender"    />
+        <result property="birthDate"    column="birth_date"    />
+        <result property="healthStatus"    column="health_status"    />
+        <result property="address"    column="address"    />
+        <result property="emergencyContactName"    column="emergency_contact_name"    />
+        <result property="emergencyContactPhone"    column="emergency_contact_phone"    />
+        <result property="backupFlag"    column="backup_flag"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTElderlyVo">
+        select elderly_id, user_id, name, id_card, phone, gender, birth_date, health_status, address, emergency_contact_name, emergency_contact_phone, backup_flag, is_deleted, create_time, update_time from t_elderly
+    </sql>
+
+    <select id="selectTElderlyList" parameterType="TElderly" resultMap="TElderlyResult">
+        <include refid="selectTElderlyVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+            <if test="gender != null "> and gender = #{gender}</if>
+            <if test="healthStatus != null "> and health_status = #{healthStatus}</if>
+            <if test="createTime != null "> and create_time = #{createTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectTElderlyByElderlyId" parameterType="Long" resultMap="TElderlyResult">
+        <include refid="selectTElderlyVo"/>
+        where elderly_id = #{elderlyId}
+    </select>
+
+    <insert id="insertTElderly" parameterType="TElderly" useGeneratedKeys="true" keyProperty="elderlyId">
+        insert into t_elderly
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="idCard != null and idCard != ''">id_card,</if>
+            <if test="phone != null">phone,</if>
+            <if test="gender != null">gender,</if>
+            <if test="birthDate != null">birth_date,</if>
+            <if test="healthStatus != null">health_status,</if>
+            <if test="address != null">address,</if>
+            <if test="emergencyContactName != null">emergency_contact_name,</if>
+            <if test="emergencyContactPhone != null">emergency_contact_phone,</if>
+            <if test="backupFlag != null">backup_flag,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="idCard != null and idCard != ''">#{idCard},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="birthDate != null">#{birthDate},</if>
+            <if test="healthStatus != null">#{healthStatus},</if>
+            <if test="address != null">#{address},</if>
+            <if test="emergencyContactName != null">#{emergencyContactName},</if>
+            <if test="emergencyContactPhone != null">#{emergencyContactPhone},</if>
+            <if test="backupFlag != null">#{backupFlag},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTElderly" parameterType="TElderly">
+        update t_elderly
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="idCard != null and idCard != ''">id_card = #{idCard},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="birthDate != null">birth_date = #{birthDate},</if>
+            <if test="healthStatus != null">health_status = #{healthStatus},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="emergencyContactName != null">emergency_contact_name = #{emergencyContactName},</if>
+            <if test="emergencyContactPhone != null">emergency_contact_phone = #{emergencyContactPhone},</if>
+            <if test="backupFlag != null">backup_flag = #{backupFlag},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where elderly_id = #{elderlyId}
+    </update>
+
+    <delete id="deleteTElderlyByElderlyId" parameterType="Long">
+        delete from t_elderly where elderly_id = #{elderlyId}
+    </delete>
+
+    <delete id="deleteTElderlyByElderlyIds" parameterType="String">
+        delete from t_elderly where elderly_id in 
+        <foreach item="elderlyId" collection="array" open="(" separator="," close=")">
+            #{elderlyId}
+        </foreach>
+    </delete>
+</mapper>

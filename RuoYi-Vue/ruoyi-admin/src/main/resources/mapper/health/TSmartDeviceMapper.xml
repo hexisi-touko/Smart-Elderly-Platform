@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.health.mapper.TSmartDeviceMapper">
+    
+    <resultMap type="TSmartDevice" id="TSmartDeviceResult">
+        <result property="deviceId"    column="device_id"    />
+        <result property="deviceCode"    column="device_code"    />
+        <result property="deviceType"    column="device_type"    />
+        <result property="elderlyId"    column="elderly_id"    />
+        <result property="deviceBrand"    column="device_brand"    />
+        <result property="deviceModel"    column="device_model"    />
+        <result property="bindTime"    column="bind_time"    />
+        <result property="maintenanceTime"    column="maintenance_time"    />
+        <result property="nextMaintenanceTime"    column="next_maintenance_time"    />
+        <result property="pushStatus"    column="push_status"    />
+        <result property="deviceStatus"    column="device_status"    />
+        <result property="thirdPartyDeviceId"    column="third_party_device_id"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTSmartDeviceVo">
+        select device_id, device_code, device_type, elderly_id, device_brand, device_model, bind_time, maintenance_time, next_maintenance_time, push_status, device_status, third_party_device_id, is_deleted, create_time, update_time from t_smart_device
+    </sql>
+
+    <select id="selectTSmartDeviceList" parameterType="TSmartDevice" resultMap="TSmartDeviceResult">
+        <include refid="selectTSmartDeviceVo"/>
+        <where>  
+            <if test="deviceCode != null  and deviceCode != ''"> and device_code = #{deviceCode}</if>
+            <if test="deviceType != null  and deviceType != ''"> and device_type = #{deviceType}</if>
+            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
+            <if test="pushStatus != null "> and push_status = #{pushStatus}</if>
+            <if test="deviceStatus != null "> and device_status = #{deviceStatus}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectTSmartDeviceByDeviceId" parameterType="Long" resultMap="TSmartDeviceResult">
+        <include refid="selectTSmartDeviceVo"/>
+        where device_id = #{deviceId}
+    </select>
+
+    <insert id="insertTSmartDevice" parameterType="TSmartDevice" useGeneratedKeys="true" keyProperty="deviceId">
+        insert into t_smart_device
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deviceCode != null and deviceCode != ''">device_code,</if>
+            <if test="deviceType != null and deviceType != ''">device_type,</if>
+            <if test="elderlyId != null">elderly_id,</if>
+            <if test="deviceBrand != null">device_brand,</if>
+            <if test="deviceModel != null">device_model,</if>
+            <if test="bindTime != null">bind_time,</if>
+            <if test="maintenanceTime != null">maintenance_time,</if>
+            <if test="nextMaintenanceTime != null">next_maintenance_time,</if>
+            <if test="pushStatus != null">push_status,</if>
+            <if test="deviceStatus != null">device_status,</if>
+            <if test="thirdPartyDeviceId != null">third_party_device_id,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deviceCode != null and deviceCode != ''">#{deviceCode},</if>
+            <if test="deviceType != null and deviceType != ''">#{deviceType},</if>
+            <if test="elderlyId != null">#{elderlyId},</if>
+            <if test="deviceBrand != null">#{deviceBrand},</if>
+            <if test="deviceModel != null">#{deviceModel},</if>
+            <if test="bindTime != null">#{bindTime},</if>
+            <if test="maintenanceTime != null">#{maintenanceTime},</if>
+            <if test="nextMaintenanceTime != null">#{nextMaintenanceTime},</if>
+            <if test="pushStatus != null">#{pushStatus},</if>
+            <if test="deviceStatus != null">#{deviceStatus},</if>
+            <if test="thirdPartyDeviceId != null">#{thirdPartyDeviceId},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTSmartDevice" parameterType="TSmartDevice">
+        update t_smart_device
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deviceCode != null and deviceCode != ''">device_code = #{deviceCode},</if>
+            <if test="deviceType != null and deviceType != ''">device_type = #{deviceType},</if>
+            <if test="elderlyId != null">elderly_id = #{elderlyId},</if>
+            <if test="deviceBrand != null">device_brand = #{deviceBrand},</if>
+            <if test="deviceModel != null">device_model = #{deviceModel},</if>
+            <if test="bindTime != null">bind_time = #{bindTime},</if>
+            <if test="maintenanceTime != null">maintenance_time = #{maintenanceTime},</if>
+            <if test="nextMaintenanceTime != null">next_maintenance_time = #{nextMaintenanceTime},</if>
+            <if test="pushStatus != null">push_status = #{pushStatus},</if>
+            <if test="deviceStatus != null">device_status = #{deviceStatus},</if>
+            <if test="thirdPartyDeviceId != null">third_party_device_id = #{thirdPartyDeviceId},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where device_id = #{deviceId}
+    </update>
+
+    <delete id="deleteTSmartDeviceByDeviceId" parameterType="Long">
+        delete from t_smart_device where device_id = #{deviceId}
+    </delete>
+
+    <delete id="deleteTSmartDeviceByDeviceIds" parameterType="String">
+        delete from t_smart_device where device_id in 
+        <foreach item="deviceId" collection="array" open="(" separator="," close=")">
+            #{deviceId}
+        </foreach>
+    </delete>
+</mapper>

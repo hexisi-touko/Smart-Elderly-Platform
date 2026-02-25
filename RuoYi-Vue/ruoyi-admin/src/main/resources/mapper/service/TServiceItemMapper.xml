@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.service.mapper.TServiceItemMapper">
+    
+    <resultMap type="TServiceItem" id="TServiceItemResult">
+        <result property="itemId"    column="item_id"    />
+        <result property="providerId"    column="provider_id"    />
+        <result property="itemName"    column="item_name"    />
+        <result property="itemCategory"    column="item_category"    />
+        <result property="itemDescription"    column="item_description"    />
+        <result property="standardPrice"    column="standard_price"    />
+        <result property="serviceDuration"    column="service_duration"    />
+        <result property="serviceUnit"    column="service_unit"    />
+        <result property="status"    column="status"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTServiceItemVo">
+        select item_id, provider_id, item_name, item_category, item_description, standard_price, service_duration, service_unit, status, is_deleted, create_time, update_time from t_service_item
+    </sql>
+
+    <select id="selectTServiceItemList" parameterType="TServiceItem" resultMap="TServiceItemResult">
+        <include refid="selectTServiceItemVo"/>
+        <where>  
+            <if test="providerId != null "> and provider_id = #{providerId}</if>
+            <if test="itemName != null  and itemName != ''"> and item_name like concat('%', #{itemName}, '%')</if>
+            <if test="itemCategory != null  and itemCategory != ''"> and item_category = #{itemCategory}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectTServiceItemByItemId" parameterType="Long" resultMap="TServiceItemResult">
+        <include refid="selectTServiceItemVo"/>
+        where item_id = #{itemId}
+    </select>
+
+    <insert id="insertTServiceItem" parameterType="TServiceItem" useGeneratedKeys="true" keyProperty="itemId">
+        insert into t_service_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="providerId != null">provider_id,</if>
+            <if test="itemName != null and itemName != ''">item_name,</if>
+            <if test="itemCategory != null and itemCategory != ''">item_category,</if>
+            <if test="itemDescription != null">item_description,</if>
+            <if test="standardPrice != null">standard_price,</if>
+            <if test="serviceDuration != null">service_duration,</if>
+            <if test="serviceUnit != null">service_unit,</if>
+            <if test="status != null">status,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="providerId != null">#{providerId},</if>
+            <if test="itemName != null and itemName != ''">#{itemName},</if>
+            <if test="itemCategory != null and itemCategory != ''">#{itemCategory},</if>
+            <if test="itemDescription != null">#{itemDescription},</if>
+            <if test="standardPrice != null">#{standardPrice},</if>
+            <if test="serviceDuration != null">#{serviceDuration},</if>
+            <if test="serviceUnit != null">#{serviceUnit},</if>
+            <if test="status != null">#{status},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTServiceItem" parameterType="TServiceItem">
+        update t_service_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="providerId != null">provider_id = #{providerId},</if>
+            <if test="itemName != null and itemName != ''">item_name = #{itemName},</if>
+            <if test="itemCategory != null and itemCategory != ''">item_category = #{itemCategory},</if>
+            <if test="itemDescription != null">item_description = #{itemDescription},</if>
+            <if test="standardPrice != null">standard_price = #{standardPrice},</if>
+            <if test="serviceDuration != null">service_duration = #{serviceDuration},</if>
+            <if test="serviceUnit != null">service_unit = #{serviceUnit},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where item_id = #{itemId}
+    </update>
+
+    <delete id="deleteTServiceItemByItemId" parameterType="Long">
+        delete from t_service_item where item_id = #{itemId}
+    </delete>
+
+    <delete id="deleteTServiceItemByItemIds" parameterType="String">
+        delete from t_service_item where item_id in 
+        <foreach item="itemId" collection="array" open="(" separator="," close=")">
+            #{itemId}
+        </foreach>
+    </delete>
+</mapper>

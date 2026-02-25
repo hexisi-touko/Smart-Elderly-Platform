@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.order.mapper.TProviderSettlementMapper">
+    
+    <resultMap type="TProviderSettlement" id="TProviderSettlementResult">
+        <result property="settlementId"    column="settlement_id"    />
+        <result property="providerId"    column="provider_id"    />
+        <result property="settlementPeriod"    column="settlement_period"    />
+        <result property="orderCount"    column="order_count"    />
+        <result property="totalAmount"    column="total_amount"    />
+        <result property="platformFee"    column="platform_fee"    />
+        <result property="actualAmount"    column="actual_amount"    />
+        <result property="settlementStatus"    column="settlement_status"    />
+        <result property="applyTime"    column="apply_time"    />
+        <result property="approveTime"    column="approve_time"    />
+        <result property="transferTime"    column="transfer_time"    />
+        <result property="transferVoucher"    column="transfer_voucher"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTProviderSettlementVo">
+        select settlement_id, provider_id, settlement_period, order_count, total_amount, platform_fee, actual_amount, settlement_status, apply_time, approve_time, transfer_time, transfer_voucher, is_deleted, create_time, update_time from t_provider_settlement
+    </sql>
+
+    <select id="selectTProviderSettlementList" parameterType="TProviderSettlement" resultMap="TProviderSettlementResult">
+        <include refid="selectTProviderSettlementVo"/>
+        <where>  
+            <if test="providerId != null "> and provider_id = #{providerId}</if>
+            <if test="settlementPeriod != null  and settlementPeriod != ''"> and settlement_period = #{settlementPeriod}</if>
+            <if test="orderCount != null "> and order_count = #{orderCount}</if>
+            <if test="settlementStatus != null "> and settlement_status = #{settlementStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectTProviderSettlementBySettlementId" parameterType="Long" resultMap="TProviderSettlementResult">
+        <include refid="selectTProviderSettlementVo"/>
+        where settlement_id = #{settlementId}
+    </select>
+
+    <insert id="insertTProviderSettlement" parameterType="TProviderSettlement" useGeneratedKeys="true" keyProperty="settlementId">
+        insert into t_provider_settlement
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="providerId != null">provider_id,</if>
+            <if test="settlementPeriod != null and settlementPeriod != ''">settlement_period,</if>
+            <if test="orderCount != null">order_count,</if>
+            <if test="totalAmount != null">total_amount,</if>
+            <if test="platformFee != null">platform_fee,</if>
+            <if test="actualAmount != null">actual_amount,</if>
+            <if test="settlementStatus != null">settlement_status,</if>
+            <if test="applyTime != null">apply_time,</if>
+            <if test="approveTime != null">approve_time,</if>
+            <if test="transferTime != null">transfer_time,</if>
+            <if test="transferVoucher != null">transfer_voucher,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="providerId != null">#{providerId},</if>
+            <if test="settlementPeriod != null and settlementPeriod != ''">#{settlementPeriod},</if>
+            <if test="orderCount != null">#{orderCount},</if>
+            <if test="totalAmount != null">#{totalAmount},</if>
+            <if test="platformFee != null">#{platformFee},</if>
+            <if test="actualAmount != null">#{actualAmount},</if>
+            <if test="settlementStatus != null">#{settlementStatus},</if>
+            <if test="applyTime != null">#{applyTime},</if>
+            <if test="approveTime != null">#{approveTime},</if>
+            <if test="transferTime != null">#{transferTime},</if>
+            <if test="transferVoucher != null">#{transferVoucher},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTProviderSettlement" parameterType="TProviderSettlement">
+        update t_provider_settlement
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="providerId != null">provider_id = #{providerId},</if>
+            <if test="settlementPeriod != null and settlementPeriod != ''">settlement_period = #{settlementPeriod},</if>
+            <if test="orderCount != null">order_count = #{orderCount},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="platformFee != null">platform_fee = #{platformFee},</if>
+            <if test="actualAmount != null">actual_amount = #{actualAmount},</if>
+            <if test="settlementStatus != null">settlement_status = #{settlementStatus},</if>
+            <if test="applyTime != null">apply_time = #{applyTime},</if>
+            <if test="approveTime != null">approve_time = #{approveTime},</if>
+            <if test="transferTime != null">transfer_time = #{transferTime},</if>
+            <if test="transferVoucher != null">transfer_voucher = #{transferVoucher},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where settlement_id = #{settlementId}
+    </update>
+
+    <delete id="deleteTProviderSettlementBySettlementId" parameterType="Long">
+        delete from t_provider_settlement where settlement_id = #{settlementId}
+    </delete>
+
+    <delete id="deleteTProviderSettlementBySettlementIds" parameterType="String">
+        delete from t_provider_settlement where settlement_id in 
+        <foreach item="settlementId" collection="array" open="(" separator="," close=")">
+            #{settlementId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.order.mapper.TServiceEvaluationMapper">
+    
+    <resultMap type="TServiceEvaluation" id="TServiceEvaluationResult">
+        <result property="evaluationId"    column="evaluation_id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="elderlyId"    column="elderly_id"    />
+        <result property="starLevel"    column="star_level"    />
+        <result property="evaluationContent"    column="evaluation_content"    />
+        <result property="proofPhotos"    column="proof_photos"    />
+        <result property="evaluationTime"    column="evaluation_time"    />
+        <result property="providerReply"    column="provider_reply"    />
+        <result property="replyTime"    column="reply_time"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTServiceEvaluationVo">
+        select evaluation_id, order_id, elderly_id, star_level, evaluation_content, proof_photos, evaluation_time, provider_reply, reply_time, is_deleted, create_time, update_time from t_service_evaluation
+    </sql>
+
+    <select id="selectTServiceEvaluationList" parameterType="TServiceEvaluation" resultMap="TServiceEvaluationResult">
+        <include refid="selectTServiceEvaluationVo"/>
+        <where>  
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectTServiceEvaluationByEvaluationId" parameterType="Long" resultMap="TServiceEvaluationResult">
+        <include refid="selectTServiceEvaluationVo"/>
+        where evaluation_id = #{evaluationId}
+    </select>
+
+    <insert id="insertTServiceEvaluation" parameterType="TServiceEvaluation" useGeneratedKeys="true" keyProperty="evaluationId">
+        insert into t_service_evaluation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">order_id,</if>
+            <if test="elderlyId != null">elderly_id,</if>
+            <if test="starLevel != null">star_level,</if>
+            <if test="evaluationContent != null">evaluation_content,</if>
+            <if test="proofPhotos != null">proof_photos,</if>
+            <if test="evaluationTime != null">evaluation_time,</if>
+            <if test="providerReply != null">provider_reply,</if>
+            <if test="replyTime != null">reply_time,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">#{orderId},</if>
+            <if test="elderlyId != null">#{elderlyId},</if>
+            <if test="starLevel != null">#{starLevel},</if>
+            <if test="evaluationContent != null">#{evaluationContent},</if>
+            <if test="proofPhotos != null">#{proofPhotos},</if>
+            <if test="evaluationTime != null">#{evaluationTime},</if>
+            <if test="providerReply != null">#{providerReply},</if>
+            <if test="replyTime != null">#{replyTime},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTServiceEvaluation" parameterType="TServiceEvaluation">
+        update t_service_evaluation
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="elderlyId != null">elderly_id = #{elderlyId},</if>
+            <if test="starLevel != null">star_level = #{starLevel},</if>
+            <if test="evaluationContent != null">evaluation_content = #{evaluationContent},</if>
+            <if test="proofPhotos != null">proof_photos = #{proofPhotos},</if>
+            <if test="evaluationTime != null">evaluation_time = #{evaluationTime},</if>
+            <if test="providerReply != null">provider_reply = #{providerReply},</if>
+            <if test="replyTime != null">reply_time = #{replyTime},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where evaluation_id = #{evaluationId}
+    </update>
+
+    <delete id="deleteTServiceEvaluationByEvaluationId" parameterType="Long">
+        delete from t_service_evaluation where evaluation_id = #{evaluationId}
+    </delete>
+
+    <delete id="deleteTServiceEvaluationByEvaluationIds" parameterType="String">
+        delete from t_service_evaluation where evaluation_id in 
+        <foreach item="evaluationId" collection="array" open="(" separator="," close=")">
+            #{evaluationId}
+        </foreach>
+    </delete>
+</mapper>

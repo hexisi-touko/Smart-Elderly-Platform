@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.health.mapper.THealthRecordMapper">
+    
+    <resultMap type="THealthRecord" id="THealthRecordResult">
+        <result property="recordId"    column="record_id"    />
+        <result property="elderlyId"    column="elderly_id"    />
+        <result property="deviceId"    column="device_id"    />
+        <result property="collectTime"    column="collect_time"    />
+        <result property="recordType"    column="record_type"    />
+        <result property="collectMethod"    column="collect_method"    />
+        <result property="systolicBp"    column="systolic_bp"    />
+        <result property="diastolicBp"    column="diastolic_bp"    />
+        <result property="bloodSugar"    column="blood_sugar"    />
+        <result property="heartRate"    column="heart_rate"    />
+        <result property="temperature"    column="temperature"    />
+        <result property="bloodOxygen"    column="blood_oxygen"    />
+        <result property="dataStatus"    column="data_status"    />
+        <result property="thirdPartySyncId"    column="third_party_sync_id"    />
+        <result property="backupFlag"    column="backup_flag"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTHealthRecordVo">
+        select record_id, elderly_id, device_id, collect_time, record_type, collect_method, systolic_bp, diastolic_bp, blood_sugar, heart_rate, temperature, blood_oxygen, data_status, third_party_sync_id, backup_flag, is_deleted, create_time, update_time from t_health_record
+    </sql>
+
+    <select id="selectTHealthRecordList" parameterType="THealthRecord" resultMap="THealthRecordResult">
+        <include refid="selectTHealthRecordVo"/>
+        <where>  
+            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
+            <if test="deviceId != null "> and device_id = #{deviceId}</if>
+            <if test="params.beginCollectTime != null and params.beginCollectTime != '' and params.endCollectTime != null and params.endCollectTime != ''"> and collect_time between #{params.beginCollectTime} and #{params.endCollectTime}</if>
+            <if test="recordType != null  and recordType != ''"> and record_type = #{recordType}</if>
+            <if test="collectMethod != null "> and collect_method = #{collectMethod}</if>
+            <if test="dataStatus != null "> and data_status = #{dataStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectTHealthRecordByRecordId" parameterType="Long" resultMap="THealthRecordResult">
+        <include refid="selectTHealthRecordVo"/>
+        where record_id = #{recordId}
+    </select>
+
+    <insert id="insertTHealthRecord" parameterType="THealthRecord" useGeneratedKeys="true" keyProperty="recordId">
+        insert into t_health_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id,</if>
+            <if test="deviceId != null">device_id,</if>
+            <if test="collectTime != null">collect_time,</if>
+            <if test="recordType != null and recordType != ''">record_type,</if>
+            <if test="collectMethod != null">collect_method,</if>
+            <if test="systolicBp != null">systolic_bp,</if>
+            <if test="diastolicBp != null">diastolic_bp,</if>
+            <if test="bloodSugar != null">blood_sugar,</if>
+            <if test="heartRate != null">heart_rate,</if>
+            <if test="temperature != null">temperature,</if>
+            <if test="bloodOxygen != null">blood_oxygen,</if>
+            <if test="dataStatus != null">data_status,</if>
+            <if test="thirdPartySyncId != null">third_party_sync_id,</if>
+            <if test="backupFlag != null">backup_flag,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">#{elderlyId},</if>
+            <if test="deviceId != null">#{deviceId},</if>
+            <if test="collectTime != null">#{collectTime},</if>
+            <if test="recordType != null and recordType != ''">#{recordType},</if>
+            <if test="collectMethod != null">#{collectMethod},</if>
+            <if test="systolicBp != null">#{systolicBp},</if>
+            <if test="diastolicBp != null">#{diastolicBp},</if>
+            <if test="bloodSugar != null">#{bloodSugar},</if>
+            <if test="heartRate != null">#{heartRate},</if>
+            <if test="temperature != null">#{temperature},</if>
+            <if test="bloodOxygen != null">#{bloodOxygen},</if>
+            <if test="dataStatus != null">#{dataStatus},</if>
+            <if test="thirdPartySyncId != null">#{thirdPartySyncId},</if>
+            <if test="backupFlag != null">#{backupFlag},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTHealthRecord" parameterType="THealthRecord">
+        update t_health_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id = #{elderlyId},</if>
+            <if test="deviceId != null">device_id = #{deviceId},</if>
+            <if test="collectTime != null">collect_time = #{collectTime},</if>
+            <if test="recordType != null and recordType != ''">record_type = #{recordType},</if>
+            <if test="collectMethod != null">collect_method = #{collectMethod},</if>
+            <if test="systolicBp != null">systolic_bp = #{systolicBp},</if>
+            <if test="diastolicBp != null">diastolic_bp = #{diastolicBp},</if>
+            <if test="bloodSugar != null">blood_sugar = #{bloodSugar},</if>
+            <if test="heartRate != null">heart_rate = #{heartRate},</if>
+            <if test="temperature != null">temperature = #{temperature},</if>
+            <if test="bloodOxygen != null">blood_oxygen = #{bloodOxygen},</if>
+            <if test="dataStatus != null">data_status = #{dataStatus},</if>
+            <if test="thirdPartySyncId != null">third_party_sync_id = #{thirdPartySyncId},</if>
+            <if test="backupFlag != null">backup_flag = #{backupFlag},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where record_id = #{recordId}
+    </update>
+
+    <delete id="deleteTHealthRecordByRecordId" parameterType="Long">
+        delete from t_health_record where record_id = #{recordId}
+    </delete>
+
+    <delete id="deleteTHealthRecordByRecordIds" parameterType="String">
+        delete from t_health_record where record_id in 
+        <foreach item="recordId" collection="array" open="(" separator="," close=")">
+            #{recordId}
+        </foreach>
+    </delete>
+</mapper>

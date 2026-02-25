@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.safety.mapper.TSafetyAlertMapper">
+    
+    <resultMap type="TSafetyAlert" id="TSafetyAlertResult">
+        <result property="alertId"    column="alert_id"    />
+        <result property="elderlyId"    column="elderly_id"    />
+        <result property="deviceId"    column="device_id"    />
+        <result property="alertType"    column="alert_type"    />
+        <result property="alertTime"    column="alert_time"    />
+        <result property="responseTime"    column="response_time"    />
+        <result property="completeTime"    column="complete_time"    />
+        <result property="urgeCount"    column="urge_count"    />
+        <result property="handlerId"    column="handler_id"    />
+        <result property="handlerRole"    column="handler_role"    />
+        <result property="alertLng"    column="alert_lng"    />
+        <result property="alertLat"    column="alert_lat"    />
+        <result property="alertAddress"    column="alert_address"    />
+        <result property="alertStatus"    column="alert_status"    />
+        <result property="handleResult"    column="handle_result"    />
+        <result property="emergencyOrderId"    column="emergency_order_id"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTSafetyAlertVo">
+        select alert_id, elderly_id, device_id, alert_type, alert_time, response_time, complete_time, urge_count, handler_id, handler_role, alert_lng, alert_lat, alert_address, alert_status, handle_result, emergency_order_id, is_deleted, create_time, update_time from t_safety_alert
+    </sql>
+
+    <select id="selectTSafetyAlertList" parameterType="TSafetyAlert" resultMap="TSafetyAlertResult">
+        <include refid="selectTSafetyAlertVo"/>
+        <where>  
+            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
+            <if test="deviceId != null "> and device_id = #{deviceId}</if>
+            <if test="alertType != null  and alertType != ''"> and alert_type = #{alertType}</if>
+            <if test="params.beginAlertTime != null and params.beginAlertTime != '' and params.endAlertTime != null and params.endAlertTime != ''"> and alert_time between #{params.beginAlertTime} and #{params.endAlertTime}</if>
+            <if test="handlerRole != null "> and handler_role = #{handlerRole}</if>
+            <if test="alertStatus != null "> and alert_status = #{alertStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectTSafetyAlertByAlertId" parameterType="Long" resultMap="TSafetyAlertResult">
+        <include refid="selectTSafetyAlertVo"/>
+        where alert_id = #{alertId}
+    </select>
+
+    <insert id="insertTSafetyAlert" parameterType="TSafetyAlert" useGeneratedKeys="true" keyProperty="alertId">
+        insert into t_safety_alert
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id,</if>
+            <if test="deviceId != null">device_id,</if>
+            <if test="alertType != null and alertType != ''">alert_type,</if>
+            <if test="alertTime != null">alert_time,</if>
+            <if test="responseTime != null">response_time,</if>
+            <if test="completeTime != null">complete_time,</if>
+            <if test="urgeCount != null">urge_count,</if>
+            <if test="handlerId != null">handler_id,</if>
+            <if test="handlerRole != null">handler_role,</if>
+            <if test="alertLng != null">alert_lng,</if>
+            <if test="alertLat != null">alert_lat,</if>
+            <if test="alertAddress != null and alertAddress != ''">alert_address,</if>
+            <if test="alertStatus != null">alert_status,</if>
+            <if test="handleResult != null">handle_result,</if>
+            <if test="emergencyOrderId != null">emergency_order_id,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">#{elderlyId},</if>
+            <if test="deviceId != null">#{deviceId},</if>
+            <if test="alertType != null and alertType != ''">#{alertType},</if>
+            <if test="alertTime != null">#{alertTime},</if>
+            <if test="responseTime != null">#{responseTime},</if>
+            <if test="completeTime != null">#{completeTime},</if>
+            <if test="urgeCount != null">#{urgeCount},</if>
+            <if test="handlerId != null">#{handlerId},</if>
+            <if test="handlerRole != null">#{handlerRole},</if>
+            <if test="alertLng != null">#{alertLng},</if>
+            <if test="alertLat != null">#{alertLat},</if>
+            <if test="alertAddress != null and alertAddress != ''">#{alertAddress},</if>
+            <if test="alertStatus != null">#{alertStatus},</if>
+            <if test="handleResult != null">#{handleResult},</if>
+            <if test="emergencyOrderId != null">#{emergencyOrderId},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTSafetyAlert" parameterType="TSafetyAlert">
+        update t_safety_alert
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id = #{elderlyId},</if>
+            <if test="deviceId != null">device_id = #{deviceId},</if>
+            <if test="alertType != null and alertType != ''">alert_type = #{alertType},</if>
+            <if test="alertTime != null">alert_time = #{alertTime},</if>
+            <if test="responseTime != null">response_time = #{responseTime},</if>
+            <if test="completeTime != null">complete_time = #{completeTime},</if>
+            <if test="urgeCount != null">urge_count = #{urgeCount},</if>
+            <if test="handlerId != null">handler_id = #{handlerId},</if>
+            <if test="handlerRole != null">handler_role = #{handlerRole},</if>
+            <if test="alertLng != null">alert_lng = #{alertLng},</if>
+            <if test="alertLat != null">alert_lat = #{alertLat},</if>
+            <if test="alertAddress != null and alertAddress != ''">alert_address = #{alertAddress},</if>
+            <if test="alertStatus != null">alert_status = #{alertStatus},</if>
+            <if test="handleResult != null">handle_result = #{handleResult},</if>
+            <if test="emergencyOrderId != null">emergency_order_id = #{emergencyOrderId},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where alert_id = #{alertId}
+    </update>
+
+    <delete id="deleteTSafetyAlertByAlertId" parameterType="Long">
+        delete from t_safety_alert where alert_id = #{alertId}
+    </delete>
+
+    <delete id="deleteTSafetyAlertByAlertIds" parameterType="String">
+        delete from t_safety_alert where alert_id in 
+        <foreach item="alertId" collection="array" open="(" separator="," close=")">
+            #{alertId}
+        </foreach>
+    </delete>
+</mapper>

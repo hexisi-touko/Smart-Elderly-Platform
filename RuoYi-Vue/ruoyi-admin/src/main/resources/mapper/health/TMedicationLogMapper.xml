@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.health.mapper.TMedicationLogMapper">
+    
+    <resultMap type="TMedicationLog" id="TMedicationLogResult">
+        <result property="logId"    column="log_id"    />
+        <result property="reminderId"    column="reminder_id"    />
+        <result property="elderlyId"    column="elderly_id"    />
+        <result property="medicationName"    column="medication_name"    />
+        <result property="scheduledTime"    column="scheduled_time"    />
+        <result property="takenTime"    column="taken_time"    />
+        <result property="isTaken"    column="is_taken"    />
+        <result property="skipReason"    column="skip_reason"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTMedicationLogVo">
+        select log_id, reminder_id, elderly_id, medication_name, scheduled_time, taken_time, is_taken, skip_reason, is_deleted, create_time, update_time from t_medication_log
+    </sql>
+
+    <select id="selectTMedicationLogList" parameterType="TMedicationLog" resultMap="TMedicationLogResult">
+        <include refid="selectTMedicationLogVo"/>
+        <where>  
+            <if test="reminderId != null "> and reminder_id = #{reminderId}</if>
+            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
+            <if test="medicationName != null  and medicationName != ''"> and medication_name like concat('%', #{medicationName}, '%')</if>
+            <if test="params.beginScheduledTime != null and params.beginScheduledTime != '' and params.endScheduledTime != null and params.endScheduledTime != ''"> and scheduled_time between #{params.beginScheduledTime} and #{params.endScheduledTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectTMedicationLogByLogId" parameterType="Long" resultMap="TMedicationLogResult">
+        <include refid="selectTMedicationLogVo"/>
+        where log_id = #{logId}
+    </select>
+
+    <insert id="insertTMedicationLog" parameterType="TMedicationLog" useGeneratedKeys="true" keyProperty="logId">
+        insert into t_medication_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="reminderId != null">reminder_id,</if>
+            <if test="elderlyId != null">elderly_id,</if>
+            <if test="medicationName != null and medicationName != ''">medication_name,</if>
+            <if test="scheduledTime != null">scheduled_time,</if>
+            <if test="takenTime != null">taken_time,</if>
+            <if test="isTaken != null">is_taken,</if>
+            <if test="skipReason != null">skip_reason,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="reminderId != null">#{reminderId},</if>
+            <if test="elderlyId != null">#{elderlyId},</if>
+            <if test="medicationName != null and medicationName != ''">#{medicationName},</if>
+            <if test="scheduledTime != null">#{scheduledTime},</if>
+            <if test="takenTime != null">#{takenTime},</if>
+            <if test="isTaken != null">#{isTaken},</if>
+            <if test="skipReason != null">#{skipReason},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTMedicationLog" parameterType="TMedicationLog">
+        update t_medication_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="reminderId != null">reminder_id = #{reminderId},</if>
+            <if test="elderlyId != null">elderly_id = #{elderlyId},</if>
+            <if test="medicationName != null and medicationName != ''">medication_name = #{medicationName},</if>
+            <if test="scheduledTime != null">scheduled_time = #{scheduledTime},</if>
+            <if test="takenTime != null">taken_time = #{takenTime},</if>
+            <if test="isTaken != null">is_taken = #{isTaken},</if>
+            <if test="skipReason != null">skip_reason = #{skipReason},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where log_id = #{logId}
+    </update>
+
+    <delete id="deleteTMedicationLogByLogId" parameterType="Long">
+        delete from t_medication_log where log_id = #{logId}
+    </delete>
+
+    <delete id="deleteTMedicationLogByLogIds" parameterType="String">
+        delete from t_medication_log where log_id in 
+        <foreach item="logId" collection="array" open="(" separator="," close=")">
+            #{logId}
+        </foreach>
+    </delete>
+</mapper>

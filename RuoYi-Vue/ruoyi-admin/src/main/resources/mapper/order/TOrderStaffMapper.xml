@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.order.mapper.TOrderStaffMapper">
+    
+    <resultMap type="TOrderStaff" id="TOrderStaffResult">
+        <result property="id"    column="id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="staffId"    column="staff_id"    />
+        <result property="isPrimary"    column="is_primary"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTOrderStaffVo">
+        select id, order_id, staff_id, is_primary, is_deleted, create_time, update_time from t_order_staff
+    </sql>
+
+    <select id="selectTOrderStaffList" parameterType="TOrderStaff" resultMap="TOrderStaffResult">
+        <include refid="selectTOrderStaffVo"/>
+        <where>  
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="staffId != null "> and staff_id = #{staffId}</if>
+            <if test="isPrimary != null "> and is_primary = #{isPrimary}</if>
+        </where>
+    </select>
+    
+    <select id="selectTOrderStaffById" parameterType="Long" resultMap="TOrderStaffResult">
+        <include refid="selectTOrderStaffVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertTOrderStaff" parameterType="TOrderStaff" useGeneratedKeys="true" keyProperty="id">
+        insert into t_order_staff
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">order_id,</if>
+            <if test="staffId != null">staff_id,</if>
+            <if test="isPrimary != null">is_primary,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">#{orderId},</if>
+            <if test="staffId != null">#{staffId},</if>
+            <if test="isPrimary != null">#{isPrimary},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTOrderStaff" parameterType="TOrderStaff">
+        update t_order_staff
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="staffId != null">staff_id = #{staffId},</if>
+            <if test="isPrimary != null">is_primary = #{isPrimary},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTOrderStaffById" parameterType="Long">
+        delete from t_order_staff where id = #{id}
+    </delete>
+
+    <delete id="deleteTOrderStaffByIds" parameterType="String">
+        delete from t_order_staff where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

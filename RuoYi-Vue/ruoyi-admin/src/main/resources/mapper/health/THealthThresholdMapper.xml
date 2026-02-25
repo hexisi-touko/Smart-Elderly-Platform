@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.health.mapper.THealthThresholdMapper">
+    
+    <resultMap type="THealthThreshold" id="THealthThresholdResult">
+        <result property="thresholdId"    column="threshold_id"    />
+        <result property="elderlyId"    column="elderly_id"    />
+        <result property="sysBpMax"    column="sys_bp_max"    />
+        <result property="sysBpMin"    column="sys_bp_min"    />
+        <result property="diaBpMax"    column="dia_bp_max"    />
+        <result property="diaBpMin"    column="dia_bp_min"    />
+        <result property="heartRateMax"    column="heart_rate_max"    />
+        <result property="heartRateMin"    column="heart_rate_min"    />
+        <result property="bloodSugarMax"    column="blood_sugar_max"    />
+        <result property="bloodSugarMin"    column="blood_sugar_min"    />
+        <result property="temperatureMax"    column="temperature_max"    />
+        <result property="temperatureMin"    column="temperature_min"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTHealthThresholdVo">
+        select threshold_id, elderly_id, sys_bp_max, sys_bp_min, dia_bp_max, dia_bp_min, heart_rate_max, heart_rate_min, blood_sugar_max, blood_sugar_min, temperature_max, temperature_min, is_deleted, create_time, update_time from t_health_threshold
+    </sql>
+
+    <select id="selectTHealthThresholdList" parameterType="THealthThreshold" resultMap="THealthThresholdResult">
+        <include refid="selectTHealthThresholdVo"/>
+        <where>  
+            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
+        </where>
+    </select>
+    
+    <select id="selectTHealthThresholdByThresholdId" parameterType="Long" resultMap="THealthThresholdResult">
+        <include refid="selectTHealthThresholdVo"/>
+        where threshold_id = #{thresholdId}
+    </select>
+
+    <insert id="insertTHealthThreshold" parameterType="THealthThreshold" useGeneratedKeys="true" keyProperty="thresholdId">
+        insert into t_health_threshold
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id,</if>
+            <if test="sysBpMax != null">sys_bp_max,</if>
+            <if test="sysBpMin != null">sys_bp_min,</if>
+            <if test="diaBpMax != null">dia_bp_max,</if>
+            <if test="diaBpMin != null">dia_bp_min,</if>
+            <if test="heartRateMax != null">heart_rate_max,</if>
+            <if test="heartRateMin != null">heart_rate_min,</if>
+            <if test="bloodSugarMax != null">blood_sugar_max,</if>
+            <if test="bloodSugarMin != null">blood_sugar_min,</if>
+            <if test="temperatureMax != null">temperature_max,</if>
+            <if test="temperatureMin != null">temperature_min,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">#{elderlyId},</if>
+            <if test="sysBpMax != null">#{sysBpMax},</if>
+            <if test="sysBpMin != null">#{sysBpMin},</if>
+            <if test="diaBpMax != null">#{diaBpMax},</if>
+            <if test="diaBpMin != null">#{diaBpMin},</if>
+            <if test="heartRateMax != null">#{heartRateMax},</if>
+            <if test="heartRateMin != null">#{heartRateMin},</if>
+            <if test="bloodSugarMax != null">#{bloodSugarMax},</if>
+            <if test="bloodSugarMin != null">#{bloodSugarMin},</if>
+            <if test="temperatureMax != null">#{temperatureMax},</if>
+            <if test="temperatureMin != null">#{temperatureMin},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTHealthThreshold" parameterType="THealthThreshold">
+        update t_health_threshold
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id = #{elderlyId},</if>
+            <if test="sysBpMax != null">sys_bp_max = #{sysBpMax},</if>
+            <if test="sysBpMin != null">sys_bp_min = #{sysBpMin},</if>
+            <if test="diaBpMax != null">dia_bp_max = #{diaBpMax},</if>
+            <if test="diaBpMin != null">dia_bp_min = #{diaBpMin},</if>
+            <if test="heartRateMax != null">heart_rate_max = #{heartRateMax},</if>
+            <if test="heartRateMin != null">heart_rate_min = #{heartRateMin},</if>
+            <if test="bloodSugarMax != null">blood_sugar_max = #{bloodSugarMax},</if>
+            <if test="bloodSugarMin != null">blood_sugar_min = #{bloodSugarMin},</if>
+            <if test="temperatureMax != null">temperature_max = #{temperatureMax},</if>
+            <if test="temperatureMin != null">temperature_min = #{temperatureMin},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where threshold_id = #{thresholdId}
+    </update>
+
+    <delete id="deleteTHealthThresholdByThresholdId" parameterType="Long">
+        delete from t_health_threshold where threshold_id = #{thresholdId}
+    </delete>
+
+    <delete id="deleteTHealthThresholdByThresholdIds" parameterType="String">
+        delete from t_health_threshold where threshold_id in 
+        <foreach item="thresholdId" collection="array" open="(" separator="," close=")">
+            #{thresholdId}
+        </foreach>
+    </delete>
+</mapper>

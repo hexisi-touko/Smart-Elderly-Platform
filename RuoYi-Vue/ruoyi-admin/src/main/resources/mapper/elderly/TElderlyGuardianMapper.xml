@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.elderly.mapper.TElderlyGuardianMapper">
+    
+    <resultMap type="TElderlyGuardian" id="TElderlyGuardianResult">
+        <result property="id"    column="id"    />
+        <result property="elderlyId"    column="elderly_id"    />
+        <result property="guardianId"    column="guardian_id"    />
+        <result property="authorizationStatus"    column="authorization_status"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTElderlyGuardianVo">
+        select id, elderly_id, guardian_id, authorization_status, is_deleted, create_time, update_time from t_elderly_guardian
+    </sql>
+
+    <select id="selectTElderlyGuardianList" parameterType="TElderlyGuardian" resultMap="TElderlyGuardianResult">
+        <include refid="selectTElderlyGuardianVo"/>
+        <where>  
+            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
+            <if test="guardianId != null "> and guardian_id = #{guardianId}</if>
+            <if test="authorizationStatus != null "> and authorization_status = #{authorizationStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectTElderlyGuardianById" parameterType="Long" resultMap="TElderlyGuardianResult">
+        <include refid="selectTElderlyGuardianVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertTElderlyGuardian" parameterType="TElderlyGuardian" useGeneratedKeys="true" keyProperty="id">
+        insert into t_elderly_guardian
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id,</if>
+            <if test="guardianId != null">guardian_id,</if>
+            <if test="authorizationStatus != null">authorization_status,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">#{elderlyId},</if>
+            <if test="guardianId != null">#{guardianId},</if>
+            <if test="authorizationStatus != null">#{authorizationStatus},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTElderlyGuardian" parameterType="TElderlyGuardian">
+        update t_elderly_guardian
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id = #{elderlyId},</if>
+            <if test="guardianId != null">guardian_id = #{guardianId},</if>
+            <if test="authorizationStatus != null">authorization_status = #{authorizationStatus},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTElderlyGuardianById" parameterType="Long">
+        delete from t_elderly_guardian where id = #{id}
+    </delete>
+
+    <delete id="deleteTElderlyGuardianByIds" parameterType="String">
+        delete from t_elderly_guardian where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

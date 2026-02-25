@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.service.mapper.TServiceProviderMapper">
+    
+    <resultMap type="TServiceProvider" id="TServiceProviderResult">
+        <result property="providerId"    column="provider_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="providerName"    column="provider_name"    />
+        <result property="licenseCode"    column="license_code"    />
+        <result property="contactPerson"    column="contact_person"    />
+        <result property="contactPhone"    column="contact_phone"    />
+        <result property="address"    column="address"    />
+        <result property="businessLicense"    column="business_license"    />
+        <result property="auditStatus"    column="audit_status"    />
+        <result property="serviceScope"    column="service_scope"    />
+        <result property="score"    column="score"    />
+        <result property="bankAccount"    column="bank_account"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTServiceProviderVo">
+        select provider_id, user_id, provider_name, license_code, contact_person, contact_phone, address, business_license, audit_status, service_scope, score, bank_account, is_deleted, create_time, update_time from t_service_provider
+    </sql>
+
+    <select id="selectTServiceProviderList" parameterType="TServiceProvider" resultMap="TServiceProviderResult">
+        <include refid="selectTServiceProviderVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="providerName != null  and providerName != ''"> and provider_name like concat('%', #{providerName}, '%')</if>
+            <if test="contactPhone != null  and contactPhone != ''"> and contact_phone = #{contactPhone}</if>
+            <if test="auditStatus != null "> and audit_status = #{auditStatus}</if>
+            <if test="serviceScope != null  and serviceScope != ''"> and service_scope like concat('%', #{serviceScope}, '%')</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectTServiceProviderByProviderId" parameterType="Long" resultMap="TServiceProviderResult">
+        <include refid="selectTServiceProviderVo"/>
+        where provider_id = #{providerId}
+    </select>
+
+    <insert id="insertTServiceProvider" parameterType="TServiceProvider" useGeneratedKeys="true" keyProperty="providerId">
+        insert into t_service_provider
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="providerName != null and providerName != ''">provider_name,</if>
+            <if test="licenseCode != null and licenseCode != ''">license_code,</if>
+            <if test="contactPerson != null and contactPerson != ''">contact_person,</if>
+            <if test="contactPhone != null and contactPhone != ''">contact_phone,</if>
+            <if test="address != null and address != ''">address,</if>
+            <if test="businessLicense != null">business_license,</if>
+            <if test="auditStatus != null">audit_status,</if>
+            <if test="serviceScope != null and serviceScope != ''">service_scope,</if>
+            <if test="score != null">score,</if>
+            <if test="bankAccount != null">bank_account,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="providerName != null and providerName != ''">#{providerName},</if>
+            <if test="licenseCode != null and licenseCode != ''">#{licenseCode},</if>
+            <if test="contactPerson != null and contactPerson != ''">#{contactPerson},</if>
+            <if test="contactPhone != null and contactPhone != ''">#{contactPhone},</if>
+            <if test="address != null and address != ''">#{address},</if>
+            <if test="businessLicense != null">#{businessLicense},</if>
+            <if test="auditStatus != null">#{auditStatus},</if>
+            <if test="serviceScope != null and serviceScope != ''">#{serviceScope},</if>
+            <if test="score != null">#{score},</if>
+            <if test="bankAccount != null">#{bankAccount},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTServiceProvider" parameterType="TServiceProvider">
+        update t_service_provider
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="providerName != null and providerName != ''">provider_name = #{providerName},</if>
+            <if test="licenseCode != null and licenseCode != ''">license_code = #{licenseCode},</if>
+            <if test="contactPerson != null and contactPerson != ''">contact_person = #{contactPerson},</if>
+            <if test="contactPhone != null and contactPhone != ''">contact_phone = #{contactPhone},</if>
+            <if test="address != null and address != ''">address = #{address},</if>
+            <if test="businessLicense != null">business_license = #{businessLicense},</if>
+            <if test="auditStatus != null">audit_status = #{auditStatus},</if>
+            <if test="serviceScope != null and serviceScope != ''">service_scope = #{serviceScope},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="bankAccount != null">bank_account = #{bankAccount},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where provider_id = #{providerId}
+    </update>
+
+    <delete id="deleteTServiceProviderByProviderId" parameterType="Long">
+        delete from t_service_provider where provider_id = #{providerId}
+    </delete>
+
+    <delete id="deleteTServiceProviderByProviderIds" parameterType="String">
+        delete from t_service_provider where provider_id in 
+        <foreach item="providerId" collection="array" open="(" separator="," close=")">
+            #{providerId}
+        </foreach>
+    </delete>
+</mapper>

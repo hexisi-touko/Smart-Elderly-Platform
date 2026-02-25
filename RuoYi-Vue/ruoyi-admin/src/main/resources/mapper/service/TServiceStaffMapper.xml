@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.service.mapper.TServiceStaffMapper">
+    
+    <resultMap type="TServiceStaff" id="TServiceStaffResult">
+        <result property="staffId"    column="staff_id"    />
+        <result property="staffName"    column="staff_name"    />
+        <result property="providerId"    column="provider_id"    />
+        <result property="phone"    column="phone"    />
+        <result property="idCard"    column="id_card"    />
+        <result property="certificate"    column="certificate"    />
+        <result property="staffType"    column="staff_type"    />
+        <result property="status"    column="status"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTServiceStaffVo">
+        select staff_id, staff_name, provider_id, phone, id_card, certificate, staff_type, status, is_deleted, create_time, update_time from t_service_staff
+    </sql>
+
+    <select id="selectTServiceStaffList" parameterType="TServiceStaff" resultMap="TServiceStaffResult">
+        <include refid="selectTServiceStaffVo"/>
+        <where>  
+            <if test="staffName != null  and staffName != ''"> and staff_name like concat('%', #{staffName}, '%')</if>
+            <if test="providerId != null "> and provider_id = #{providerId}</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+            <if test="staffType != null  and staffType != ''"> and staff_type = #{staffType}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectTServiceStaffByStaffId" parameterType="Long" resultMap="TServiceStaffResult">
+        <include refid="selectTServiceStaffVo"/>
+        where staff_id = #{staffId}
+    </select>
+
+    <insert id="insertTServiceStaff" parameterType="TServiceStaff" useGeneratedKeys="true" keyProperty="staffId">
+        insert into t_service_staff
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="staffName != null and staffName != ''">staff_name,</if>
+            <if test="providerId != null">provider_id,</if>
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="idCard != null">id_card,</if>
+            <if test="certificate != null">certificate,</if>
+            <if test="staffType != null">staff_type,</if>
+            <if test="status != null">status,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="staffName != null and staffName != ''">#{staffName},</if>
+            <if test="providerId != null">#{providerId},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="idCard != null">#{idCard},</if>
+            <if test="certificate != null">#{certificate},</if>
+            <if test="staffType != null">#{staffType},</if>
+            <if test="status != null">#{status},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTServiceStaff" parameterType="TServiceStaff">
+        update t_service_staff
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="staffName != null and staffName != ''">staff_name = #{staffName},</if>
+            <if test="providerId != null">provider_id = #{providerId},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="idCard != null">id_card = #{idCard},</if>
+            <if test="certificate != null">certificate = #{certificate},</if>
+            <if test="staffType != null">staff_type = #{staffType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where staff_id = #{staffId}
+    </update>
+
+    <delete id="deleteTServiceStaffByStaffId" parameterType="Long">
+        delete from t_service_staff where staff_id = #{staffId}
+    </delete>
+
+    <delete id="deleteTServiceStaffByStaffIds" parameterType="String">
+        delete from t_service_staff where staff_id in 
+        <foreach item="staffId" collection="array" open="(" separator="," close=")">
+            #{staffId}
+        </foreach>
+    </delete>
+</mapper>

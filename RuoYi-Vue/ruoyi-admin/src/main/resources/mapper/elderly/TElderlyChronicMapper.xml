@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.elderly.mapper.TElderlyChronicMapper">
+    
+    <resultMap type="TElderlyChronic" id="TElderlyChronicResult">
+        <result property="id"    column="id"    />
+        <result property="elderlyId"    column="elderly_id"    />
+        <result property="chronicType"    column="chronic_type"    />
+        <result property="diagnosisDate"    column="diagnosis_date"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTElderlyChronicVo">
+        select id, elderly_id, chronic_type, diagnosis_date, is_deleted, create_time, update_time from t_elderly_chronic
+    </sql>
+
+    <select id="selectTElderlyChronicList" parameterType="TElderlyChronic" resultMap="TElderlyChronicResult">
+        <include refid="selectTElderlyChronicVo"/>
+        <where>  
+            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
+            <if test="chronicType != null  and chronicType != ''"> and chronic_type = #{chronicType}</if>
+        </where>
+    </select>
+    
+    <select id="selectTElderlyChronicById" parameterType="Long" resultMap="TElderlyChronicResult">
+        <include refid="selectTElderlyChronicVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertTElderlyChronic" parameterType="TElderlyChronic" useGeneratedKeys="true" keyProperty="id">
+        insert into t_elderly_chronic
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id,</if>
+            <if test="chronicType != null and chronicType != ''">chronic_type,</if>
+            <if test="diagnosisDate != null">diagnosis_date,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">#{elderlyId},</if>
+            <if test="chronicType != null and chronicType != ''">#{chronicType},</if>
+            <if test="diagnosisDate != null">#{diagnosisDate},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTElderlyChronic" parameterType="TElderlyChronic">
+        update t_elderly_chronic
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id = #{elderlyId},</if>
+            <if test="chronicType != null and chronicType != ''">chronic_type = #{chronicType},</if>
+            <if test="diagnosisDate != null">diagnosis_date = #{diagnosisDate},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTElderlyChronicById" parameterType="Long">
+        delete from t_elderly_chronic where id = #{id}
+    </delete>
+
+    <delete id="deleteTElderlyChronicByIds" parameterType="String">
+        delete from t_elderly_chronic where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

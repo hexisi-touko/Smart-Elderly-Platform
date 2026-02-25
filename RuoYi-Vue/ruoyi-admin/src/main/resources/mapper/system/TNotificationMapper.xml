@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TNotificationMapper">
+    
+    <resultMap type="TNotification" id="TNotificationResult">
+        <result property="notificationId"    column="notification_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userType"    column="user_type"    />
+        <result property="notificationType"    column="notification_type"    />
+        <result property="title"    column="title"    />
+        <result property="content"    column="content"    />
+        <result property="priority"    column="priority"    />
+        <result property="isRead"    column="is_read"    />
+        <result property="readTime"    column="read_time"    />
+        <result property="bizId"    column="biz_id"    />
+        <result property="bizType"    column="biz_type"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTNotificationVo">
+        select notification_id, user_id, user_type, notification_type, title, content, priority, is_read, read_time, biz_id, biz_type, is_deleted, create_time, update_time from t_notification
+    </sql>
+
+    <select id="selectTNotificationList" parameterType="TNotification" resultMap="TNotificationResult">
+        <include refid="selectTNotificationVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="userType != null  and userType != ''"> and user_type = #{userType}</if>
+            <if test="notificationType != null  and notificationType != ''"> and notification_type = #{notificationType}</if>
+            <if test="title != null  and title != ''"> and title like concat('%', #{title}, '%')</if>
+            <if test="isRead != null "> and is_read = #{isRead}</if>
+            <if test="bizType != null  and bizType != ''"> and biz_type = #{bizType}</if>
+        </where>
+    </select>
+    
+    <select id="selectTNotificationByNotificationId" parameterType="Long" resultMap="TNotificationResult">
+        <include refid="selectTNotificationVo"/>
+        where notification_id = #{notificationId}
+    </select>
+
+    <insert id="insertTNotification" parameterType="TNotification" useGeneratedKeys="true" keyProperty="notificationId">
+        insert into t_notification
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="userType != null and userType != ''">user_type,</if>
+            <if test="notificationType != null and notificationType != ''">notification_type,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="content != null and content != ''">content,</if>
+            <if test="priority != null">priority,</if>
+            <if test="isRead != null">is_read,</if>
+            <if test="readTime != null">read_time,</if>
+            <if test="bizId != null">biz_id,</if>
+            <if test="bizType != null">biz_type,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="userType != null and userType != ''">#{userType},</if>
+            <if test="notificationType != null and notificationType != ''">#{notificationType},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="content != null and content != ''">#{content},</if>
+            <if test="priority != null">#{priority},</if>
+            <if test="isRead != null">#{isRead},</if>
+            <if test="readTime != null">#{readTime},</if>
+            <if test="bizId != null">#{bizId},</if>
+            <if test="bizType != null">#{bizType},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTNotification" parameterType="TNotification">
+        update t_notification
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="userType != null and userType != ''">user_type = #{userType},</if>
+            <if test="notificationType != null and notificationType != ''">notification_type = #{notificationType},</if>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="isRead != null">is_read = #{isRead},</if>
+            <if test="readTime != null">read_time = #{readTime},</if>
+            <if test="bizId != null">biz_id = #{bizId},</if>
+            <if test="bizType != null">biz_type = #{bizType},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where notification_id = #{notificationId}
+    </update>
+
+    <delete id="deleteTNotificationByNotificationId" parameterType="Long">
+        delete from t_notification where notification_id = #{notificationId}
+    </delete>
+
+    <delete id="deleteTNotificationByNotificationIds" parameterType="String">
+        delete from t_notification where notification_id in 
+        <foreach item="notificationId" collection="array" open="(" separator="," close=")">
+            #{notificationId}
+        </foreach>
+    </delete>
+</mapper>

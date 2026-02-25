@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.elderly.mapper.TGuardianMapper">
+    
+    <resultMap type="TGuardian" id="TGuardianResult">
+        <result property="guardianId"    column="guardian_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="name"    column="name"    />
+        <result property="idCard"    column="id_card"    />
+        <result property="phone"    column="phone"    />
+        <result property="relationship"    column="relationship"    />
+        <result property="isPrimary"    column="is_primary"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTGuardianVo">
+        select guardian_id, user_id, name, id_card, phone, relationship, is_primary, is_deleted, create_time, update_time from t_guardian
+    </sql>
+
+    <select id="selectTGuardianList" parameterType="TGuardian" resultMap="TGuardianResult">
+        <include refid="selectTGuardianVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+            <if test="relationship != null  and relationship != ''"> and relationship = #{relationship}</if>
+            <if test="isPrimary != null "> and is_primary = #{isPrimary}</if>
+        </where>
+    </select>
+    
+    <select id="selectTGuardianByGuardianId" parameterType="Long" resultMap="TGuardianResult">
+        <include refid="selectTGuardianVo"/>
+        where guardian_id = #{guardianId}
+    </select>
+
+    <insert id="insertTGuardian" parameterType="TGuardian" useGeneratedKeys="true" keyProperty="guardianId">
+        insert into t_guardian
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="idCard != null and idCard != ''">id_card,</if>
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="relationship != null">relationship,</if>
+            <if test="isPrimary != null">is_primary,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="idCard != null and idCard != ''">#{idCard},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="relationship != null">#{relationship},</if>
+            <if test="isPrimary != null">#{isPrimary},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTGuardian" parameterType="TGuardian">
+        update t_guardian
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="idCard != null and idCard != ''">id_card = #{idCard},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="relationship != null">relationship = #{relationship},</if>
+            <if test="isPrimary != null">is_primary = #{isPrimary},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where guardian_id = #{guardianId}
+    </update>
+
+    <delete id="deleteTGuardianByGuardianId" parameterType="Long">
+        delete from t_guardian where guardian_id = #{guardianId}
+    </delete>
+
+    <delete id="deleteTGuardianByGuardianIds" parameterType="String">
+        delete from t_guardian where guardian_id in 
+        <foreach item="guardianId" collection="array" open="(" separator="," close=")">
+            #{guardianId}
+        </foreach>
+    </delete>
+</mapper>
