@@ -1,10 +1,10 @@
 -- ============================================================================
 -- 智慧居家养老服务平台 - 数据库初始化脚本（方案B：在 RuoYi 数据库中追加业务表）
 -- 数据库版本: MySQL 8.0
--- 更新时间: 2026-02-23
+-- 更新时间: 2026-02-26
 -- 使用方式: 在 RuoYi 的 ry-vue 数据库中直接执行本脚本
 -- 说明: 
---   1. 所有主键使用 VARCHAR(36) 存储 UUID
+--   1. 所有主键使用 BIGINT AUTO_INCREMENT
 --   2. 敏感字段（身份证号、手机号、银行卡号）需使用 AES 加密
 --   3. 所有业务表包含逻辑删除字段 is_deleted
 --   4. 所有表包含审计字段：create_time, update_time
@@ -19,7 +19,7 @@
 -- 1. C端用户账号表（统一管理老人/监护人/服务商的登录态）
 DROP TABLE IF EXISTS t_app_user;
 CREATE TABLE t_app_user (
-    user_id VARCHAR(36) PRIMARY KEY COMMENT '用户唯一标识（UUID）',
+    user_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '用户唯一标识',
     phone VARCHAR(50) NOT NULL COMMENT '手机号（登录账号，需 AES 加密）',
     password VARCHAR(100) NOT NULL COMMENT '密码（BCrypt 加密）',
     real_name VARCHAR(50) NOT NULL COMMENT '真实姓名',
@@ -40,8 +40,8 @@ CREATE TABLE t_app_user (
 -- 2. 老人表
 DROP TABLE IF EXISTS t_elderly;
 CREATE TABLE t_elderly (
-    elderly_id VARCHAR(36) PRIMARY KEY COMMENT '老人唯一标识（UUID）',
-    user_id VARCHAR(36) NOT NULL COMMENT '关联C端用户ID（t_app_user.user_id）',
+    elderly_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '老人唯一标识',
+    user_id BIGINT NOT NULL COMMENT '关联C端用户ID（t_app_user.user_id）',
     name VARCHAR(50) NOT NULL COMMENT '老人姓名',
     id_card VARCHAR(100) NOT NULL COMMENT '身份证号（需 AES 加密）',
     phone VARCHAR(50) COMMENT '老人手机号（需 AES 加密）',
@@ -64,8 +64,8 @@ CREATE TABLE t_elderly (
 -- 3. 老人慢病关联表
 DROP TABLE IF EXISTS t_elderly_chronic;
 CREATE TABLE t_elderly_chronic (
-    id VARCHAR(36) PRIMARY KEY COMMENT '唯一标识（UUID）',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '唯一标识',
+    elderly_id BIGINT NOT NULL COMMENT '关联老人ID',
     chronic_type VARCHAR(50) NOT NULL COMMENT '慢病类型（如高血压、糖尿病、冠心病等）',
     diagnosis_date DATE COMMENT '确诊日期',
     is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
@@ -79,8 +79,8 @@ CREATE TABLE t_elderly_chronic (
 -- 4. 监护人表
 DROP TABLE IF EXISTS t_guardian;
 CREATE TABLE t_guardian (
-    guardian_id VARCHAR(36) PRIMARY KEY COMMENT '监护人唯一标识（UUID）',
-    user_id VARCHAR(36) NOT NULL COMMENT '关联C端用户ID（t_app_user.user_id）',
+    guardian_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '监护人唯一标识',
+    user_id BIGINT NOT NULL COMMENT '关联C端用户ID（t_app_user.user_id）',
     name VARCHAR(50) NOT NULL COMMENT '监护人姓名',
     id_card VARCHAR(100) NOT NULL COMMENT '身份证号（需 AES 加密）',
     phone VARCHAR(50) NOT NULL COMMENT '监护人手机号（需 AES 加密）',
@@ -97,9 +97,9 @@ CREATE TABLE t_guardian (
 -- 5. 老人-监护人关联表（N:M中间表）
 DROP TABLE IF EXISTS t_elderly_guardian;
 CREATE TABLE t_elderly_guardian (
-    id VARCHAR(36) PRIMARY KEY COMMENT '唯一标识（UUID）',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
-    guardian_id VARCHAR(36) NOT NULL COMMENT '关联监护人ID',
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '唯一标识',
+    elderly_id BIGINT NOT NULL COMMENT '关联老人ID',
+    guardian_id BIGINT NOT NULL COMMENT '关联监护人ID',
     authorization_status TINYINT DEFAULT 1 COMMENT '授权状态（0-已撤销、1-已授权）',
     is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -113,9 +113,9 @@ CREATE TABLE t_elderly_guardian (
 -- 6. 服务人员表
 DROP TABLE IF EXISTS t_service_staff;
 CREATE TABLE t_service_staff (
-    staff_id VARCHAR(36) PRIMARY KEY COMMENT '服务人员唯一标识（UUID）',
+    staff_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '服务人员唯一标识',
     staff_name VARCHAR(50) NOT NULL COMMENT '服务人员姓名',
-    provider_id VARCHAR(36) NOT NULL COMMENT '关联所属服务商ID',
+    provider_id BIGINT NOT NULL COMMENT '关联所属服务商ID',
     phone VARCHAR(50) NOT NULL COMMENT '服务人员手机号（需 AES 加密）',
     id_card VARCHAR(100) COMMENT '身份证号（需 AES 加密）',
     certificate VARCHAR(100) COMMENT '职业资格证书编号（如护理证、养老护理员证）',
@@ -137,8 +137,8 @@ CREATE TABLE t_service_staff (
 -- 7. 服务商表
 DROP TABLE IF EXISTS t_service_provider;
 CREATE TABLE t_service_provider (
-    provider_id VARCHAR(36) PRIMARY KEY COMMENT '服务商唯一标识（UUID）',
-    user_id VARCHAR(36) NOT NULL COMMENT '关联C端用户ID（t_app_user.user_id）',
+    provider_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '服务商唯一标识',
+    user_id BIGINT NOT NULL COMMENT '关联C端用户ID（t_app_user.user_id）',
     provider_name VARCHAR(100) NOT NULL UNIQUE COMMENT '服务商名称',
     license_code VARCHAR(100) NOT NULL UNIQUE COMMENT '资质许可证号',
     contact_person VARCHAR(50) NOT NULL COMMENT '联系人姓名',
@@ -162,8 +162,8 @@ CREATE TABLE t_service_provider (
 -- 8. 服务项目表
 DROP TABLE IF EXISTS t_service_item;
 CREATE TABLE t_service_item (
-    item_id VARCHAR(36) PRIMARY KEY COMMENT '服务项目唯一标识（UUID）',
-    provider_id VARCHAR(36) NOT NULL COMMENT '关联服务商ID',
+    item_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '服务项目唯一标识',
+    provider_id BIGINT NOT NULL COMMENT '关联服务商ID',
     item_name VARCHAR(100) NOT NULL COMMENT '服务项目名称',
     item_category VARCHAR(50) NOT NULL COMMENT '服务类别（生活照料、医疗护理、康复理疗、家政服务等）',
     item_description TEXT COMMENT '服务项目描述',
@@ -183,7 +183,7 @@ CREATE TABLE t_service_item (
 -- 9. 线上课程表
 DROP TABLE IF EXISTS t_online_course;
 CREATE TABLE t_online_course (
-    course_id VARCHAR(36) PRIMARY KEY COMMENT '课程唯一标识（UUID）',
+    course_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '课程唯一标识',
     course_name VARCHAR(100) NOT NULL COMMENT '课程名称',
     course_type VARCHAR(50) NOT NULL COMMENT '课程类型（健康讲座、兴趣培训、文化娱乐等）',
     course_description TEXT COMMENT '课程描述',
@@ -208,9 +208,9 @@ CREATE TABLE t_online_course (
 -- 10. 老人-课程报名表（N:M中间表）
 DROP TABLE IF EXISTS t_elderly_course;
 CREATE TABLE t_elderly_course (
-    id VARCHAR(36) PRIMARY KEY COMMENT '唯一标识（UUID）',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
-    course_id VARCHAR(36) NOT NULL COMMENT '关联课程ID',
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '唯一标识',
+    elderly_id BIGINT NOT NULL COMMENT '关联老人ID',
+    course_id BIGINT NOT NULL COMMENT '关联课程ID',
     enrollment_status TINYINT DEFAULT 1 COMMENT '报名状态（0-已取消、1-已报名、2-学习中、3-已完成）',
     learning_progress INT DEFAULT 0 COMMENT '学习进度（百分比：0-100）',
     enrollment_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '报名时间',
@@ -227,7 +227,7 @@ CREATE TABLE t_elderly_course (
 -- 11. 线下活动表
 DROP TABLE IF EXISTS t_offline_activity;
 CREATE TABLE t_offline_activity (
-    activity_id VARCHAR(36) PRIMARY KEY COMMENT '活动唯一标识（UUID）',
+    activity_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '活动唯一标识',
     activity_name VARCHAR(100) NOT NULL COMMENT '活动名称',
     activity_type VARCHAR(50) NOT NULL COMMENT '活动类型（文娱活动、社交聚会、健康讲座等）',
     activity_description TEXT COMMENT '活动描述',
@@ -253,9 +253,9 @@ CREATE TABLE t_offline_activity (
 -- 12. 活动报名表（N:M中间表）
 DROP TABLE IF EXISTS t_activity_enrollment;
 CREATE TABLE t_activity_enrollment (
-    id VARCHAR(36) PRIMARY KEY COMMENT '唯一标识（UUID）',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
-    activity_id VARCHAR(36) NOT NULL COMMENT '关联活动ID',
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '唯一标识',
+    elderly_id BIGINT NOT NULL COMMENT '关联老人ID',
+    activity_id BIGINT NOT NULL COMMENT '关联活动ID',
     enrollment_status TINYINT DEFAULT 1 COMMENT '报名状态（0-已取消、1-已报名、2-已签到、3-已完成）',
     check_in_time DATETIME COMMENT '签到时间',
     is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
@@ -275,10 +275,10 @@ CREATE TABLE t_activity_enrollment (
 -- 13. 智能设备表
 DROP TABLE IF EXISTS t_smart_device;
 CREATE TABLE t_smart_device (
-    device_id VARCHAR(36) PRIMARY KEY COMMENT '设备唯一标识（UUID）',
+    device_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '设备唯一标识',
     device_code VARCHAR(50) NOT NULL UNIQUE COMMENT '设备硬件编码',
     device_type VARCHAR(50) NOT NULL COMMENT '设备类型（血压计、血糖仪、红外探测器、智能手环等）',
-    elderly_id VARCHAR(36) COMMENT '关联老人ID（支持设备换绑）',
+    elderly_id BIGINT COMMENT '关联老人ID（支持设备换绑）',
     device_brand VARCHAR(50) COMMENT '设备品牌',
     device_model VARCHAR(50) COMMENT '设备型号',
     bind_time DATETIME COMMENT '绑定时间',
@@ -301,9 +301,9 @@ CREATE TABLE t_smart_device (
 -- 已移除冗余字段 data_source，由 collect_method 统一表示数据来源
 DROP TABLE IF EXISTS t_health_record;
 CREATE TABLE t_health_record (
-    record_id VARCHAR(36) PRIMARY KEY COMMENT '记录唯一标识（UUID）',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
-    device_id VARCHAR(36) COMMENT '关联采集设备ID（手动录入时为空）',
+    record_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '记录唯一标识',
+    elderly_id BIGINT NOT NULL COMMENT '关联老人ID',
+    device_id BIGINT COMMENT '关联采集设备ID（手动录入时为空）',
     collect_time DATETIME NOT NULL COMMENT '数据采集时间',
     record_type VARCHAR(50) NOT NULL COMMENT '记录类型（血压、血糖、心率、体温、血氧等）',
     collect_method TINYINT NOT NULL COMMENT '采集方式（0-智能设备、1-手动录入、2-医院同步）',
@@ -328,8 +328,8 @@ CREATE TABLE t_health_record (
 -- 15. 健康阈值表
 DROP TABLE IF EXISTS t_health_threshold;
 CREATE TABLE t_health_threshold (
-    threshold_id VARCHAR(36) PRIMARY KEY COMMENT '阈值唯一标识（UUID）',
-    elderly_id VARCHAR(36) NOT NULL UNIQUE COMMENT '关联老人ID（一人一套个性化阈值）',
+    threshold_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '阈值唯一标识',
+    elderly_id BIGINT NOT NULL UNIQUE COMMENT '关联老人ID（一人一套个性化阈值）',
     sys_bp_max INT NOT NULL DEFAULT 140 COMMENT '收缩压上限阈值（mmHg）',
     sys_bp_min INT NOT NULL DEFAULT 90 COMMENT '收缩压下限阈值（mmHg）',
     dia_bp_max INT NOT NULL DEFAULT 90 COMMENT '舒张压上限阈值（mmHg）',
@@ -351,15 +351,15 @@ CREATE TABLE t_health_threshold (
 -- handler_role 由 VARCHAR 改为 TINYINT 枚举，避免魔法字符串
 DROP TABLE IF EXISTS t_safety_alert;
 CREATE TABLE t_safety_alert (
-    alert_id VARCHAR(36) PRIMARY KEY COMMENT '预警唯一标识（UUID）',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
-    device_id VARCHAR(36) NOT NULL COMMENT '关联触发预警的设备ID',
+    alert_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '预警唯一标识',
+    elderly_id BIGINT NOT NULL COMMENT '关联老人ID',
+    device_id BIGINT NOT NULL COMMENT '关联触发预警的设备ID',
     alert_type VARCHAR(50) NOT NULL COMMENT '预警类型（跌倒、血压异常、久坐不动、离开安全区域等）',
     alert_time DATETIME NOT NULL COMMENT '预警触发时间',
     response_time DATETIME COMMENT '服务商接单时间（用于计算15分钟响应率）',
     complete_time DATETIME COMMENT '处置完成时间',
     urge_count TINYINT DEFAULT 0 COMMENT '子女一键催促次数',
-    handler_id VARCHAR(36) COMMENT '处理人ID（服务商/运营人员账号）',
+    handler_id BIGINT COMMENT '处理人ID（服务商/运营人员账号）',
     handler_role TINYINT COMMENT '处理人角色（0-服务商、1-运营人员、2-系统自动）',
     alert_lng DECIMAL(10,6) NOT NULL COMMENT '预警地点经度',
     alert_lat DECIMAL(10,6) NOT NULL COMMENT '预警地点纬度',
@@ -380,8 +380,8 @@ CREATE TABLE t_safety_alert (
 -- 17. 安全区域/地理围栏表（支持"离开安全区域"预警类型）
 DROP TABLE IF EXISTS t_safety_zone;
 CREATE TABLE t_safety_zone (
-    zone_id VARCHAR(36) PRIMARY KEY COMMENT '安全区域唯一标识（UUID）',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
+    zone_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '安全区域唯一标识',
+    elderly_id BIGINT NOT NULL COMMENT '关联老人ID',
     zone_name VARCHAR(50) NOT NULL COMMENT '区域名称（如"家"、"社区"）',
     center_lng DECIMAL(10,6) NOT NULL COMMENT '区域中心经度',
     center_lat DECIMAL(10,6) NOT NULL COMMENT '区域中心纬度',
@@ -400,8 +400,8 @@ CREATE TABLE t_safety_zone (
 -- 已移除 is_taken 和 last_taken_time，服药记录由 t_medication_log 表管理
 DROP TABLE IF EXISTS t_medication_reminder;
 CREATE TABLE t_medication_reminder (
-    reminder_id VARCHAR(36) PRIMARY KEY COMMENT '提醒唯一标识（UUID）',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
+    reminder_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '提醒唯一标识',
+    elderly_id BIGINT NOT NULL COMMENT '关联老人ID',
     medication_name VARCHAR(100) NOT NULL COMMENT '药品名称',
     medication_type VARCHAR(50) COMMENT '药品类型（降压药、降糖药等）',
     dosage VARCHAR(50) COMMENT '用药剂量（如1片、10ml）',
@@ -423,9 +423,9 @@ CREATE TABLE t_medication_reminder (
 -- 19. 用药记录表（记录每次服药确认，支持追踪历史服药情况）
 DROP TABLE IF EXISTS t_medication_log;
 CREATE TABLE t_medication_log (
-    log_id VARCHAR(36) PRIMARY KEY COMMENT '记录唯一标识（UUID）',
-    reminder_id VARCHAR(36) NOT NULL COMMENT '关联用药提醒ID',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
+    log_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '记录唯一标识',
+    reminder_id BIGINT NOT NULL COMMENT '关联用药提醒ID',
+    elderly_id BIGINT NOT NULL COMMENT '关联老人ID',
     medication_name VARCHAR(100) NOT NULL COMMENT '药品名称',
     scheduled_time DATETIME NOT NULL COMMENT '计划服药时间',
     taken_time DATETIME COMMENT '实际服药确认时间',
@@ -444,8 +444,8 @@ CREATE TABLE t_medication_log (
 -- 20. 体检预约表
 DROP TABLE IF EXISTS t_physical_exam_reservation;
 CREATE TABLE t_physical_exam_reservation (
-    reservation_id VARCHAR(36) PRIMARY KEY COMMENT '预约唯一标识（UUID）',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
+    reservation_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '预约唯一标识',
+    elderly_id BIGINT NOT NULL COMMENT '关联老人ID',
     exam_type VARCHAR(50) NOT NULL COMMENT '体检类型（常规体检、专项检查、上门体检等）',
     exam_institution VARCHAR(100) NOT NULL COMMENT '体检机构名称',
     third_party_org_id VARCHAR(100) COMMENT '第三方体检机构ID',
@@ -472,10 +472,10 @@ CREATE TABLE t_physical_exam_reservation (
 -- 21. 服务订单表
 DROP TABLE IF EXISTS t_service_order;
 CREATE TABLE t_service_order (
-    order_id VARCHAR(36) PRIMARY KEY COMMENT '订单唯一标识（UUID）',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '关联老人ID',
-    provider_id VARCHAR(36) NOT NULL COMMENT '关联服务商ID',
-    service_item_id VARCHAR(36) NOT NULL COMMENT '关联服务项目ID',
+    order_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '订单唯一标识',
+    elderly_id BIGINT NOT NULL COMMENT '关联老人ID',
+    provider_id BIGINT NOT NULL COMMENT '关联服务商ID',
+    service_item_id BIGINT NOT NULL COMMENT '关联服务项目ID',
     order_no VARCHAR(50) NOT NULL UNIQUE COMMENT '订单编号（业务流水号）',
     order_amount DECIMAL(10,2) NOT NULL COMMENT '订单金额',
     service_time DATETIME NOT NULL COMMENT '约定服务时间',
@@ -499,9 +499,9 @@ CREATE TABLE t_service_order (
 -- 22. 订单-服务人员关联表（N:M中间表，支持多人协作服务）
 DROP TABLE IF EXISTS t_order_staff;
 CREATE TABLE t_order_staff (
-    id VARCHAR(36) PRIMARY KEY COMMENT '唯一标识（UUID）',
-    order_id VARCHAR(36) NOT NULL COMMENT '关联订单ID',
-    staff_id VARCHAR(36) NOT NULL COMMENT '关联服务人员ID',
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '唯一标识',
+    order_id BIGINT NOT NULL COMMENT '关联订单ID',
+    staff_id BIGINT NOT NULL COMMENT '关联服务人员ID',
     is_primary TINYINT DEFAULT 0 COMMENT '是否主要服务人员（0-否、1-是）',
     is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -514,8 +514,8 @@ CREATE TABLE t_order_staff (
 -- 23. 支付记录表
 DROP TABLE IF EXISTS t_payment_record;
 CREATE TABLE t_payment_record (
-    payment_id VARCHAR(36) PRIMARY KEY COMMENT '支付记录唯一标识（UUID）',
-    order_id VARCHAR(36) NOT NULL UNIQUE COMMENT '关联服务订单ID（1:1对应）',
+    payment_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '支付记录唯一标识',
+    order_id BIGINT NOT NULL UNIQUE COMMENT '关联服务订单ID（1:1对应）',
     payment_amount DECIMAL(10,2) NOT NULL COMMENT '支付金额',
     payment_time DATETIME NOT NULL COMMENT '支付时间',
     payment_method VARCHAR(20) COMMENT '支付方式（微信、支付宝、余额等）',
@@ -538,9 +538,9 @@ CREATE TABLE t_payment_record (
 -- proof_photos 由逗号分隔字符串改为 JSON 数组，便于查询和管理
 DROP TABLE IF EXISTS t_service_evaluation;
 CREATE TABLE t_service_evaluation (
-    evaluation_id VARCHAR(36) PRIMARY KEY COMMENT '评价唯一标识（UUID）',
-    order_id VARCHAR(36) NOT NULL UNIQUE COMMENT '关联服务订单ID（1:1对应）',
-    elderly_id VARCHAR(36) NOT NULL COMMENT '评价人ID（老人/监护人）',
+    evaluation_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '评价唯一标识',
+    order_id BIGINT NOT NULL UNIQUE COMMENT '关联服务订单ID（1:1对应）',
+    elderly_id BIGINT NOT NULL COMMENT '评价人ID（老人/监护人）',
     star_level TINYINT NOT NULL COMMENT '星级评分（1-5分）',
     evaluation_content TEXT COMMENT '评价内容',
     proof_photos JSON COMMENT '照片凭证（JSON数组，每项为阿里云OSS链接）',
@@ -563,8 +563,8 @@ CREATE TABLE t_service_evaluation (
 -- 25. 消息通知表（持久化 WebSocket 推送消息，支持离线消息补偿）
 DROP TABLE IF EXISTS t_notification;
 CREATE TABLE t_notification (
-    notification_id VARCHAR(36) PRIMARY KEY COMMENT '通知唯一标识（UUID）',
-    user_id VARCHAR(36) NOT NULL COMMENT '接收用户ID（t_app_user.user_id 或 RuoYi sys_user.user_id）',
+    notification_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '通知唯一标识',
+    user_id BIGINT NOT NULL COMMENT '接收用户ID（t_app_user.user_id 或 RuoYi sys_user.user_id）',
     user_type VARCHAR(20) NOT NULL COMMENT '用户来源（app-C端用户、admin-管理端用户）',
     notification_type VARCHAR(50) NOT NULL COMMENT '通知类型（alert.new/alert.update/order.status/health.abnormal/medication.remind/activity.remind）',
     title VARCHAR(100) NOT NULL COMMENT '通知标题',
@@ -572,7 +572,7 @@ CREATE TABLE t_notification (
     priority TINYINT DEFAULT 0 COMMENT '优先级（0-普通、1-重要、2-紧急）',
     is_read TINYINT DEFAULT 0 COMMENT '是否已读（0-未读、1-已读）',
     read_time DATETIME COMMENT '阅读时间',
-    biz_id VARCHAR(36) COMMENT '关联业务ID（如alertId、orderId等）',
+    biz_id BIGINT COMMENT '关联业务ID（如alertId、orderId等）',
     biz_type VARCHAR(50) COMMENT '业务类型（alert/order/health/medication/activity）',
     is_deleted TINYINT DEFAULT 0 COMMENT '逻辑删除（0-未删除、1-已删除）',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -591,8 +591,8 @@ CREATE TABLE t_notification (
 -- 26. 系统日志表
 DROP TABLE IF EXISTS t_system_log;
 CREATE TABLE t_system_log (
-    log_id VARCHAR(36) PRIMARY KEY COMMENT '日志唯一标识（UUID）',
-    operator_id VARCHAR(36) NOT NULL COMMENT '操作人员ID',
+    log_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '日志唯一标识',
+    operator_id BIGINT NOT NULL COMMENT '操作人员ID',
     operator_name VARCHAR(50) NOT NULL COMMENT '操作人员姓名',
     operator_role VARCHAR(50) COMMENT '操作人员角色',
     operate_type VARCHAR(50) NOT NULL COMMENT '操作类型（登录、新增、修改、删除、查询等）',
@@ -621,8 +621,8 @@ CREATE TABLE t_system_log (
 -- 27. 服务商结算表
 DROP TABLE IF EXISTS t_provider_settlement;
 CREATE TABLE t_provider_settlement (
-    settlement_id VARCHAR(36) PRIMARY KEY COMMENT '结算唯一标识（UUID）',
-    provider_id VARCHAR(36) NOT NULL COMMENT '关联服务商ID',
+    settlement_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '结算唯一标识',
+    provider_id BIGINT NOT NULL COMMENT '关联服务商ID',
     settlement_period VARCHAR(20) NOT NULL COMMENT '结算周期（如2026-01）',
     order_count INT DEFAULT 0 COMMENT '订单数量',
     total_amount DECIMAL(10,2) DEFAULT 0.00 COMMENT '结算总金额',
@@ -651,7 +651,7 @@ CREATE TABLE t_provider_settlement (
 --
 -- 2. C端用户（老人/监护人/服务商）统一通过 t_app_user 管理登录态
 --    业务表 t_elderly、t_guardian、t_service_provider 通过 user_id 关联
---    两套认证链路通过拦截器前缀区分：/admin/* vs /api/*
+--    两套认证链路通过拦截器前缀区分：/admin/* vs /app/*
 --
 -- 3. 以下表在生产环境中需要按年度分表，以优化查询性能和存储效率：
 --    - t_health_record -> t_health_record_2026, t_health_record_2027 等

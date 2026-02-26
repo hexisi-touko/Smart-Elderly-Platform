@@ -119,7 +119,7 @@ public class AppLoginServiceImpl implements IAppLoginService {
         newUser.setPassword(SecurityUtils.encryptPassword(body.getPassword()));
         newUser.setRealName(body.getRealName());
         newUser.setUserType(StringUtils.isEmpty(body.getUserType()) ? "elderly" : body.getUserType());
-        newUser.setStatus(0L);
+        newUser.setStatus(1L);
         newUser.setCreateTime(DateUtils.getNowDate());
         appUserMapper.insertTAppUser(newUser);
     }
