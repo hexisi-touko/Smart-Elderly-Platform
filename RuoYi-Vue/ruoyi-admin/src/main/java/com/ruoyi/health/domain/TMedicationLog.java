@@ -13,8 +13,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TMedicationLog extends BaseEntity
-{
+public class TMedicationLog extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 记录id */
@@ -51,110 +50,105 @@ public class TMedicationLog extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setLogId(Long logId) 
-    {
+    /** 关联老人姓名（非数据库字段，JOIN查询用） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    public void setLogId(Long logId) {
         this.logId = logId;
     }
 
-    public Long getLogId() 
-    {
+    public Long getLogId() {
         return logId;
     }
 
-    public void setReminderId(Long reminderId) 
-    {
+    public void setReminderId(Long reminderId) {
         this.reminderId = reminderId;
     }
 
-    public Long getReminderId() 
-    {
+    public Long getReminderId() {
         return reminderId;
     }
 
-    public void setElderlyId(Long elderlyId) 
-    {
+    public void setElderlyId(Long elderlyId) {
         this.elderlyId = elderlyId;
     }
 
-    public Long getElderlyId() 
-    {
+    public Long getElderlyId() {
         return elderlyId;
     }
 
-    public void setMedicationName(String medicationName) 
-    {
+    public void setMedicationName(String medicationName) {
         this.medicationName = medicationName;
     }
 
-    public String getMedicationName() 
-    {
+    public String getMedicationName() {
         return medicationName;
     }
 
-    public void setScheduledTime(Date scheduledTime) 
-    {
+    public void setScheduledTime(Date scheduledTime) {
         this.scheduledTime = scheduledTime;
     }
 
-    public Date getScheduledTime() 
-    {
+    public Date getScheduledTime() {
         return scheduledTime;
     }
 
-    public void setTakenTime(Date takenTime) 
-    {
+    public void setTakenTime(Date takenTime) {
         this.takenTime = takenTime;
     }
 
-    public Date getTakenTime() 
-    {
+    public Date getTakenTime() {
         return takenTime;
     }
 
-    public void setIsTaken(Long isTaken) 
-    {
+    public void setIsTaken(Long isTaken) {
         this.isTaken = isTaken;
     }
 
-    public Long getIsTaken() 
-    {
+    public Long getIsTaken() {
         return isTaken;
     }
 
-    public void setSkipReason(String skipReason) 
-    {
+    public void setSkipReason(String skipReason) {
         this.skipReason = skipReason;
     }
 
-    public String getSkipReason() 
-    {
+    public String getSkipReason() {
         return skipReason;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setElderlyName(String elderlyName) {
+        this.elderlyName = elderlyName;
+    }
+
+    public String getElderlyName() {
+        return elderlyName;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("logId", getLogId())
-            .append("reminderId", getReminderId())
-            .append("elderlyId", getElderlyId())
-            .append("medicationName", getMedicationName())
-            .append("scheduledTime", getScheduledTime())
-            .append("takenTime", getTakenTime())
-            .append("isTaken", getIsTaken())
-            .append("skipReason", getSkipReason())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("logId", getLogId())
+                .append("reminderId", getReminderId())
+                .append("elderlyId", getElderlyId())
+                .append("elderlyName", getElderlyName())
+                .append("medicationName", getMedicationName())
+                .append("scheduledTime", getScheduledTime())
+                .append("takenTime", getTakenTime())
+                .append("isTaken", getIsTaken())
+                .append("skipReason", getSkipReason())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

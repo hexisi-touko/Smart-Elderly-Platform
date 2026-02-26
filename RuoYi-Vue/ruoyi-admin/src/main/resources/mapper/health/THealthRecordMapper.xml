@@ -7,7 +7,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="THealthRecord" id="THealthRecordResult">
         <result property="recordId"    column="record_id"    />
         <result property="elderlyId"    column="elderly_id"    />
+        <result property="elderlyName"    column="elderly_name"    />
         <result property="deviceId"    column="device_id"    />
+        <result property="deviceCode"    column="device_code"    />
         <result property="collectTime"    column="collect_time"    />
         <result property="recordType"    column="record_type"    />
         <result property="collectMethod"    column="collect_method"    />
@@ -26,24 +28,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectTHealthRecordVo">
-        select record_id, elderly_id, device_id, collect_time, record_type, collect_method, systolic_bp, diastolic_bp, blood_sugar, heart_rate, temperature, blood_oxygen, data_status, third_party_sync_id, backup_flag, is_deleted, create_time, update_time from t_health_record
+        select r.record_id, r.elderly_id, e.name as elderly_name, r.device_id, sd.device_code as device_code,
+               r.collect_time, r.record_type, r.collect_method,
+               r.systolic_bp, r.diastolic_bp, r.blood_sugar, r.heart_rate, r.temperature, r.blood_oxygen,
+               r.data_status, r.third_party_sync_id, r.backup_flag, r.is_deleted, r.create_time, r.update_time
+        from t_health_record r
+        left join t_elderly e on r.elderly_id = e.elderly_id
+        left join t_smart_device sd on r.device_id = sd.device_id
     </sql>
 
     <select id="selectTHealthRecordList" parameterType="THealthRecord" resultMap="THealthRecordResult">
         <include refid="selectTHealthRecordVo"/>
         <where>  
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="deviceId != null "> and device_id = #{deviceId}</if>
-            <if test="params.beginCollectTime != null and params.beginCollectTime != '' and params.endCollectTime != null and params.endCollectTime != ''"> and collect_time between #{params.beginCollectTime} and #{params.endCollectTime}</if>
-            <if test="recordType != null  and recordType != ''"> and record_type = #{recordType}</if>
-            <if test="collectMethod != null "> and collect_method = #{collectMethod}</if>
-            <if test="dataStatus != null "> and data_status = #{dataStatus}</if>
+            <if test="elderlyId != null "> and r.elderly_id = #{elderlyId}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
+            <if test="deviceId != null "> and r.device_id = #{deviceId}</if>
+            <if test="params.beginCollectTime != null and params.beginCollectTime != '' and params.endCollectTime != null and params.endCollectTime != ''"> and r.collect_time between #{params.beginCollectTime} and #{params.endCollectTime}</if>
+            <if test="recordType != null  and recordType != ''"> and r.record_type = #{recordType}</if>
+            <if test="collectMethod != null "> and r.collect_method = #{collectMethod}</if>
+            <if test="dataStatus != null "> and r.data_status = #{dataStatus}</if>
         </where>
     </select>
     
     <select id="selectTHealthRecordByRecordId" parameterType="Long" resultMap="THealthRecordResult">
         <include refid="selectTHealthRecordVo"/>
-        where record_id = #{recordId}
+        where r.record_id = #{recordId}
     </select>
 
     <insert id="insertTHealthRecord" parameterType="THealthRecord" useGeneratedKeys="true" keyProperty="recordId">

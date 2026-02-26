@@ -9,6 +9,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="deviceCode"    column="device_code"    />
         <result property="deviceType"    column="device_type"    />
         <result property="elderlyId"    column="elderly_id"    />
+        <result property="elderlyName"    column="elderly_name"    />
         <result property="deviceBrand"    column="device_brand"    />
         <result property="deviceModel"    column="device_model"    />
         <result property="bindTime"    column="bind_time"    />
@@ -23,18 +24,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectTSmartDeviceVo">
-        select device_id, device_code, device_type, elderly_id, device_brand, device_model, bind_time, maintenance_time, next_maintenance_time, push_status, device_status, third_party_device_id, is_deleted, create_time, update_time from t_smart_device
+        select d.device_id, d.device_code, d.device_type, d.elderly_id, e.name as elderly_name,
+               d.device_brand, d.device_model, d.bind_time, d.maintenance_time, d.next_maintenance_time,
+               d.push_status, d.device_status, d.third_party_device_id, d.is_deleted, d.create_time, d.update_time
+        from t_smart_device d
+        left join t_elderly e on d.elderly_id = e.elderly_id
     </sql>
 
     <select id="selectTSmartDeviceList" parameterType="TSmartDevice" resultMap="TSmartDeviceResult">
         <include refid="selectTSmartDeviceVo"/>
         <where>  
-            <if test="deviceCode != null  and deviceCode != ''"> and device_code = #{deviceCode}</if>
-            <if test="deviceType != null  and deviceType != ''"> and device_type = #{deviceType}</if>
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="pushStatus != null "> and push_status = #{pushStatus}</if>
-            <if test="deviceStatus != null "> and device_status = #{deviceStatus}</if>
-            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+            <if test="deviceCode != null  and deviceCode != ''"> and d.device_code like concat('%', #{deviceCode}, '%')</if>
+            <if test="deviceType != null  and deviceType != ''"> and d.device_type = #{deviceType}</if>
+            <if test="elderlyId != null "> and d.elderly_id = #{elderlyId}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
+            <if test="pushStatus != null "> and d.push_status = #{pushStatus}</if>
+            <if test="deviceStatus != null "> and d.device_status = #{deviceStatus}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and d.create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
         </where>
     </select>
     

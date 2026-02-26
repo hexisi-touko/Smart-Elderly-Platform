@@ -7,7 +7,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="TSafetyAlert" id="TSafetyAlertResult">
         <result property="alertId"    column="alert_id"    />
         <result property="elderlyId"    column="elderly_id"    />
+        <result property="elderlyName"    column="elderly_name"    />
         <result property="deviceId"    column="device_id"    />
+        <result property="deviceCode"    column="device_code"    />
         <result property="alertType"    column="alert_type"    />
         <result property="alertTime"    column="alert_time"    />
         <result property="responseTime"    column="response_time"    />
@@ -27,24 +29,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectTSafetyAlertVo">
-        select alert_id, elderly_id, device_id, alert_type, alert_time, response_time, complete_time, urge_count, handler_id, handler_role, alert_lng, alert_lat, alert_address, alert_status, handle_result, emergency_order_id, is_deleted, create_time, update_time from t_safety_alert
+        select sa.alert_id, sa.elderly_id, e.name as elderly_name, sa.device_id, d.device_code,
+               sa.alert_type, sa.alert_time, sa.response_time, sa.complete_time, sa.urge_count,
+               sa.handler_id, sa.handler_role, sa.alert_lng, sa.alert_lat, sa.alert_address,
+               sa.alert_status, sa.handle_result, sa.emergency_order_id, sa.is_deleted,
+               sa.create_time, sa.update_time
+        from t_safety_alert sa
+        left join t_elderly e on sa.elderly_id = e.elderly_id
+        left join t_smart_device d on sa.device_id = d.device_id
     </sql>
 
     <select id="selectTSafetyAlertList" parameterType="TSafetyAlert" resultMap="TSafetyAlertResult">
         <include refid="selectTSafetyAlertVo"/>
         <where>  
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="deviceId != null "> and device_id = #{deviceId}</if>
-            <if test="alertType != null  and alertType != ''"> and alert_type = #{alertType}</if>
-            <if test="params.beginAlertTime != null and params.beginAlertTime != '' and params.endAlertTime != null and params.endAlertTime != ''"> and alert_time between #{params.beginAlertTime} and #{params.endAlertTime}</if>
-            <if test="handlerRole != null "> and handler_role = #{handlerRole}</if>
-            <if test="alertStatus != null "> and alert_status = #{alertStatus}</if>
+            <if test="elderlyId != null "> and sa.elderly_id = #{elderlyId}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
+            <if test="deviceId != null "> and sa.device_id = #{deviceId}</if>
+            <if test="alertType != null  and alertType != ''"> and sa.alert_type = #{alertType}</if>
+            <if test="params.beginAlertTime != null and params.beginAlertTime != '' and params.endAlertTime != null and params.endAlertTime != ''"> and sa.alert_time between #{params.beginAlertTime} and #{params.endAlertTime}</if>
+            <if test="handlerRole != null "> and sa.handler_role = #{handlerRole}</if>
+            <if test="alertStatus != null "> and sa.alert_status = #{alertStatus}</if>
         </where>
     </select>
     
     <select id="selectTSafetyAlertByAlertId" parameterType="Long" resultMap="TSafetyAlertResult">
         <include refid="selectTSafetyAlertVo"/>
-        where alert_id = #{alertId}
+        where sa.alert_id = #{alertId}
     </select>
 
     <insert id="insertTSafetyAlert" parameterType="TSafetyAlert" useGeneratedKeys="true" keyProperty="alertId">

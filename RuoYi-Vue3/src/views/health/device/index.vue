@@ -19,10 +19,10 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="关联老人ID" prop="elderlyId">
+      <el-form-item label="老人姓名" prop="elderlyName">
         <el-input
-          v-model="queryParams.elderlyId"
-          placeholder="请输入关联老人ID"
+          v-model="queryParams.elderlyName"
+          placeholder="请输入老人姓名"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -114,7 +114,7 @@
           <dict-tag :options="device_type" :value="scope.row.deviceType"/>
         </template>
       </el-table-column>
-      <el-table-column label="关联老人ID" align="center" prop="elderlyId" />
+      <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="设备品牌" align="center" prop="deviceBrand" />
       <el-table-column label="设备型号" align="center" prop="deviceModel" />
       <el-table-column label="绑定时间" align="center" prop="bindTime" width="180">
@@ -174,8 +174,24 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="关联老人ID" prop="elderlyId">
-          <el-input v-model="form.elderlyId" placeholder="请输入关联老人ID" />
+        <el-form-item label="关联老人" prop="elderlyId">
+          <el-select
+            v-model="form.elderlyId"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="请输入老人姓名搜索"
+            :remote-method="remoteSearchElderly"
+            :loading="elderlyLoading"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in elderlyOptions"
+              :key="item.elderlyId"
+              :label="item.name + ' (' + (item.phone || '无手机号') + ')'"
+              :value="item.elderlyId"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="设备品牌" prop="deviceBrand">
           <el-input v-model="form.deviceBrand" placeholder="请输入设备品牌" />
@@ -235,6 +251,7 @@
 
 <script setup name="Device">
 import { listDevice, getDevice, delDevice, addDevice, updateDevice } from "@/api/health/device"
+import { listElderly } from "@/api/elderly/elderly"
 
 const { proxy } = getCurrentInstance()
 const { device_status, device_type, sys_normal_disable } = proxy.useDict('device_status', 'device_type', 'sys_normal_disable')
@@ -249,6 +266,8 @@ const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
 const daterangeCreateTime = ref([])
+const elderlyOptions = ref([])
+const elderlyLoading = ref(false)
 
 const data = reactive({
   form: {},
@@ -258,6 +277,7 @@ const data = reactive({
     deviceCode: null,
     deviceType: null,
     elderlyId: null,
+    elderlyName: null,
     pushStatus: null,
     deviceStatus: null,
     createTime: null,
@@ -317,6 +337,19 @@ function reset() {
   proxy.resetForm("deviceRef")
 }
 
+/** 远程搜索老人 */
+function remoteSearchElderly(query) {
+  if (query) {
+    elderlyLoading.value = true
+    listElderly({ name: query, pageNum: 1, pageSize: 20 }).then(res => {
+      elderlyOptions.value = res.rows
+      elderlyLoading.value = false
+    })
+  } else {
+    elderlyOptions.value = []
+  }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -350,6 +383,12 @@ function handleUpdate(row) {
   const _deviceId = row.deviceId || ids.value
   getDevice(_deviceId).then(response => {
     form.value = response.data
+    // 编辑时预加载当前关联老人到下拉列表
+    if (form.value.elderlyId) {
+      listElderly({ elderlyId: form.value.elderlyId, pageNum: 1, pageSize: 10 }).then(res => {
+        elderlyOptions.value = res.rows
+      })
+    }
     open.value = true
     title.value = "修改智能设备管理"
   })

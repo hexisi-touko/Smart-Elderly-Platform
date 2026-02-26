@@ -12,8 +12,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TSafetyZone extends BaseEntity
-{
+public class TSafetyZone extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 安全区域id */
@@ -51,110 +50,105 @@ public class TSafetyZone extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setZoneId(Long zoneId) 
-    {
+    /** 关联老人姓名（非数据库字段，JOIN查询用） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
     }
 
-    public Long getZoneId() 
-    {
+    public Long getZoneId() {
         return zoneId;
     }
 
-    public void setElderlyId(Long elderlyId) 
-    {
+    public void setElderlyId(Long elderlyId) {
         this.elderlyId = elderlyId;
     }
 
-    public Long getElderlyId() 
-    {
+    public Long getElderlyId() {
         return elderlyId;
     }
 
-    public void setZoneName(String zoneName) 
-    {
+    public void setZoneName(String zoneName) {
         this.zoneName = zoneName;
     }
 
-    public String getZoneName() 
-    {
+    public String getZoneName() {
         return zoneName;
     }
 
-    public void setCenterLng(BigDecimal centerLng) 
-    {
+    public void setCenterLng(BigDecimal centerLng) {
         this.centerLng = centerLng;
     }
 
-    public BigDecimal getCenterLng() 
-    {
+    public BigDecimal getCenterLng() {
         return centerLng;
     }
 
-    public void setCenterLat(BigDecimal centerLat) 
-    {
+    public void setCenterLat(BigDecimal centerLat) {
         this.centerLat = centerLat;
     }
 
-    public BigDecimal getCenterLat() 
-    {
+    public BigDecimal getCenterLat() {
         return centerLat;
     }
 
-    public void setRadius(Long radius) 
-    {
+    public void setRadius(Long radius) {
         this.radius = radius;
     }
 
-    public Long getRadius() 
-    {
+    public Long getRadius() {
         return radius;
     }
 
-    public void setZoneAddress(String zoneAddress) 
-    {
+    public void setZoneAddress(String zoneAddress) {
         this.zoneAddress = zoneAddress;
     }
 
-    public String getZoneAddress() 
-    {
+    public String getZoneAddress() {
         return zoneAddress;
     }
 
-    public void setIsActive(Long isActive) 
-    {
+    public void setIsActive(Long isActive) {
         this.isActive = isActive;
     }
 
-    public Long getIsActive() 
-    {
+    public Long getIsActive() {
         return isActive;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setElderlyName(String elderlyName) {
+        this.elderlyName = elderlyName;
+    }
+
+    public String getElderlyName() {
+        return elderlyName;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("zoneId", getZoneId())
-            .append("elderlyId", getElderlyId())
-            .append("zoneName", getZoneName())
-            .append("centerLng", getCenterLng())
-            .append("centerLat", getCenterLat())
-            .append("radius", getRadius())
-            .append("zoneAddress", getZoneAddress())
-            .append("isActive", getIsActive())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("zoneId", getZoneId())
+                .append("elderlyId", getElderlyId())
+                .append("elderlyName", getElderlyName())
+                .append("zoneName", getZoneName())
+                .append("centerLng", getCenterLng())
+                .append("centerLat", getCenterLat())
+                .append("radius", getRadius())
+                .append("zoneAddress", getZoneAddress())
+                .append("isActive", getIsActive())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

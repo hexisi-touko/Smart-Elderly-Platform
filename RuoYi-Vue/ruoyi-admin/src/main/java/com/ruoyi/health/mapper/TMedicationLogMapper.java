@@ -9,8 +9,7 @@ import com.ruoyi.health.domain.TMedicationLog;
  * @author zhangTing
  * @date 2026-02-25
  */
-public interface TMedicationLogMapper 
-{
+public interface TMedicationLogMapper {
     /**
      * 查询用药记录管理
      * 
@@ -58,4 +57,12 @@ public interface TMedicationLogMapper
      * @return 结果
      */
     public int deleteTMedicationLogByLogIds(Long[] logIds);
+
+    /**
+     * 根据提醒ID查询用药记录列表（主子表关联查询）
+     * 
+     * @param reminderId 用药提醒主键
+     * @return 用药记录列表
+     */
+    public List<TMedicationLog> selectTMedicationLogByReminderId(Long reminderId);
 }

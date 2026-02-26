@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="TMedicationReminder" id="TMedicationReminderResult">
         <result property="reminderId"    column="reminder_id"    />
         <result property="elderlyId"    column="elderly_id"    />
+        <result property="elderlyName"    column="elderly_name"    />
         <result property="medicationName"    column="medication_name"    />
         <result property="medicationType"    column="medication_type"    />
         <result property="dosage"    column="dosage"    />
@@ -21,23 +22,34 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
     </resultMap>
 
+    <!-- 包含子表用药记录的 resultMap（用于详情查询） -->
+    <resultMap type="TMedicationReminder" id="TMedicationReminderWithLogsResult" extends="TMedicationReminderResult">
+        <collection property="medicationLogList" column="reminder_id" select="com.ruoyi.health.mapper.TMedicationLogMapper.selectTMedicationLogByReminderId" />
+    </resultMap>
+
     <sql id="selectTMedicationReminderVo">
-        select reminder_id, elderly_id, medication_name, medication_type, dosage, frequency, reminder_time, start_date, end_date, note, status, is_deleted, create_time, update_time from t_medication_reminder
+        select mr.reminder_id, mr.elderly_id, e.name as elderly_name, mr.medication_name, mr.medication_type,
+               mr.dosage, mr.frequency, mr.reminder_time, mr.start_date, mr.end_date,
+               mr.note, mr.status, mr.is_deleted, mr.create_time, mr.update_time
+        from t_medication_reminder mr
+        left join t_elderly e on mr.elderly_id = e.elderly_id
     </sql>
 
     <select id="selectTMedicationReminderList" parameterType="TMedicationReminder" resultMap="TMedicationReminderResult">
         <include refid="selectTMedicationReminderVo"/>
         <where>  
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="medicationName != null  and medicationName != ''"> and medication_name like concat('%', #{medicationName}, '%')</if>
-            <if test="medicationType != null  and medicationType != ''"> and medication_type = #{medicationType}</if>
-            <if test="status != null "> and status = #{status}</if>
+            <if test="elderlyId != null "> and mr.elderly_id = #{elderlyId}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
+            <if test="medicationName != null  and medicationName != ''"> and mr.medication_name like concat('%', #{medicationName}, '%')</if>
+            <if test="medicationType != null  and medicationType != ''"> and mr.medication_type = #{medicationType}</if>
+            <if test="status != null "> and mr.status = #{status}</if>
         </where>
     </select>
-    
-    <select id="selectTMedicationReminderByReminderId" parameterType="Long" resultMap="TMedicationReminderResult">
+
+    <!-- 查询详情时加载子表用药记录 -->
+    <select id="selectTMedicationReminderByReminderId" parameterType="Long" resultMap="TMedicationReminderWithLogsResult">
         <include refid="selectTMedicationReminderVo"/>
-        where reminder_id = #{reminderId}
+        where mr.reminder_id = #{reminderId}
     </select>
 
     <insert id="insertTMedicationReminder" parameterType="TMedicationReminder" useGeneratedKeys="true" keyProperty="reminderId">

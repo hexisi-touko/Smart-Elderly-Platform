@@ -1,18 +1,10 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联老人ID" prop="elderlyId">
+      <el-form-item label="老人姓名" prop="elderlyName">
         <el-input
-          v-model="queryParams.elderlyId"
-          placeholder="请输入关联老人ID"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="关联采集设备ID" prop="deviceId">
-        <el-input
-          v-model="queryParams.deviceId"
-          placeholder="请输入关联采集设备ID"
+          v-model="queryParams.elderlyName"
+          placeholder="请输入老人姓名"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -108,8 +100,8 @@
     <el-table v-loading="loading" :data="healthRecordList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="记录id" align="center" prop="recordId" />
-      <el-table-column label="关联老人ID" align="center" prop="elderlyId" />
-      <el-table-column label="关联采集设备ID" align="center" prop="deviceId" />
+      <el-table-column label="老人姓名" align="center" prop="elderlyName" />
+      <el-table-column label="设备编码" align="center" prop="deviceCode" />
       <el-table-column label="数据采集时间" align="center" prop="collectTime" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.collectTime, '{y}-{m}-{d}') }}</span>
@@ -160,8 +152,24 @@
     <!-- 添加或修改健康记录管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="healthRecordRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联老人ID" prop="elderlyId">
-          <el-input v-model="form.elderlyId" placeholder="请输入关联老人ID" />
+        <el-form-item label="关联老人" prop="elderlyId">
+          <el-select
+            v-model="form.elderlyId"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="请输入老人姓名搜索"
+            :remote-method="remoteSearchElderly"
+            :loading="elderlyLoading"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in elderlyOptions"
+              :key="item.elderlyId"
+              :label="item.name + ' (' + (item.phone || '无手机号') + ')'"
+              :value="item.elderlyId"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="关联采集设备ID" prop="deviceId">
           <el-input v-model="form.deviceId" placeholder="请输入关联采集设备ID" />
@@ -235,6 +243,7 @@
 
 <script setup name="HealthRecord">
 import { listHealthRecord, getHealthRecord, delHealthRecord, addHealthRecord, updateHealthRecord } from "@/api/health/healthRecord"
+import { listElderly } from "@/api/elderly/elderly"
 
 const { proxy } = getCurrentInstance()
 const { health_record_type, collect_method, health_data_status } = proxy.useDict('health_record_type', 'collect_method', 'health_data_status')
@@ -249,6 +258,8 @@ const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
 const daterangeCollectTime = ref([])
+const elderlyOptions = ref([])
+const elderlyLoading = ref(false)
 
 const data = reactive({
   form: {},
@@ -256,6 +267,7 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     elderlyId: null,
+    elderlyName: null,
     deviceId: null,
     collectTime: null,
     recordType: null,
@@ -326,6 +338,19 @@ function reset() {
   proxy.resetForm("healthRecordRef")
 }
 
+/** 远程搜索老人 */
+function remoteSearchElderly(query) {
+  if (query) {
+    elderlyLoading.value = true
+    listElderly({ name: query, pageNum: 1, pageSize: 20 }).then(res => {
+      elderlyOptions.value = res.rows
+      elderlyLoading.value = false
+    })
+  } else {
+    elderlyOptions.value = []
+  }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -359,6 +384,11 @@ function handleUpdate(row) {
   const _recordId = row.recordId || ids.value
   getHealthRecord(_recordId).then(response => {
     form.value = response.data
+    if (form.value.elderlyId) {
+      listElderly({ elderlyId: form.value.elderlyId, pageNum: 1, pageSize: 10 }).then(res => {
+        elderlyOptions.value = res.rows
+      })
+    }
     open.value = true
     title.value = "修改健康记录管理"
   })

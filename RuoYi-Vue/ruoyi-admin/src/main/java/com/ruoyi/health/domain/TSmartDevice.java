@@ -13,8 +13,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TSmartDevice extends BaseEntity
-{
+public class TSmartDevice extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 设备id */
@@ -68,154 +67,141 @@ public class TSmartDevice extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setDeviceId(Long deviceId) 
-    {
+    /** 关联老人姓名（非数据库字段，JOIN查询用） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    public void setDeviceId(Long deviceId) {
         this.deviceId = deviceId;
     }
 
-    public Long getDeviceId() 
-    {
+    public Long getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceCode(String deviceCode) 
-    {
+    public void setDeviceCode(String deviceCode) {
         this.deviceCode = deviceCode;
     }
 
-    public String getDeviceCode() 
-    {
+    public String getDeviceCode() {
         return deviceCode;
     }
 
-    public void setDeviceType(String deviceType) 
-    {
+    public void setDeviceType(String deviceType) {
         this.deviceType = deviceType;
     }
 
-    public String getDeviceType() 
-    {
+    public String getDeviceType() {
         return deviceType;
     }
 
-    public void setElderlyId(Long elderlyId) 
-    {
+    public void setElderlyId(Long elderlyId) {
         this.elderlyId = elderlyId;
     }
 
-    public Long getElderlyId() 
-    {
+    public Long getElderlyId() {
         return elderlyId;
     }
 
-    public void setDeviceBrand(String deviceBrand) 
-    {
+    public void setDeviceBrand(String deviceBrand) {
         this.deviceBrand = deviceBrand;
     }
 
-    public String getDeviceBrand() 
-    {
+    public String getDeviceBrand() {
         return deviceBrand;
     }
 
-    public void setDeviceModel(String deviceModel) 
-    {
+    public void setDeviceModel(String deviceModel) {
         this.deviceModel = deviceModel;
     }
 
-    public String getDeviceModel() 
-    {
+    public String getDeviceModel() {
         return deviceModel;
     }
 
-    public void setBindTime(Date bindTime) 
-    {
+    public void setBindTime(Date bindTime) {
         this.bindTime = bindTime;
     }
 
-    public Date getBindTime() 
-    {
+    public Date getBindTime() {
         return bindTime;
     }
 
-    public void setMaintenanceTime(Date maintenanceTime) 
-    {
+    public void setMaintenanceTime(Date maintenanceTime) {
         this.maintenanceTime = maintenanceTime;
     }
 
-    public Date getMaintenanceTime() 
-    {
+    public Date getMaintenanceTime() {
         return maintenanceTime;
     }
 
-    public void setNextMaintenanceTime(Date nextMaintenanceTime) 
-    {
+    public void setNextMaintenanceTime(Date nextMaintenanceTime) {
         this.nextMaintenanceTime = nextMaintenanceTime;
     }
 
-    public Date getNextMaintenanceTime() 
-    {
+    public Date getNextMaintenanceTime() {
         return nextMaintenanceTime;
     }
 
-    public void setPushStatus(Long pushStatus) 
-    {
+    public void setPushStatus(Long pushStatus) {
         this.pushStatus = pushStatus;
     }
 
-    public Long getPushStatus() 
-    {
+    public Long getPushStatus() {
         return pushStatus;
     }
 
-    public void setDeviceStatus(Long deviceStatus) 
-    {
+    public void setDeviceStatus(Long deviceStatus) {
         this.deviceStatus = deviceStatus;
     }
 
-    public Long getDeviceStatus() 
-    {
+    public Long getDeviceStatus() {
         return deviceStatus;
     }
 
-    public void setThirdPartyDeviceId(String thirdPartyDeviceId) 
-    {
+    public void setThirdPartyDeviceId(String thirdPartyDeviceId) {
         this.thirdPartyDeviceId = thirdPartyDeviceId;
     }
 
-    public String getThirdPartyDeviceId() 
-    {
+    public String getThirdPartyDeviceId() {
         return thirdPartyDeviceId;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setElderlyName(String elderlyName) {
+        this.elderlyName = elderlyName;
+    }
+
+    public String getElderlyName() {
+        return elderlyName;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("deviceId", getDeviceId())
-            .append("deviceCode", getDeviceCode())
-            .append("deviceType", getDeviceType())
-            .append("elderlyId", getElderlyId())
-            .append("deviceBrand", getDeviceBrand())
-            .append("deviceModel", getDeviceModel())
-            .append("bindTime", getBindTime())
-            .append("maintenanceTime", getMaintenanceTime())
-            .append("nextMaintenanceTime", getNextMaintenanceTime())
-            .append("pushStatus", getPushStatus())
-            .append("deviceStatus", getDeviceStatus())
-            .append("thirdPartyDeviceId", getThirdPartyDeviceId())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("deviceId", getDeviceId())
+                .append("deviceCode", getDeviceCode())
+                .append("deviceType", getDeviceType())
+                .append("elderlyId", getElderlyId())
+                .append("elderlyName", getElderlyName())
+                .append("deviceBrand", getDeviceBrand())
+                .append("deviceModel", getDeviceModel())
+                .append("bindTime", getBindTime())
+                .append("maintenanceTime", getMaintenanceTime())
+                .append("nextMaintenanceTime", getNextMaintenanceTime())
+                .append("pushStatus", getPushStatus())
+                .append("deviceStatus", getDeviceStatus())
+                .append("thirdPartyDeviceId", getThirdPartyDeviceId())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

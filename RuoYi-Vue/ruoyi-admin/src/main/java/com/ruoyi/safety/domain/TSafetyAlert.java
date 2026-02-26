@@ -14,8 +14,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TSafetyAlert extends BaseEntity
-{
+public class TSafetyAlert extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 预警id */
@@ -84,198 +83,190 @@ public class TSafetyAlert extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setAlertId(Long alertId) 
-    {
+    /** 关联老人姓名（非数据库字段，JOIN查询用） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    /** 设备编码（非数据库字段，JOIN查询用） */
+    @Excel(name = "设备编码")
+    private String deviceCode;
+
+    public void setAlertId(Long alertId) {
         this.alertId = alertId;
     }
 
-    public Long getAlertId() 
-    {
+    public Long getAlertId() {
         return alertId;
     }
 
-    public void setElderlyId(Long elderlyId) 
-    {
+    public void setElderlyId(Long elderlyId) {
         this.elderlyId = elderlyId;
     }
 
-    public Long getElderlyId() 
-    {
+    public Long getElderlyId() {
         return elderlyId;
     }
 
-    public void setDeviceId(Long deviceId) 
-    {
+    public void setDeviceId(Long deviceId) {
         this.deviceId = deviceId;
     }
 
-    public Long getDeviceId() 
-    {
+    public Long getDeviceId() {
         return deviceId;
     }
 
-    public void setAlertType(String alertType) 
-    {
+    public void setAlertType(String alertType) {
         this.alertType = alertType;
     }
 
-    public String getAlertType() 
-    {
+    public String getAlertType() {
         return alertType;
     }
 
-    public void setAlertTime(Date alertTime) 
-    {
+    public void setAlertTime(Date alertTime) {
         this.alertTime = alertTime;
     }
 
-    public Date getAlertTime() 
-    {
+    public Date getAlertTime() {
         return alertTime;
     }
 
-    public void setResponseTime(Date responseTime) 
-    {
+    public void setResponseTime(Date responseTime) {
         this.responseTime = responseTime;
     }
 
-    public Date getResponseTime() 
-    {
+    public Date getResponseTime() {
         return responseTime;
     }
 
-    public void setCompleteTime(Date completeTime) 
-    {
+    public void setCompleteTime(Date completeTime) {
         this.completeTime = completeTime;
     }
 
-    public Date getCompleteTime() 
-    {
+    public Date getCompleteTime() {
         return completeTime;
     }
 
-    public void setUrgeCount(Long urgeCount) 
-    {
+    public void setUrgeCount(Long urgeCount) {
         this.urgeCount = urgeCount;
     }
 
-    public Long getUrgeCount() 
-    {
+    public Long getUrgeCount() {
         return urgeCount;
     }
 
-    public void setHandlerId(Long handlerId) 
-    {
+    public void setHandlerId(Long handlerId) {
         this.handlerId = handlerId;
     }
 
-    public Long getHandlerId() 
-    {
+    public Long getHandlerId() {
         return handlerId;
     }
 
-    public void setHandlerRole(Long handlerRole) 
-    {
+    public void setHandlerRole(Long handlerRole) {
         this.handlerRole = handlerRole;
     }
 
-    public Long getHandlerRole() 
-    {
+    public Long getHandlerRole() {
         return handlerRole;
     }
 
-    public void setAlertLng(BigDecimal alertLng) 
-    {
+    public void setAlertLng(BigDecimal alertLng) {
         this.alertLng = alertLng;
     }
 
-    public BigDecimal getAlertLng() 
-    {
+    public BigDecimal getAlertLng() {
         return alertLng;
     }
 
-    public void setAlertLat(BigDecimal alertLat) 
-    {
+    public void setAlertLat(BigDecimal alertLat) {
         this.alertLat = alertLat;
     }
 
-    public BigDecimal getAlertLat() 
-    {
+    public BigDecimal getAlertLat() {
         return alertLat;
     }
 
-    public void setAlertAddress(String alertAddress) 
-    {
+    public void setAlertAddress(String alertAddress) {
         this.alertAddress = alertAddress;
     }
 
-    public String getAlertAddress() 
-    {
+    public String getAlertAddress() {
         return alertAddress;
     }
 
-    public void setAlertStatus(Long alertStatus) 
-    {
+    public void setAlertStatus(Long alertStatus) {
         this.alertStatus = alertStatus;
     }
 
-    public Long getAlertStatus() 
-    {
+    public Long getAlertStatus() {
         return alertStatus;
     }
 
-    public void setHandleResult(String handleResult) 
-    {
+    public void setHandleResult(String handleResult) {
         this.handleResult = handleResult;
     }
 
-    public String getHandleResult() 
-    {
+    public String getHandleResult() {
         return handleResult;
     }
 
-    public void setEmergencyOrderId(String emergencyOrderId) 
-    {
+    public void setEmergencyOrderId(String emergencyOrderId) {
         this.emergencyOrderId = emergencyOrderId;
     }
 
-    public String getEmergencyOrderId() 
-    {
+    public String getEmergencyOrderId() {
         return emergencyOrderId;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setElderlyName(String elderlyName) {
+        this.elderlyName = elderlyName;
+    }
+
+    public String getElderlyName() {
+        return elderlyName;
+    }
+
+    public void setDeviceCode(String deviceCode) {
+        this.deviceCode = deviceCode;
+    }
+
+    public String getDeviceCode() {
+        return deviceCode;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("alertId", getAlertId())
-            .append("elderlyId", getElderlyId())
-            .append("deviceId", getDeviceId())
-            .append("alertType", getAlertType())
-            .append("alertTime", getAlertTime())
-            .append("responseTime", getResponseTime())
-            .append("completeTime", getCompleteTime())
-            .append("urgeCount", getUrgeCount())
-            .append("handlerId", getHandlerId())
-            .append("handlerRole", getHandlerRole())
-            .append("alertLng", getAlertLng())
-            .append("alertLat", getAlertLat())
-            .append("alertAddress", getAlertAddress())
-            .append("alertStatus", getAlertStatus())
-            .append("handleResult", getHandleResult())
-            .append("emergencyOrderId", getEmergencyOrderId())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("alertId", getAlertId())
+                .append("elderlyId", getElderlyId())
+                .append("elderlyName", getElderlyName())
+                .append("deviceId", getDeviceId())
+                .append("deviceCode", getDeviceCode())
+                .append("alertType", getAlertType())
+                .append("alertTime", getAlertTime())
+                .append("responseTime", getResponseTime())
+                .append("completeTime", getCompleteTime())
+                .append("urgeCount", getUrgeCount())
+                .append("handlerId", getHandlerId())
+                .append("handlerRole", getHandlerRole())
+                .append("alertLng", getAlertLng())
+                .append("alertLat", getAlertLat())
+                .append("alertAddress", getAlertAddress())
+                .append("alertStatus", getAlertStatus())
+                .append("handleResult", getHandleResult())
+                .append("emergencyOrderId", getEmergencyOrderId())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

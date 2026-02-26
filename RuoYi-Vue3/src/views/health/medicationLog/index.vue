@@ -9,10 +9,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="关联老人ID" prop="elderlyId">
+      <el-form-item label="老人姓名" prop="elderlyName">
         <el-input
-          v-model="queryParams.elderlyId"
-          placeholder="请输入关联老人ID"
+          v-model="queryParams.elderlyName"
+          placeholder="请输入老人姓名"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -87,7 +87,7 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="记录id" align="center" prop="logId" />
       <el-table-column label="关联用药提醒ID" align="center" prop="reminderId" />
-      <el-table-column label="关联老人ID" align="center" prop="elderlyId" />
+      <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="药品名称" align="center" prop="medicationName" />
       <el-table-column label="计划服药时间" align="center" prop="scheduledTime" width="180">
         <template #default="scope">
@@ -126,8 +126,24 @@
         <el-form-item label="关联用药提醒ID" prop="reminderId">
           <el-input v-model="form.reminderId" placeholder="请输入关联用药提醒ID" />
         </el-form-item>
-        <el-form-item label="关联老人ID" prop="elderlyId">
-          <el-input v-model="form.elderlyId" placeholder="请输入关联老人ID" />
+        <el-form-item label="关联老人" prop="elderlyId">
+          <el-select
+            v-model="form.elderlyId"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="请输入老人姓名搜索"
+            :remote-method="remoteSearchElderly"
+            :loading="elderlyLoading"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in elderlyOptions"
+              :key="item.elderlyId"
+              :label="item.name + ' (' + (item.phone || '无手机号') + ')'"
+              :value="item.elderlyId"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="药品名称" prop="medicationName">
           <el-input v-model="form.medicationName" placeholder="请输入药品名称" />
@@ -153,6 +169,7 @@
 
 <script setup name="MedicationLog">
 import { listMedicationLog, getMedicationLog, delMedicationLog, addMedicationLog, updateMedicationLog } from "@/api/health/medicationLog"
+import { listElderly } from "@/api/elderly/elderly"
 
 const { proxy } = getCurrentInstance()
 const { medication_taken } = proxy.useDict('medication_taken')
@@ -167,6 +184,8 @@ const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
 const daterangeScheduledTime = ref([])
+const elderlyOptions = ref([])
+const elderlyLoading = ref(false)
 
 const data = reactive({
   form: {},
@@ -175,6 +194,7 @@ const data = reactive({
     pageSize: 10,
     reminderId: null,
     elderlyId: null,
+    elderlyName: null,
     medicationName: null,
     scheduledTime: null,
   },
@@ -235,6 +255,19 @@ function reset() {
   proxy.resetForm("medicationLogRef")
 }
 
+/** 远程搜索老人 */
+function remoteSearchElderly(query) {
+  if (query) {
+    elderlyLoading.value = true
+    listElderly({ name: query, pageNum: 1, pageSize: 20 }).then(res => {
+      elderlyOptions.value = res.rows
+      elderlyLoading.value = false
+    })
+  } else {
+    elderlyOptions.value = []
+  }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -268,6 +301,11 @@ function handleUpdate(row) {
   const _logId = row.logId || ids.value
   getMedicationLog(_logId).then(response => {
     form.value = response.data
+    if (form.value.elderlyId) {
+      listElderly({ elderlyId: form.value.elderlyId, pageNum: 1, pageSize: 10 }).then(res => {
+        elderlyOptions.value = res.rows
+      })
+    }
     open.value = true
     title.value = "修改用药记录管理"
   })

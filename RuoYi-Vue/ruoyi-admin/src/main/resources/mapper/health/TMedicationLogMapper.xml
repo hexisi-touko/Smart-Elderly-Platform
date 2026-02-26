@@ -8,6 +8,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="logId"    column="log_id"    />
         <result property="reminderId"    column="reminder_id"    />
         <result property="elderlyId"    column="elderly_id"    />
+        <result property="elderlyName"    column="elderly_name"    />
         <result property="medicationName"    column="medication_name"    />
         <result property="scheduledTime"    column="scheduled_time"    />
         <result property="takenTime"    column="taken_time"    />
@@ -19,22 +20,34 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectTMedicationLogVo">
-        select log_id, reminder_id, elderly_id, medication_name, scheduled_time, taken_time, is_taken, skip_reason, is_deleted, create_time, update_time from t_medication_log
+        select ml.log_id, ml.reminder_id, ml.elderly_id, e.name as elderly_name,
+               ml.medication_name, ml.scheduled_time, ml.taken_time, ml.is_taken,
+               ml.skip_reason, ml.is_deleted, ml.create_time, ml.update_time
+        from t_medication_log ml
+        left join t_elderly e on ml.elderly_id = e.elderly_id
     </sql>
 
     <select id="selectTMedicationLogList" parameterType="TMedicationLog" resultMap="TMedicationLogResult">
         <include refid="selectTMedicationLogVo"/>
         <where>  
-            <if test="reminderId != null "> and reminder_id = #{reminderId}</if>
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="medicationName != null  and medicationName != ''"> and medication_name like concat('%', #{medicationName}, '%')</if>
-            <if test="params.beginScheduledTime != null and params.beginScheduledTime != '' and params.endScheduledTime != null and params.endScheduledTime != ''"> and scheduled_time between #{params.beginScheduledTime} and #{params.endScheduledTime}</if>
+            <if test="reminderId != null "> and ml.reminder_id = #{reminderId}</if>
+            <if test="elderlyId != null "> and ml.elderly_id = #{elderlyId}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
+            <if test="medicationName != null  and medicationName != ''"> and ml.medication_name like concat('%', #{medicationName}, '%')</if>
+            <if test="params.beginScheduledTime != null and params.beginScheduledTime != '' and params.endScheduledTime != null and params.endScheduledTime != ''"> and ml.scheduled_time between #{params.beginScheduledTime} and #{params.endScheduledTime}</if>
         </where>
     </select>
     
     <select id="selectTMedicationLogByLogId" parameterType="Long" resultMap="TMedicationLogResult">
         <include refid="selectTMedicationLogVo"/>
-        where log_id = #{logId}
+        where ml.log_id = #{logId}
+    </select>
+
+    <!-- 根据提醒ID查询关联的用药记录（用于主子表查询） -->
+    <select id="selectTMedicationLogByReminderId" parameterType="Long" resultMap="TMedicationLogResult">
+        <include refid="selectTMedicationLogVo"/>
+        where ml.reminder_id = #{reminderId}
+        order by ml.scheduled_time desc
     </select>
 
     <insert id="insertTMedicationLog" parameterType="TMedicationLog" useGeneratedKeys="true" keyProperty="logId">

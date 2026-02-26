@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联老人ID" prop="elderlyId">
+      <el-form-item label="老人姓名" prop="elderlyName">
         <el-input
-          v-model="queryParams.elderlyId"
-          placeholder="请输入关联老人ID"
+          v-model="queryParams.elderlyName"
+          placeholder="请输入老人姓名"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -78,7 +78,7 @@
     <el-table v-loading="loading" :data="zoneList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="安全区域id" align="center" prop="zoneId" />
-      <el-table-column label="关联老人ID" align="center" prop="elderlyId" />
+      <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="区域名称" align="center" prop="zoneName" />
       <el-table-column label="区域中心经度" align="center" prop="centerLng" />
       <el-table-column label="区域中心纬度" align="center" prop="centerLat" />
@@ -113,8 +113,24 @@
     <!-- 添加或修改安全区域/地理围栏对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="zoneRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联老人ID" prop="elderlyId">
-          <el-input v-model="form.elderlyId" placeholder="请输入关联老人ID" />
+        <el-form-item label="关联老人" prop="elderlyId">
+          <el-select
+            v-model="form.elderlyId"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="请输入老人姓名搜索"
+            :remote-method="remoteSearchElderly"
+            :loading="elderlyLoading"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in elderlyOptions"
+              :key="item.elderlyId"
+              :label="item.name + ' (' + (item.phone || '无手机号') + ')'"
+              :value="item.elderlyId"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="区域名称" prop="zoneName">
           <el-input v-model="form.zoneName" placeholder="请输入区域名称" />
@@ -154,6 +170,7 @@
 
 <script setup name="Zone">
 import { listZone, getZone, delZone, addZone, updateZone } from "@/api/safety/zone"
+import { listElderly } from "@/api/elderly/elderly"
 
 const { proxy } = getCurrentInstance()
 const { sys_normal_disable } = proxy.useDict('sys_normal_disable')
@@ -167,6 +184,8 @@ const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
+const elderlyOptions = ref([])
+const elderlyLoading = ref(false)
 
 const data = reactive({
   form: {},
@@ -174,6 +193,7 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     elderlyId: null,
+    elderlyName: null,
     zoneName: null,
     isActive: null,
   },
@@ -232,6 +252,19 @@ function reset() {
   proxy.resetForm("zoneRef")
 }
 
+/** 远程搜索老人 */
+function remoteSearchElderly(query) {
+  if (query) {
+    elderlyLoading.value = true
+    listElderly({ name: query, pageNum: 1, pageSize: 20 }).then(res => {
+      elderlyOptions.value = res.rows
+      elderlyLoading.value = false
+    })
+  } else {
+    elderlyOptions.value = []
+  }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -264,6 +297,11 @@ function handleUpdate(row) {
   const _zoneId = row.zoneId || ids.value
   getZone(_zoneId).then(response => {
     form.value = response.data
+    if (form.value.elderlyId) {
+      listElderly({ elderlyId: form.value.elderlyId, pageNum: 1, pageSize: 10 }).then(res => {
+        elderlyOptions.value = res.rows
+      })
+    }
     open.value = true
     title.value = "修改安全区域/地理围栏"
   })

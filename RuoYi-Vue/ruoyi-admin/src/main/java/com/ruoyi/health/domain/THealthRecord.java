@@ -14,8 +14,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class THealthRecord extends BaseEntity
-{
+public class THealthRecord extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 记录id */
@@ -80,187 +79,181 @@ public class THealthRecord extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setRecordId(Long recordId) 
-    {
+    /** 关联老人姓名（非数据库字段，JOIN查询用） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    /** 关联设备编码（非数据库字段，JOIN查询用） */
+    @Excel(name = "设备编码")
+    private String deviceCode;
+
+    public void setRecordId(Long recordId) {
         this.recordId = recordId;
     }
 
-    public Long getRecordId() 
-    {
+    public Long getRecordId() {
         return recordId;
     }
 
-    public void setElderlyId(Long elderlyId) 
-    {
+    public void setElderlyId(Long elderlyId) {
         this.elderlyId = elderlyId;
     }
 
-    public Long getElderlyId() 
-    {
+    public Long getElderlyId() {
         return elderlyId;
     }
 
-    public void setDeviceId(Long deviceId) 
-    {
+    public void setDeviceId(Long deviceId) {
         this.deviceId = deviceId;
     }
 
-    public Long getDeviceId() 
-    {
+    public Long getDeviceId() {
         return deviceId;
     }
 
-    public void setCollectTime(Date collectTime) 
-    {
+    public void setCollectTime(Date collectTime) {
         this.collectTime = collectTime;
     }
 
-    public Date getCollectTime() 
-    {
+    public Date getCollectTime() {
         return collectTime;
     }
 
-    public void setRecordType(String recordType) 
-    {
+    public void setRecordType(String recordType) {
         this.recordType = recordType;
     }
 
-    public String getRecordType() 
-    {
+    public String getRecordType() {
         return recordType;
     }
 
-    public void setCollectMethod(Long collectMethod) 
-    {
+    public void setCollectMethod(Long collectMethod) {
         this.collectMethod = collectMethod;
     }
 
-    public Long getCollectMethod() 
-    {
+    public Long getCollectMethod() {
         return collectMethod;
     }
 
-    public void setSystolicBp(Long systolicBp) 
-    {
+    public void setSystolicBp(Long systolicBp) {
         this.systolicBp = systolicBp;
     }
 
-    public Long getSystolicBp() 
-    {
+    public Long getSystolicBp() {
         return systolicBp;
     }
 
-    public void setDiastolicBp(Long diastolicBp) 
-    {
+    public void setDiastolicBp(Long diastolicBp) {
         this.diastolicBp = diastolicBp;
     }
 
-    public Long getDiastolicBp() 
-    {
+    public Long getDiastolicBp() {
         return diastolicBp;
     }
 
-    public void setBloodSugar(BigDecimal bloodSugar) 
-    {
+    public void setBloodSugar(BigDecimal bloodSugar) {
         this.bloodSugar = bloodSugar;
     }
 
-    public BigDecimal getBloodSugar() 
-    {
+    public BigDecimal getBloodSugar() {
         return bloodSugar;
     }
 
-    public void setHeartRate(Long heartRate) 
-    {
+    public void setHeartRate(Long heartRate) {
         this.heartRate = heartRate;
     }
 
-    public Long getHeartRate() 
-    {
+    public Long getHeartRate() {
         return heartRate;
     }
 
-    public void setTemperature(BigDecimal temperature) 
-    {
+    public void setTemperature(BigDecimal temperature) {
         this.temperature = temperature;
     }
 
-    public BigDecimal getTemperature() 
-    {
+    public BigDecimal getTemperature() {
         return temperature;
     }
 
-    public void setBloodOxygen(Long bloodOxygen) 
-    {
+    public void setBloodOxygen(Long bloodOxygen) {
         this.bloodOxygen = bloodOxygen;
     }
 
-    public Long getBloodOxygen() 
-    {
+    public Long getBloodOxygen() {
         return bloodOxygen;
     }
 
-    public void setDataStatus(Long dataStatus) 
-    {
+    public void setDataStatus(Long dataStatus) {
         this.dataStatus = dataStatus;
     }
 
-    public Long getDataStatus() 
-    {
+    public Long getDataStatus() {
         return dataStatus;
     }
 
-    public void setThirdPartySyncId(String thirdPartySyncId) 
-    {
+    public void setThirdPartySyncId(String thirdPartySyncId) {
         this.thirdPartySyncId = thirdPartySyncId;
     }
 
-    public String getThirdPartySyncId() 
-    {
+    public String getThirdPartySyncId() {
         return thirdPartySyncId;
     }
 
-    public void setBackupFlag(Long backupFlag) 
-    {
+    public void setBackupFlag(Long backupFlag) {
         this.backupFlag = backupFlag;
     }
 
-    public Long getBackupFlag() 
-    {
+    public Long getBackupFlag() {
         return backupFlag;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setElderlyName(String elderlyName) {
+        this.elderlyName = elderlyName;
+    }
+
+    public String getElderlyName() {
+        return elderlyName;
+    }
+
+    public void setDeviceCode(String deviceCode) {
+        this.deviceCode = deviceCode;
+    }
+
+    public String getDeviceCode() {
+        return deviceCode;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("recordId", getRecordId())
-            .append("elderlyId", getElderlyId())
-            .append("deviceId", getDeviceId())
-            .append("collectTime", getCollectTime())
-            .append("recordType", getRecordType())
-            .append("collectMethod", getCollectMethod())
-            .append("systolicBp", getSystolicBp())
-            .append("diastolicBp", getDiastolicBp())
-            .append("bloodSugar", getBloodSugar())
-            .append("heartRate", getHeartRate())
-            .append("temperature", getTemperature())
-            .append("bloodOxygen", getBloodOxygen())
-            .append("dataStatus", getDataStatus())
-            .append("thirdPartySyncId", getThirdPartySyncId())
-            .append("backupFlag", getBackupFlag())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("recordId", getRecordId())
+                .append("elderlyId", getElderlyId())
+                .append("elderlyName", getElderlyName())
+                .append("deviceId", getDeviceId())
+                .append("deviceCode", getDeviceCode())
+                .append("collectTime", getCollectTime())
+                .append("recordType", getRecordType())
+                .append("collectMethod", getCollectMethod())
+                .append("systolicBp", getSystolicBp())
+                .append("diastolicBp", getDiastolicBp())
+                .append("bloodSugar", getBloodSugar())
+                .append("heartRate", getHeartRate())
+                .append("temperature", getTemperature())
+                .append("bloodOxygen", getBloodOxygen())
+                .append("dataStatus", getDataStatus())
+                .append("thirdPartySyncId", getThirdPartySyncId())
+                .append("backupFlag", getBackupFlag())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

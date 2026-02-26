@@ -1,6 +1,7 @@
 package com.ruoyi.health.domain;
 
 import java.util.Date;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -13,8 +14,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TMedicationReminder extends BaseEntity
-{
+public class TMedicationReminder extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 提醒id */
@@ -66,143 +66,144 @@ public class TMedicationReminder extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setReminderId(Long reminderId) 
-    {
+    /** 关联老人姓名（非数据库字段，JOIN查询用） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    /** 用药记录列表（子表数据） */
+    private List<TMedicationLog> medicationLogList;
+
+    public void setReminderId(Long reminderId) {
         this.reminderId = reminderId;
     }
 
-    public Long getReminderId() 
-    {
+    public Long getReminderId() {
         return reminderId;
     }
 
-    public void setElderlyId(Long elderlyId) 
-    {
+    public void setElderlyId(Long elderlyId) {
         this.elderlyId = elderlyId;
     }
 
-    public Long getElderlyId() 
-    {
+    public Long getElderlyId() {
         return elderlyId;
     }
 
-    public void setMedicationName(String medicationName) 
-    {
+    public void setMedicationName(String medicationName) {
         this.medicationName = medicationName;
     }
 
-    public String getMedicationName() 
-    {
+    public String getMedicationName() {
         return medicationName;
     }
 
-    public void setMedicationType(String medicationType) 
-    {
+    public void setMedicationType(String medicationType) {
         this.medicationType = medicationType;
     }
 
-    public String getMedicationType() 
-    {
+    public String getMedicationType() {
         return medicationType;
     }
 
-    public void setDosage(String dosage) 
-    {
+    public void setDosage(String dosage) {
         this.dosage = dosage;
     }
 
-    public String getDosage() 
-    {
+    public String getDosage() {
         return dosage;
     }
 
-    public void setFrequency(String frequency) 
-    {
+    public void setFrequency(String frequency) {
         this.frequency = frequency;
     }
 
-    public String getFrequency() 
-    {
+    public String getFrequency() {
         return frequency;
     }
 
-    public void setReminderTime(Date reminderTime) 
-    {
+    public void setReminderTime(Date reminderTime) {
         this.reminderTime = reminderTime;
     }
 
-    public Date getReminderTime() 
-    {
+    public Date getReminderTime() {
         return reminderTime;
     }
 
-    public void setStartDate(Date startDate) 
-    {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public Date getStartDate() 
-    {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setEndDate(Date endDate) 
-    {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
-    public Date getEndDate() 
-    {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setNote(String note) 
-    {
+    public void setNote(String note) {
         this.note = note;
     }
 
-    public String getNote() 
-    {
+    public String getNote() {
         return note;
     }
 
-    public void setStatus(Long status) 
-    {
+    public void setStatus(Long status) {
         this.status = status;
     }
 
-    public Long getStatus() 
-    {
+    public Long getStatus() {
         return status;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setElderlyName(String elderlyName) {
+        this.elderlyName = elderlyName;
+    }
+
+    public String getElderlyName() {
+        return elderlyName;
+    }
+
+    public void setMedicationLogList(List<TMedicationLog> medicationLogList) {
+        this.medicationLogList = medicationLogList;
+    }
+
+    public List<TMedicationLog> getMedicationLogList() {
+        return medicationLogList;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("reminderId", getReminderId())
-            .append("elderlyId", getElderlyId())
-            .append("medicationName", getMedicationName())
-            .append("medicationType", getMedicationType())
-            .append("dosage", getDosage())
-            .append("frequency", getFrequency())
-            .append("reminderTime", getReminderTime())
-            .append("startDate", getStartDate())
-            .append("endDate", getEndDate())
-            .append("note", getNote())
-            .append("status", getStatus())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("reminderId", getReminderId())
+                .append("elderlyId", getElderlyId())
+                .append("elderlyName", getElderlyName())
+                .append("medicationName", getMedicationName())
+                .append("medicationType", getMedicationType())
+                .append("dosage", getDosage())
+                .append("frequency", getFrequency())
+                .append("reminderTime", getReminderTime())
+                .append("startDate", getStartDate())
+                .append("endDate", getEndDate())
+                .append("note", getNote())
+                .append("status", getStatus())
+                .append("isDeleted", getIsDeleted())
+                .append("medicationLogList", getMedicationLogList())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

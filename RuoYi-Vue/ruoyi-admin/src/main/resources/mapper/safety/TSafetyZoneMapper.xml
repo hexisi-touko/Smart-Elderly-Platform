@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="TSafetyZone" id="TSafetyZoneResult">
         <result property="zoneId"    column="zone_id"    />
         <result property="elderlyId"    column="elderly_id"    />
+        <result property="elderlyName"    column="elderly_name"    />
         <result property="zoneName"    column="zone_name"    />
         <result property="centerLng"    column="center_lng"    />
         <result property="centerLat"    column="center_lat"    />
@@ -19,21 +20,26 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectTSafetyZoneVo">
-        select zone_id, elderly_id, zone_name, center_lng, center_lat, radius, zone_address, is_active, is_deleted, create_time, update_time from t_safety_zone
+        select sz.zone_id, sz.elderly_id, e.name as elderly_name, sz.zone_name,
+               sz.center_lng, sz.center_lat, sz.radius, sz.zone_address,
+               sz.is_active, sz.is_deleted, sz.create_time, sz.update_time
+        from t_safety_zone sz
+        left join t_elderly e on sz.elderly_id = e.elderly_id
     </sql>
 
     <select id="selectTSafetyZoneList" parameterType="TSafetyZone" resultMap="TSafetyZoneResult">
         <include refid="selectTSafetyZoneVo"/>
         <where>  
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="zoneName != null  and zoneName != ''"> and zone_name like concat('%', #{zoneName}, '%')</if>
-            <if test="isActive != null "> and is_active = #{isActive}</if>
+            <if test="elderlyId != null "> and sz.elderly_id = #{elderlyId}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
+            <if test="zoneName != null  and zoneName != ''"> and sz.zone_name like concat('%', #{zoneName}, '%')</if>
+            <if test="isActive != null "> and sz.is_active = #{isActive}</if>
         </where>
     </select>
     
     <select id="selectTSafetyZoneByZoneId" parameterType="Long" resultMap="TSafetyZoneResult">
         <include refid="selectTSafetyZoneVo"/>
-        where zone_id = #{zoneId}
+        where sz.zone_id = #{zoneId}
     </select>
 
     <insert id="insertTSafetyZone" parameterType="TSafetyZone" useGeneratedKeys="true" keyProperty="zoneId">
