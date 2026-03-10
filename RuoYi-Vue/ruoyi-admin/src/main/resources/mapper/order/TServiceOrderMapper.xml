@@ -7,8 +7,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="TServiceOrder" id="TServiceOrderResult">
         <result property="orderId"    column="order_id"    />
         <result property="elderlyId"    column="elderly_id"    />
+        <result property="elderlyName"    column="elderly_name"    />
         <result property="providerId"    column="provider_id"    />
+        <result property="providerName"    column="provider_name"    />
         <result property="serviceItemId"    column="service_item_id"    />
+        <result property="itemName"    column="item_name"    />
         <result property="orderNo"    column="order_no"    />
         <result property="orderAmount"    column="order_amount"    />
         <result property="serviceTime"    column="service_time"    />
@@ -25,24 +28,33 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectTServiceOrderVo">
-        select order_id, elderly_id, provider_id, service_item_id, order_no, order_amount, service_time, service_address, service_requirements, order_status, accept_time, start_time, complete_time, cancel_reason, is_deleted, create_time, update_time from t_service_order
+        select so.order_id, so.elderly_id, e.name as elderly_name,
+               so.provider_id, sp.provider_name, so.service_item_id, si.item_name,
+               so.order_no, so.order_amount, so.service_time, so.service_address,
+               so.service_requirements, so.order_status, so.accept_time, so.start_time,
+               so.complete_time, so.cancel_reason, so.is_deleted, so.create_time, so.update_time
+        from t_service_order so
+        left join t_elderly e on so.elderly_id = e.elderly_id
+        left join t_service_provider sp on so.provider_id = sp.provider_id
+        left join t_service_item si on so.service_item_id = si.item_id
     </sql>
 
     <select id="selectTServiceOrderList" parameterType="TServiceOrder" resultMap="TServiceOrderResult">
         <include refid="selectTServiceOrderVo"/>
         <where>  
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="providerId != null "> and provider_id = #{providerId}</if>
-            <if test="serviceItemId != null "> and service_item_id = #{serviceItemId}</if>
-            <if test="orderNo != null  and orderNo != ''"> and order_no = #{orderNo}</if>
-            <if test="serviceTime != null "> and service_time = #{serviceTime}</if>
-            <if test="serviceAddress != null  and serviceAddress != ''"> and service_address = #{serviceAddress}</if>
+            <if test="elderlyId != null "> and so.elderly_id = #{elderlyId}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
+            <if test="providerId != null "> and so.provider_id = #{providerId}</if>
+            <if test="serviceItemId != null "> and so.service_item_id = #{serviceItemId}</if>
+            <if test="orderNo != null  and orderNo != ''"> and so.order_no = #{orderNo}</if>
+            <if test="serviceTime != null "> and so.service_time = #{serviceTime}</if>
+            <if test="serviceAddress != null  and serviceAddress != ''"> and so.service_address = #{serviceAddress}</if>
         </where>
     </select>
     
     <select id="selectTServiceOrderByOrderId" parameterType="Long" resultMap="TServiceOrderResult">
         <include refid="selectTServiceOrderVo"/>
-        where order_id = #{orderId}
+        where so.order_id = #{orderId}
     </select>
 
     <insert id="insertTServiceOrder" parameterType="TServiceOrder" useGeneratedKeys="true" keyProperty="orderId">

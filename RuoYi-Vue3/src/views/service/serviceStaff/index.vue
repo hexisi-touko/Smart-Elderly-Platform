@@ -9,10 +9,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="关联所属服务商ID" prop="providerId">
+      <el-form-item label="服务商名称" prop="providerName">
         <el-input
-          v-model="queryParams.providerId"
-          placeholder="请输入关联所属服务商ID"
+          v-model="queryParams.providerName"
+          placeholder="请输入服务商名称"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -97,7 +97,7 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="服务人员id" align="center" prop="staffId" />
       <el-table-column label="服务人员姓名" align="center" prop="staffName" />
-      <el-table-column label="关联所属服务商ID" align="center" prop="providerId" />
+      <el-table-column label="服务商名称" align="center" prop="providerName" />
       <el-table-column label="服务人员手机号" align="center" prop="phone" />
       <el-table-column label="职业资格证书编号" align="center" prop="certificate" />
       <el-table-column label="人员类型" align="center" prop="staffType">
@@ -137,8 +137,24 @@
         <el-form-item label="服务人员姓名" prop="staffName">
           <el-input v-model="form.staffName" placeholder="请输入服务人员姓名" />
         </el-form-item>
-        <el-form-item label="关联所属服务商ID" prop="providerId">
-          <el-input v-model="form.providerId" placeholder="请输入关联所属服务商ID" />
+        <el-form-item label="关联服务商" prop="providerId">
+          <el-select
+            v-model="form.providerId"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="请输入服务商名称搜索"
+            :remote-method="remoteSearchProvider"
+            :loading="providerLoading"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in providerOptions"
+              :key="item.providerId"
+              :label="item.providerName"
+              :value="item.providerId"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="服务人员手机号" prop="phone">
           <el-input v-model="form.phone" placeholder="请输入服务人员手机号" />
@@ -182,6 +198,7 @@
 
 <script setup name="ServiceStaff">
 import { listServiceStaff, getServiceStaff, delServiceStaff, addServiceStaff, updateServiceStaff } from "@/api/service/serviceStaff"
+import { listServiceProvider } from "@/api/service/serviceProvider"
 
 const { proxy } = getCurrentInstance()
 const { staff_status, staff_type } = proxy.useDict('staff_status', 'staff_type')
@@ -195,6 +212,8 @@ const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
+const providerOptions = ref([])
+const providerLoading = ref(false)
 
 const data = reactive({
   form: {},
@@ -203,6 +222,7 @@ const data = reactive({
     pageSize: 10,
     staffName: null,
     providerId: null,
+    providerName: null,
     phone: null,
     staffType: null,
     status: null,
@@ -256,6 +276,19 @@ function reset() {
   proxy.resetForm("serviceStaffRef")
 }
 
+/** 远程搜索服务商 */
+function remoteSearchProvider(query) {
+  if (query) {
+    providerLoading.value = true
+    listServiceProvider({ providerName: query, pageNum: 1, pageSize: 20 }).then(res => {
+      providerOptions.value = res.rows
+      providerLoading.value = false
+    })
+  } else {
+    providerOptions.value = []
+  }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -288,6 +321,11 @@ function handleUpdate(row) {
   const _staffId = row.staffId || ids.value
   getServiceStaff(_staffId).then(response => {
     form.value = response.data
+    if (form.value.providerId) {
+      listServiceProvider({ providerId: form.value.providerId, pageNum: 1, pageSize: 10 }).then(res => {
+        providerOptions.value = res.rows
+      })
+    }
     open.value = true
     title.value = "修改服务人员管理"
   })

@@ -11,8 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TServiceStaff extends BaseEntity
-{
+public class TServiceStaff extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 服务人员id */
@@ -49,110 +48,105 @@ public class TServiceStaff extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setStaffId(Long staffId) 
-    {
+    /** 服务商名称（非数据库字段，JOIN查询用） */
+    @Excel(name = "服务商名称")
+    private String providerName;
+
+    public void setStaffId(Long staffId) {
         this.staffId = staffId;
     }
 
-    public Long getStaffId() 
-    {
+    public Long getStaffId() {
         return staffId;
     }
 
-    public void setStaffName(String staffName) 
-    {
+    public void setStaffName(String staffName) {
         this.staffName = staffName;
     }
 
-    public String getStaffName() 
-    {
+    public String getStaffName() {
         return staffName;
     }
 
-    public void setProviderId(Long providerId) 
-    {
+    public void setProviderId(Long providerId) {
         this.providerId = providerId;
     }
 
-    public Long getProviderId() 
-    {
+    public Long getProviderId() {
         return providerId;
     }
 
-    public void setPhone(String phone) 
-    {
+    public void setPhone(String phone) {
         this.phone = phone;
     }
 
-    public String getPhone() 
-    {
+    public String getPhone() {
         return phone;
     }
 
-    public void setIdCard(String idCard) 
-    {
+    public void setIdCard(String idCard) {
         this.idCard = idCard;
     }
 
-    public String getIdCard() 
-    {
+    public String getIdCard() {
         return idCard;
     }
 
-    public void setCertificate(String certificate) 
-    {
+    public void setCertificate(String certificate) {
         this.certificate = certificate;
     }
 
-    public String getCertificate() 
-    {
+    public String getCertificate() {
         return certificate;
     }
 
-    public void setStaffType(String staffType) 
-    {
+    public void setStaffType(String staffType) {
         this.staffType = staffType;
     }
 
-    public String getStaffType() 
-    {
+    public String getStaffType() {
         return staffType;
     }
 
-    public void setStatus(Long status) 
-    {
+    public void setStatus(Long status) {
         this.status = status;
     }
 
-    public Long getStatus() 
-    {
+    public Long getStatus() {
         return status;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
+    }
+
+    public String getProviderName() {
+        return providerName;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("staffId", getStaffId())
-            .append("staffName", getStaffName())
-            .append("providerId", getProviderId())
-            .append("phone", getPhone())
-            .append("idCard", getIdCard())
-            .append("certificate", getCertificate())
-            .append("staffType", getStaffType())
-            .append("status", getStatus())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("staffId", getStaffId())
+                .append("staffName", getStaffName())
+                .append("providerId", getProviderId())
+                .append("providerName", getProviderName())
+                .append("phone", getPhone())
+                .append("idCard", getIdCard())
+                .append("certificate", getCertificate())
+                .append("staffType", getStaffType())
+                .append("status", getStatus())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

@@ -12,8 +12,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TServiceItem extends BaseEntity
-{
+public class TServiceItem extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 服务项目id */
@@ -54,121 +53,114 @@ public class TServiceItem extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setItemId(Long itemId) 
-    {
+    /** 服务商名称（非数据库字段，JOIN查询用） */
+    @Excel(name = "服务商名称")
+    private String providerName;
+
+    public void setItemId(Long itemId) {
         this.itemId = itemId;
     }
 
-    public Long getItemId() 
-    {
+    public Long getItemId() {
         return itemId;
     }
 
-    public void setProviderId(Long providerId) 
-    {
+    public void setProviderId(Long providerId) {
         this.providerId = providerId;
     }
 
-    public Long getProviderId() 
-    {
+    public Long getProviderId() {
         return providerId;
     }
 
-    public void setItemName(String itemName) 
-    {
+    public void setItemName(String itemName) {
         this.itemName = itemName;
     }
 
-    public String getItemName() 
-    {
+    public String getItemName() {
         return itemName;
     }
 
-    public void setItemCategory(String itemCategory) 
-    {
+    public void setItemCategory(String itemCategory) {
         this.itemCategory = itemCategory;
     }
 
-    public String getItemCategory() 
-    {
+    public String getItemCategory() {
         return itemCategory;
     }
 
-    public void setItemDescription(String itemDescription) 
-    {
+    public void setItemDescription(String itemDescription) {
         this.itemDescription = itemDescription;
     }
 
-    public String getItemDescription() 
-    {
+    public String getItemDescription() {
         return itemDescription;
     }
 
-    public void setStandardPrice(BigDecimal standardPrice) 
-    {
+    public void setStandardPrice(BigDecimal standardPrice) {
         this.standardPrice = standardPrice;
     }
 
-    public BigDecimal getStandardPrice() 
-    {
+    public BigDecimal getStandardPrice() {
         return standardPrice;
     }
 
-    public void setServiceDuration(Long serviceDuration) 
-    {
+    public void setServiceDuration(Long serviceDuration) {
         this.serviceDuration = serviceDuration;
     }
 
-    public Long getServiceDuration() 
-    {
+    public Long getServiceDuration() {
         return serviceDuration;
     }
 
-    public void setServiceUnit(String serviceUnit) 
-    {
+    public void setServiceUnit(String serviceUnit) {
         this.serviceUnit = serviceUnit;
     }
 
-    public String getServiceUnit() 
-    {
+    public String getServiceUnit() {
         return serviceUnit;
     }
 
-    public void setStatus(Long status) 
-    {
+    public void setStatus(Long status) {
         this.status = status;
     }
 
-    public Long getStatus() 
-    {
+    public Long getStatus() {
         return status;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
+    }
+
+    public String getProviderName() {
+        return providerName;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("itemId", getItemId())
-            .append("providerId", getProviderId())
-            .append("itemName", getItemName())
-            .append("itemCategory", getItemCategory())
-            .append("itemDescription", getItemDescription())
-            .append("standardPrice", getStandardPrice())
-            .append("serviceDuration", getServiceDuration())
-            .append("serviceUnit", getServiceUnit())
-            .append("status", getStatus())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("itemId", getItemId())
+                .append("providerId", getProviderId())
+                .append("providerName", getProviderName())
+                .append("itemName", getItemName())
+                .append("itemCategory", getItemCategory())
+                .append("itemDescription", getItemDescription())
+                .append("standardPrice", getStandardPrice())
+                .append("serviceDuration", getServiceDuration())
+                .append("serviceUnit", getServiceUnit())
+                .append("status", getStatus())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

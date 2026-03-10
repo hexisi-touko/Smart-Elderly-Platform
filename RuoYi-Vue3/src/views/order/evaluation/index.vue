@@ -1,18 +1,18 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联服务订单ID" prop="orderId">
+      <el-form-item label="订单编号" prop="orderNo">
         <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入关联服务订单ID"
+          v-model="queryParams.orderNo"
+          placeholder="请输入订单编号"
           clearable
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="评价人ID" prop="elderlyId">
+      <el-form-item label="老人姓名" prop="elderlyName">
         <el-input
-          v-model="queryParams.elderlyId"
-          placeholder="请输入评价人ID"
+          v-model="queryParams.elderlyName"
+          placeholder="请输入老人姓名"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -78,8 +78,8 @@
     <el-table v-loading="loading" :data="evaluationList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="评价id" align="center" prop="evaluationId" />
-      <el-table-column label="关联服务订单ID" align="center" prop="orderId" />
-      <el-table-column label="评价人ID" align="center" prop="elderlyId" />
+      <el-table-column label="订单编号" align="center" prop="orderNo" />
+      <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="星级评分" align="center" prop="starLevel" />
       <el-table-column label="评价内容" align="center" prop="evaluationContent" />
       <el-table-column label="照片凭证" align="center" prop="proofPhotos" />
@@ -118,11 +118,21 @@
     <!-- 添加或修改服务评价管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="evaluationRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联服务订单ID" prop="orderId">
-          <el-input v-model="form.orderId" placeholder="请输入关联服务订单ID" />
+        <el-form-item label="关联订单" prop="orderId">
+          <el-select v-model="form.orderId" filterable remote reserve-keyword
+            placeholder="请输入订单编号搜索" :remote-method="remoteSearchOrder"
+            :loading="orderLoading" style="width: 100%">
+            <el-option v-for="item in orderOptions" :key="item.orderId"
+              :label="item.orderNo" :value="item.orderId" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="评价人ID" prop="elderlyId">
-          <el-input v-model="form.elderlyId" placeholder="请输入评价人ID" />
+        <el-form-item label="评价人" prop="elderlyId">
+          <el-select v-model="form.elderlyId" filterable remote reserve-keyword
+            placeholder="请输入老人姓名搜索" :remote-method="remoteSearchElderly"
+            :loading="elderlyLoading" style="width: 100%">
+            <el-option v-for="item in elderlyOptions" :key="item.elderlyId"
+              :label="item.name" :value="item.elderlyId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="星级评分" prop="starLevel">
           <el-input v-model="form.starLevel" placeholder="请输入星级评分" />
@@ -154,6 +164,8 @@
 
 <script setup name="Evaluation">
 import { listEvaluation, getEvaluation, delEvaluation, addEvaluation, updateEvaluation } from "@/api/order/evaluation"
+import { listServiceOrder } from "@/api/order/serviceOrder"
+import { listElderly } from "@/api/elderly/elderly"
 
 const { proxy } = getCurrentInstance()
 
@@ -166,6 +178,10 @@ const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
+const orderOptions = ref([])
+const orderLoading = ref(false)
+const elderlyOptions = ref([])
+const elderlyLoading = ref(false)
 const daterangeCreateTime = ref([])
 
 const data = reactive({
@@ -174,7 +190,9 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     orderId: null,
+    orderNo: null,
     elderlyId: null,
+    elderlyName: null,
     createTime: null,
   },
   rules: {
@@ -235,6 +253,28 @@ function reset() {
   proxy.resetForm("evaluationRef")
 }
 
+/** 远程搜索订单 */
+function remoteSearchOrder(query) {
+  if (query) {
+    orderLoading.value = true
+    listServiceOrder({ orderNo: query, pageNum: 1, pageSize: 20 }).then(res => {
+      orderOptions.value = res.rows
+      orderLoading.value = false
+    })
+  } else { orderOptions.value = [] }
+}
+
+/** 远程搜索老人 */
+function remoteSearchElderly(query) {
+  if (query) {
+    elderlyLoading.value = true
+    listElderly({ name: query, pageNum: 1, pageSize: 20 }).then(res => {
+      elderlyOptions.value = res.rows
+      elderlyLoading.value = false
+    })
+  } else { elderlyOptions.value = [] }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -268,6 +308,12 @@ function handleUpdate(row) {
   const _evaluationId = row.evaluationId || ids.value
   getEvaluation(_evaluationId).then(response => {
     form.value = response.data
+    if (form.value.orderId) {
+      listServiceOrder({ orderId: form.value.orderId, pageNum: 1, pageSize: 10 }).then(res => { orderOptions.value = res.rows })
+    }
+    if (form.value.elderlyId) {
+      listElderly({ elderlyId: form.value.elderlyId, pageNum: 1, pageSize: 10 }).then(res => { elderlyOptions.value = res.rows })
+    }
     open.value = true
     title.value = "修改服务评价管理"
   })

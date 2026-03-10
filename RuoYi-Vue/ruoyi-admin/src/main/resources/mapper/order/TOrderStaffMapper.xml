@@ -7,7 +7,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="TOrderStaff" id="TOrderStaffResult">
         <result property="id"    column="id"    />
         <result property="orderId"    column="order_id"    />
+        <result property="orderNo"    column="order_no"    />
         <result property="staffId"    column="staff_id"    />
+        <result property="staffName"    column="staff_name"    />
         <result property="isPrimary"    column="is_primary"    />
         <result property="isDeleted"    column="is_deleted"    />
         <result property="createTime"    column="create_time"    />
@@ -15,21 +17,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectTOrderStaffVo">
-        select id, order_id, staff_id, is_primary, is_deleted, create_time, update_time from t_order_staff
+        select os.id, os.order_id, o.order_no, os.staff_id, ss.staff_name,
+               os.is_primary, os.is_deleted, os.create_time, os.update_time
+        from t_order_staff os
+        left join t_service_order o on os.order_id = o.order_id
+        left join t_service_staff ss on os.staff_id = ss.staff_id
     </sql>
 
     <select id="selectTOrderStaffList" parameterType="TOrderStaff" resultMap="TOrderStaffResult">
         <include refid="selectTOrderStaffVo"/>
         <where>  
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="staffId != null "> and staff_id = #{staffId}</if>
-            <if test="isPrimary != null "> and is_primary = #{isPrimary}</if>
+            <if test="orderId != null "> and os.order_id = #{orderId}</if>
+            <if test="orderNo != null  and orderNo != ''"> and o.order_no = #{orderNo}</if>
+            <if test="staffId != null "> and os.staff_id = #{staffId}</if>
+            <if test="staffName != null  and staffName != ''"> and ss.staff_name like concat('%', #{staffName}, '%')</if>
+            <if test="isPrimary != null "> and os.is_primary = #{isPrimary}</if>
         </where>
     </select>
     
     <select id="selectTOrderStaffById" parameterType="Long" resultMap="TOrderStaffResult">
         <include refid="selectTOrderStaffVo"/>
-        where id = #{id}
+        where os.id = #{id}
     </select>
 
     <insert id="insertTOrderStaff" parameterType="TOrderStaff" useGeneratedKeys="true" keyProperty="id">

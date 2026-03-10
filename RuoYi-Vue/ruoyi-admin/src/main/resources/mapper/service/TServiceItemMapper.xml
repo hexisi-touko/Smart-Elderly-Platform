@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="TServiceItem" id="TServiceItemResult">
         <result property="itemId"    column="item_id"    />
         <result property="providerId"    column="provider_id"    />
+        <result property="providerName"    column="provider_name"    />
         <result property="itemName"    column="item_name"    />
         <result property="itemCategory"    column="item_category"    />
         <result property="itemDescription"    column="item_description"    />
@@ -20,22 +21,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectTServiceItemVo">
-        select item_id, provider_id, item_name, item_category, item_description, standard_price, service_duration, service_unit, status, is_deleted, create_time, update_time from t_service_item
+        select si.item_id, si.provider_id, sp.provider_name, si.item_name, si.item_category,
+               si.item_description, si.standard_price, si.service_duration, si.service_unit,
+               si.status, si.is_deleted, si.create_time, si.update_time
+        from t_service_item si
+        left join t_service_provider sp on si.provider_id = sp.provider_id
     </sql>
 
     <select id="selectTServiceItemList" parameterType="TServiceItem" resultMap="TServiceItemResult">
         <include refid="selectTServiceItemVo"/>
         <where>  
-            <if test="providerId != null "> and provider_id = #{providerId}</if>
-            <if test="itemName != null  and itemName != ''"> and item_name like concat('%', #{itemName}, '%')</if>
-            <if test="itemCategory != null  and itemCategory != ''"> and item_category = #{itemCategory}</if>
-            <if test="status != null "> and status = #{status}</if>
+            <if test="providerId != null "> and si.provider_id = #{providerId}</if>
+            <if test="providerName != null  and providerName != ''"> and sp.provider_name like concat('%', #{providerName}, '%')</if>
+            <if test="itemName != null  and itemName != ''"> and si.item_name like concat('%', #{itemName}, '%')</if>
+            <if test="itemCategory != null  and itemCategory != ''"> and si.item_category = #{itemCategory}</if>
+            <if test="status != null "> and si.status = #{status}</if>
         </where>
     </select>
     
     <select id="selectTServiceItemByItemId" parameterType="Long" resultMap="TServiceItemResult">
         <include refid="selectTServiceItemVo"/>
-        where item_id = #{itemId}
+        where si.item_id = #{itemId}
     </select>
 
     <insert id="insertTServiceItem" parameterType="TServiceItem" useGeneratedKeys="true" keyProperty="itemId">

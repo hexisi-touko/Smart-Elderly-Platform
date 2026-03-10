@@ -7,7 +7,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="TServiceEvaluation" id="TServiceEvaluationResult">
         <result property="evaluationId"    column="evaluation_id"    />
         <result property="orderId"    column="order_id"    />
+        <result property="orderNo"    column="order_no"    />
         <result property="elderlyId"    column="elderly_id"    />
+        <result property="elderlyName"    column="elderly_name"    />
         <result property="starLevel"    column="star_level"    />
         <result property="evaluationContent"    column="evaluation_content"    />
         <result property="proofPhotos"    column="proof_photos"    />
@@ -20,21 +22,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectTServiceEvaluationVo">
-        select evaluation_id, order_id, elderly_id, star_level, evaluation_content, proof_photos, evaluation_time, provider_reply, reply_time, is_deleted, create_time, update_time from t_service_evaluation
+        select se.evaluation_id, se.order_id, o.order_no, se.elderly_id, e.name as elderly_name,
+               se.star_level, se.evaluation_content, se.proof_photos, se.evaluation_time,
+               se.provider_reply, se.reply_time, se.is_deleted, se.create_time, se.update_time
+        from t_service_evaluation se
+        left join t_service_order o on se.order_id = o.order_id
+        left join t_elderly e on se.elderly_id = e.elderly_id
     </sql>
 
     <select id="selectTServiceEvaluationList" parameterType="TServiceEvaluation" resultMap="TServiceEvaluationResult">
         <include refid="selectTServiceEvaluationVo"/>
         <where>  
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+            <if test="orderId != null "> and se.order_id = #{orderId}</if>
+            <if test="orderNo != null  and orderNo != ''"> and o.order_no = #{orderNo}</if>
+            <if test="elderlyId != null "> and se.elderly_id = #{elderlyId}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and se.create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
         </where>
     </select>
     
     <select id="selectTServiceEvaluationByEvaluationId" parameterType="Long" resultMap="TServiceEvaluationResult">
         <include refid="selectTServiceEvaluationVo"/>
-        where evaluation_id = #{evaluationId}
+        where se.evaluation_id = #{evaluationId}
     </select>
 
     <insert id="insertTServiceEvaluation" parameterType="TServiceEvaluation" useGeneratedKeys="true" keyProperty="evaluationId">

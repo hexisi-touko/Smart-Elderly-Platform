@@ -12,24 +12,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="isDeleted"    column="is_deleted"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
+        <result property="elderlyName"  column="elderly_name"  />
+        <result property="guardianName" column="guardian_name" />
     </resultMap>
 
     <sql id="selectTElderlyGuardianVo">
-        select id, elderly_id, guardian_id, authorization_status, is_deleted, create_time, update_time from t_elderly_guardian
+        select eg.id, eg.elderly_id, eg.guardian_id, eg.authorization_status, eg.is_deleted, eg.create_time, eg.update_time,
+               e.name as elderly_name, g.name as guardian_name
+        from t_elderly_guardian eg
+        LEFT JOIN t_elderly e ON eg.elderly_id = e.elderly_id
+        LEFT JOIN t_guardian g ON eg.guardian_id = g.guardian_id
     </sql>
 
     <select id="selectTElderlyGuardianList" parameterType="TElderlyGuardian" resultMap="TElderlyGuardianResult">
         <include refid="selectTElderlyGuardianVo"/>
         <where>  
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="guardianId != null "> and guardian_id = #{guardianId}</if>
-            <if test="authorizationStatus != null "> and authorization_status = #{authorizationStatus}</if>
+            <if test="elderlyId != null "> and eg.elderly_id = #{elderlyId}</if>
+            <if test="guardianId != null "> and eg.guardian_id = #{guardianId}</if>
+            <if test="authorizationStatus != null "> and eg.authorization_status = #{authorizationStatus}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
+            <if test="guardianName != null  and guardianName != ''"> and g.name like concat('%', #{guardianName}, '%')</if>
         </where>
     </select>
     
     <select id="selectTElderlyGuardianById" parameterType="Long" resultMap="TElderlyGuardianResult">
         <include refid="selectTElderlyGuardianVo"/>
-        where id = #{id}
+        where eg.id = #{id}
     </select>
 
     <insert id="insertTElderlyGuardian" parameterType="TElderlyGuardian" useGeneratedKeys="true" keyProperty="id">

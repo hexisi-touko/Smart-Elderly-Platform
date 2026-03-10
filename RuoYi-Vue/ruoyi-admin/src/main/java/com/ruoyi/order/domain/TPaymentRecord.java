@@ -14,8 +14,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TPaymentRecord extends BaseEntity
-{
+public class TPaymentRecord extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 支付记录id */
@@ -63,143 +62,132 @@ public class TPaymentRecord extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setPaymentId(Long paymentId) 
-    {
+    /** 订单编号（JOIN查询用） */
+    @Excel(name = "订单编号")
+    private String orderNo;
+
+    public void setPaymentId(Long paymentId) {
         this.paymentId = paymentId;
     }
 
-    public Long getPaymentId() 
-    {
+    public Long getPaymentId() {
         return paymentId;
     }
 
-    public void setOrderId(Long orderId) 
-    {
+    public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
 
-    public Long getOrderId() 
-    {
+    public Long getOrderId() {
         return orderId;
     }
 
-    public void setPaymentAmount(BigDecimal paymentAmount) 
-    {
+    public void setPaymentAmount(BigDecimal paymentAmount) {
         this.paymentAmount = paymentAmount;
     }
 
-    public BigDecimal getPaymentAmount() 
-    {
+    public BigDecimal getPaymentAmount() {
         return paymentAmount;
     }
 
-    public void setPaymentTime(Date paymentTime) 
-    {
+    public void setPaymentTime(Date paymentTime) {
         this.paymentTime = paymentTime;
     }
 
-    public Date getPaymentTime() 
-    {
+    public Date getPaymentTime() {
         return paymentTime;
     }
 
-    public void setPaymentMethod(String paymentMethod) 
-    {
+    public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 
-    public String getPaymentMethod() 
-    {
+    public String getPaymentMethod() {
         return paymentMethod;
     }
 
-    public void setPaymentStatus(Long paymentStatus) 
-    {
+    public void setPaymentStatus(Long paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
 
-    public Long getPaymentStatus() 
-    {
+    public Long getPaymentStatus() {
         return paymentStatus;
     }
 
-    public void setTransactionId(String transactionId) 
-    {
+    public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
     }
 
-    public String getTransactionId() 
-    {
+    public String getTransactionId() {
         return transactionId;
     }
 
-    public void setRefundFlag(Long refundFlag) 
-    {
+    public void setRefundFlag(Long refundFlag) {
         this.refundFlag = refundFlag;
     }
 
-    public Long getRefundFlag() 
-    {
+    public Long getRefundFlag() {
         return refundFlag;
     }
 
-    public void setRefundAmount(BigDecimal refundAmount) 
-    {
+    public void setRefundAmount(BigDecimal refundAmount) {
         this.refundAmount = refundAmount;
     }
 
-    public BigDecimal getRefundAmount() 
-    {
+    public BigDecimal getRefundAmount() {
         return refundAmount;
     }
 
-    public void setRefundTime(Date refundTime) 
-    {
+    public void setRefundTime(Date refundTime) {
         this.refundTime = refundTime;
     }
 
-    public Date getRefundTime() 
-    {
+    public Date getRefundTime() {
         return refundTime;
     }
 
-    public void setRefundReason(String refundReason) 
-    {
+    public void setRefundReason(String refundReason) {
         this.refundReason = refundReason;
     }
 
-    public String getRefundReason() 
-    {
+    public String getRefundReason() {
         return refundReason;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setOrderNo(String orderNo) {
+        this.orderNo = orderNo;
+    }
+
+    public String getOrderNo() {
+        return orderNo;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("paymentId", getPaymentId())
-            .append("orderId", getOrderId())
-            .append("paymentAmount", getPaymentAmount())
-            .append("paymentTime", getPaymentTime())
-            .append("paymentMethod", getPaymentMethod())
-            .append("paymentStatus", getPaymentStatus())
-            .append("transactionId", getTransactionId())
-            .append("refundFlag", getRefundFlag())
-            .append("refundAmount", getRefundAmount())
-            .append("refundTime", getRefundTime())
-            .append("refundReason", getRefundReason())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("paymentId", getPaymentId())
+                .append("orderId", getOrderId())
+                .append("orderNo", getOrderNo())
+                .append("paymentAmount", getPaymentAmount())
+                .append("paymentTime", getPaymentTime())
+                .append("paymentMethod", getPaymentMethod())
+                .append("paymentStatus", getPaymentStatus())
+                .append("transactionId", getTransactionId())
+                .append("refundFlag", getRefundFlag())
+                .append("refundAmount", getRefundAmount())
+                .append("refundTime", getRefundTime())
+                .append("refundReason", getRefundReason())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="TProviderSettlement" id="TProviderSettlementResult">
         <result property="settlementId"    column="settlement_id"    />
         <result property="providerId"    column="provider_id"    />
+        <result property="providerName"    column="provider_name"    />
         <result property="settlementPeriod"    column="settlement_period"    />
         <result property="orderCount"    column="order_count"    />
         <result property="totalAmount"    column="total_amount"    />
@@ -23,22 +24,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectTProviderSettlementVo">
-        select settlement_id, provider_id, settlement_period, order_count, total_amount, platform_fee, actual_amount, settlement_status, apply_time, approve_time, transfer_time, transfer_voucher, is_deleted, create_time, update_time from t_provider_settlement
+        select ps.settlement_id, ps.provider_id, sp.provider_name, ps.settlement_period,
+               ps.order_count, ps.total_amount, ps.platform_fee, ps.actual_amount,
+               ps.settlement_status, ps.apply_time, ps.approve_time, ps.transfer_time,
+               ps.transfer_voucher, ps.is_deleted, ps.create_time, ps.update_time
+        from t_provider_settlement ps
+        left join t_service_provider sp on ps.provider_id = sp.provider_id
     </sql>
 
     <select id="selectTProviderSettlementList" parameterType="TProviderSettlement" resultMap="TProviderSettlementResult">
         <include refid="selectTProviderSettlementVo"/>
         <where>  
-            <if test="providerId != null "> and provider_id = #{providerId}</if>
-            <if test="settlementPeriod != null  and settlementPeriod != ''"> and settlement_period = #{settlementPeriod}</if>
-            <if test="orderCount != null "> and order_count = #{orderCount}</if>
-            <if test="settlementStatus != null "> and settlement_status = #{settlementStatus}</if>
+            <if test="providerId != null "> and ps.provider_id = #{providerId}</if>
+            <if test="providerName != null  and providerName != ''"> and sp.provider_name like concat('%', #{providerName}, '%')</if>
+            <if test="settlementPeriod != null  and settlementPeriod != ''"> and ps.settlement_period = #{settlementPeriod}</if>
+            <if test="orderCount != null "> and ps.order_count = #{orderCount}</if>
+            <if test="settlementStatus != null "> and ps.settlement_status = #{settlementStatus}</if>
         </where>
     </select>
     
     <select id="selectTProviderSettlementBySettlementId" parameterType="Long" resultMap="TProviderSettlementResult">
         <include refid="selectTProviderSettlementVo"/>
-        where settlement_id = #{settlementId}
+        where ps.settlement_id = #{settlementId}
     </select>
 
     <insert id="insertTProviderSettlement" parameterType="TProviderSettlement" useGeneratedKeys="true" keyProperty="settlementId">

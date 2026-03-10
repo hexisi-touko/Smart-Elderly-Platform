@@ -14,8 +14,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TProviderSettlement extends BaseEntity
-{
+public class TProviderSettlement extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 结算id */
@@ -72,154 +71,141 @@ public class TProviderSettlement extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setSettlementId(Long settlementId) 
-    {
+    /** 服务商名称（JOIN查询用） */
+    @Excel(name = "服务商名称")
+    private String providerName;
+
+    public void setSettlementId(Long settlementId) {
         this.settlementId = settlementId;
     }
 
-    public Long getSettlementId() 
-    {
+    public Long getSettlementId() {
         return settlementId;
     }
 
-    public void setProviderId(Long providerId) 
-    {
+    public void setProviderId(Long providerId) {
         this.providerId = providerId;
     }
 
-    public Long getProviderId() 
-    {
+    public Long getProviderId() {
         return providerId;
     }
 
-    public void setSettlementPeriod(String settlementPeriod) 
-    {
+    public void setSettlementPeriod(String settlementPeriod) {
         this.settlementPeriod = settlementPeriod;
     }
 
-    public String getSettlementPeriod() 
-    {
+    public String getSettlementPeriod() {
         return settlementPeriod;
     }
 
-    public void setOrderCount(Long orderCount) 
-    {
+    public void setOrderCount(Long orderCount) {
         this.orderCount = orderCount;
     }
 
-    public Long getOrderCount() 
-    {
+    public Long getOrderCount() {
         return orderCount;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount) 
-    {
+    public void setTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
     }
 
-    public BigDecimal getTotalAmount() 
-    {
+    public BigDecimal getTotalAmount() {
         return totalAmount;
     }
 
-    public void setPlatformFee(BigDecimal platformFee) 
-    {
+    public void setPlatformFee(BigDecimal platformFee) {
         this.platformFee = platformFee;
     }
 
-    public BigDecimal getPlatformFee() 
-    {
+    public BigDecimal getPlatformFee() {
         return platformFee;
     }
 
-    public void setActualAmount(BigDecimal actualAmount) 
-    {
+    public void setActualAmount(BigDecimal actualAmount) {
         this.actualAmount = actualAmount;
     }
 
-    public BigDecimal getActualAmount() 
-    {
+    public BigDecimal getActualAmount() {
         return actualAmount;
     }
 
-    public void setSettlementStatus(Long settlementStatus) 
-    {
+    public void setSettlementStatus(Long settlementStatus) {
         this.settlementStatus = settlementStatus;
     }
 
-    public Long getSettlementStatus() 
-    {
+    public Long getSettlementStatus() {
         return settlementStatus;
     }
 
-    public void setApplyTime(Date applyTime) 
-    {
+    public void setApplyTime(Date applyTime) {
         this.applyTime = applyTime;
     }
 
-    public Date getApplyTime() 
-    {
+    public Date getApplyTime() {
         return applyTime;
     }
 
-    public void setApproveTime(Date approveTime) 
-    {
+    public void setApproveTime(Date approveTime) {
         this.approveTime = approveTime;
     }
 
-    public Date getApproveTime() 
-    {
+    public Date getApproveTime() {
         return approveTime;
     }
 
-    public void setTransferTime(Date transferTime) 
-    {
+    public void setTransferTime(Date transferTime) {
         this.transferTime = transferTime;
     }
 
-    public Date getTransferTime() 
-    {
+    public Date getTransferTime() {
         return transferTime;
     }
 
-    public void setTransferVoucher(String transferVoucher) 
-    {
+    public void setTransferVoucher(String transferVoucher) {
         this.transferVoucher = transferVoucher;
     }
 
-    public String getTransferVoucher() 
-    {
+    public String getTransferVoucher() {
         return transferVoucher;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
+    }
+
+    public String getProviderName() {
+        return providerName;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("settlementId", getSettlementId())
-            .append("providerId", getProviderId())
-            .append("settlementPeriod", getSettlementPeriod())
-            .append("orderCount", getOrderCount())
-            .append("totalAmount", getTotalAmount())
-            .append("platformFee", getPlatformFee())
-            .append("actualAmount", getActualAmount())
-            .append("settlementStatus", getSettlementStatus())
-            .append("applyTime", getApplyTime())
-            .append("approveTime", getApproveTime())
-            .append("transferTime", getTransferTime())
-            .append("transferVoucher", getTransferVoucher())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("settlementId", getSettlementId())
+                .append("providerId", getProviderId())
+                .append("providerName", getProviderName())
+                .append("settlementPeriod", getSettlementPeriod())
+                .append("orderCount", getOrderCount())
+                .append("totalAmount", getTotalAmount())
+                .append("platformFee", getPlatformFee())
+                .append("actualAmount", getActualAmount())
+                .append("settlementStatus", getSettlementStatus())
+                .append("applyTime", getApplyTime())
+                .append("approveTime", getApproveTime())
+                .append("transferTime", getTransferTime())
+                .append("transferVoucher", getTransferVoucher())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

@@ -12,23 +12,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="isDeleted"    column="is_deleted"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
+        <result property="elderlyName"  column="elderly_name"  />
     </resultMap>
 
     <sql id="selectTElderlyChronicVo">
-        select id, elderly_id, chronic_type, diagnosis_date, is_deleted, create_time, update_time from t_elderly_chronic
+        select c.id, c.elderly_id, c.chronic_type, c.diagnosis_date, c.is_deleted, c.create_time, c.update_time,
+               e.name as elderly_name
+        from t_elderly_chronic c
+        LEFT JOIN t_elderly e ON c.elderly_id = e.elderly_id
     </sql>
 
     <select id="selectTElderlyChronicList" parameterType="TElderlyChronic" resultMap="TElderlyChronicResult">
         <include refid="selectTElderlyChronicVo"/>
         <where>  
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="chronicType != null  and chronicType != ''"> and chronic_type = #{chronicType}</if>
+            <if test="elderlyId != null "> and c.elderly_id = #{elderlyId}</if>
+            <if test="chronicType != null  and chronicType != ''"> and c.chronic_type = #{chronicType}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
         </where>
     </select>
     
     <select id="selectTElderlyChronicById" parameterType="Long" resultMap="TElderlyChronicResult">
         <include refid="selectTElderlyChronicVo"/>
-        where id = #{id}
+        where c.id = #{id}
     </select>
 
     <insert id="insertTElderlyChronic" parameterType="TElderlyChronic" useGeneratedKeys="true" keyProperty="id">

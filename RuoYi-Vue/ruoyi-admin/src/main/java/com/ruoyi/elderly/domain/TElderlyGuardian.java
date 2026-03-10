@@ -11,8 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-24
  */
-public class TElderlyGuardian extends BaseEntity
-{
+public class TElderlyGuardian extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 唯一标识 */
@@ -33,66 +32,80 @@ public class TElderlyGuardian extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setId(Long id) 
-    {
+    /** 老人姓名（关联查询） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    /** 监护人姓名（关联查询） */
+    @Excel(name = "监护人姓名")
+    private String guardianName;
+
+    public String getElderlyName() {
+        return elderlyName;
+    }
+
+    public void setElderlyName(String elderlyName) {
+        this.elderlyName = elderlyName;
+    }
+
+    public String getGuardianName() {
+        return guardianName;
+    }
+
+    public void setGuardianName(String guardianName) {
+        this.guardianName = guardianName;
+    }
+
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public Long getId() 
-    {
+    public Long getId() {
         return id;
     }
 
-    public void setElderlyId(Long elderlyId) 
-    {
+    public void setElderlyId(Long elderlyId) {
         this.elderlyId = elderlyId;
     }
 
-    public Long getElderlyId() 
-    {
+    public Long getElderlyId() {
         return elderlyId;
     }
 
-    public void setGuardianId(Long guardianId) 
-    {
+    public void setGuardianId(Long guardianId) {
         this.guardianId = guardianId;
     }
 
-    public Long getGuardianId() 
-    {
+    public Long getGuardianId() {
         return guardianId;
     }
 
-    public void setAuthorizationStatus(Long authorizationStatus) 
-    {
+    public void setAuthorizationStatus(Long authorizationStatus) {
         this.authorizationStatus = authorizationStatus;
     }
 
-    public Long getAuthorizationStatus() 
-    {
+    public Long getAuthorizationStatus() {
         return authorizationStatus;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("id", getId())
-            .append("elderlyId", getElderlyId())
-            .append("guardianId", getGuardianId())
-            .append("authorizationStatus", getAuthorizationStatus())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("id", getId())
+                .append("elderlyId", getElderlyId())
+                .append("guardianId", getGuardianId())
+                .append("authorizationStatus", getAuthorizationStatus())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

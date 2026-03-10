@@ -13,8 +13,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TServiceEvaluation extends BaseEntity
-{
+public class TServiceEvaluation extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 评价id */
@@ -58,121 +57,127 @@ public class TServiceEvaluation extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setEvaluationId(Long evaluationId) 
-    {
+    /** 订单编号（JOIN查询用） */
+    @Excel(name = "订单编号")
+    private String orderNo;
+
+    /** 老人姓名（JOIN查询用） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    public void setEvaluationId(Long evaluationId) {
         this.evaluationId = evaluationId;
     }
 
-    public Long getEvaluationId() 
-    {
+    public Long getEvaluationId() {
         return evaluationId;
     }
 
-    public void setOrderId(Long orderId) 
-    {
+    public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
 
-    public Long getOrderId() 
-    {
+    public Long getOrderId() {
         return orderId;
     }
 
-    public void setElderlyId(Long elderlyId) 
-    {
+    public void setElderlyId(Long elderlyId) {
         this.elderlyId = elderlyId;
     }
 
-    public Long getElderlyId() 
-    {
+    public Long getElderlyId() {
         return elderlyId;
     }
 
-    public void setStarLevel(Long starLevel) 
-    {
+    public void setStarLevel(Long starLevel) {
         this.starLevel = starLevel;
     }
 
-    public Long getStarLevel() 
-    {
+    public Long getStarLevel() {
         return starLevel;
     }
 
-    public void setEvaluationContent(String evaluationContent) 
-    {
+    public void setEvaluationContent(String evaluationContent) {
         this.evaluationContent = evaluationContent;
     }
 
-    public String getEvaluationContent() 
-    {
+    public String getEvaluationContent() {
         return evaluationContent;
     }
 
-    public void setProofPhotos(String proofPhotos) 
-    {
+    public void setProofPhotos(String proofPhotos) {
         this.proofPhotos = proofPhotos;
     }
 
-    public String getProofPhotos() 
-    {
+    public String getProofPhotos() {
         return proofPhotos;
     }
 
-    public void setEvaluationTime(Date evaluationTime) 
-    {
+    public void setEvaluationTime(Date evaluationTime) {
         this.evaluationTime = evaluationTime;
     }
 
-    public Date getEvaluationTime() 
-    {
+    public Date getEvaluationTime() {
         return evaluationTime;
     }
 
-    public void setProviderReply(String providerReply) 
-    {
+    public void setProviderReply(String providerReply) {
         this.providerReply = providerReply;
     }
 
-    public String getProviderReply() 
-    {
+    public String getProviderReply() {
         return providerReply;
     }
 
-    public void setReplyTime(Date replyTime) 
-    {
+    public void setReplyTime(Date replyTime) {
         this.replyTime = replyTime;
     }
 
-    public Date getReplyTime() 
-    {
+    public Date getReplyTime() {
         return replyTime;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setOrderNo(String orderNo) {
+        this.orderNo = orderNo;
+    }
+
+    public String getOrderNo() {
+        return orderNo;
+    }
+
+    public void setElderlyName(String elderlyName) {
+        this.elderlyName = elderlyName;
+    }
+
+    public String getElderlyName() {
+        return elderlyName;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("evaluationId", getEvaluationId())
-            .append("orderId", getOrderId())
-            .append("elderlyId", getElderlyId())
-            .append("starLevel", getStarLevel())
-            .append("evaluationContent", getEvaluationContent())
-            .append("proofPhotos", getProofPhotos())
-            .append("evaluationTime", getEvaluationTime())
-            .append("providerReply", getProviderReply())
-            .append("replyTime", getReplyTime())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("evaluationId", getEvaluationId())
+                .append("orderId", getOrderId())
+                .append("orderNo", getOrderNo())
+                .append("elderlyId", getElderlyId())
+                .append("elderlyName", getElderlyName())
+                .append("starLevel", getStarLevel())
+                .append("evaluationContent", getEvaluationContent())
+                .append("proofPhotos", getProofPhotos())
+                .append("evaluationTime", getEvaluationTime())
+                .append("providerReply", getProviderReply())
+                .append("replyTime", getReplyTime())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

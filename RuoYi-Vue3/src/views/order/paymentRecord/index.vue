@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联服务订单ID" prop="orderId">
+      <el-form-item label="订单编号" prop="orderNo">
         <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入关联服务订单ID"
+          v-model="queryParams.orderNo"
+          placeholder="请输入订单编号"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -106,7 +106,7 @@
     <el-table v-loading="loading" :data="paymentRecordList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="支付记录id" align="center" prop="paymentId" />
-      <el-table-column label="关联服务订单ID" align="center" prop="orderId" />
+      <el-table-column label="订单编号" align="center" prop="orderNo" />
       <el-table-column label="支付金额" align="center" prop="paymentAmount" />
       <el-table-column label="支付时间" align="center" prop="paymentTime" width="180">
         <template #default="scope">
@@ -149,8 +149,13 @@
     <!-- 添加或修改支付记录管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="paymentRecordRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联服务订单ID" prop="orderId">
-          <el-input v-model="form.orderId" placeholder="请输入关联服务订单ID" />
+        <el-form-item label="关联订单" prop="orderId">
+          <el-select v-model="form.orderId" filterable remote reserve-keyword
+            placeholder="请输入订单编号搜索" :remote-method="remoteSearchOrder"
+            :loading="orderLoading" style="width: 100%">
+            <el-option v-for="item in orderOptions" :key="item.orderId"
+              :label="item.orderNo" :value="item.orderId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="支付金额" prop="paymentAmount">
           <el-input v-model="form.paymentAmount" placeholder="请输入支付金额" />
@@ -188,6 +193,7 @@
 
 <script setup name="PaymentRecord">
 import { listPaymentRecord, getPaymentRecord, delPaymentRecord, addPaymentRecord, updatePaymentRecord } from "@/api/order/paymentRecord"
+import { listServiceOrder } from "@/api/order/serviceOrder"
 
 const { proxy } = getCurrentInstance()
 const { pay_status, pay_method } = proxy.useDict('pay_status', 'pay_method')
@@ -201,6 +207,8 @@ const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
+const orderOptions = ref([])
+const orderLoading = ref(false)
 const daterangePaymentTime = ref([])
 
 const data = reactive({
@@ -209,6 +217,7 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     orderId: null,
+    orderNo: null,
     paymentTime: null,
     paymentMethod: null,
     paymentStatus: null,
@@ -275,6 +284,17 @@ function reset() {
   proxy.resetForm("paymentRecordRef")
 }
 
+/** 远程搜索订单 */
+function remoteSearchOrder(query) {
+  if (query) {
+    orderLoading.value = true
+    listServiceOrder({ orderNo: query, pageNum: 1, pageSize: 20 }).then(res => {
+      orderOptions.value = res.rows
+      orderLoading.value = false
+    })
+  } else { orderOptions.value = [] }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -308,6 +328,9 @@ function handleUpdate(row) {
   const _paymentId = row.paymentId || ids.value
   getPaymentRecord(_paymentId).then(response => {
     form.value = response.data
+    if (form.value.orderId) {
+      listServiceOrder({ orderId: form.value.orderId, pageNum: 1, pageSize: 10 }).then(res => { orderOptions.value = res.rows })
+    }
     open.value = true
     title.value = "修改支付记录管理"
   })

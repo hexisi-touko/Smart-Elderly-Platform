@@ -1,18 +1,18 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联订单ID" prop="orderId">
+      <el-form-item label="订单编号" prop="orderNo">
         <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入关联订单ID"
+          v-model="queryParams.orderNo"
+          placeholder="请输入订单编号"
           clearable
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="关联服务人员ID" prop="staffId">
+      <el-form-item label="服务人员姓名" prop="staffName">
         <el-input
-          v-model="queryParams.staffId"
-          placeholder="请输入关联服务人员ID"
+          v-model="queryParams.staffName"
+          placeholder="请输入服务人员姓名"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -78,8 +78,8 @@
     <el-table v-loading="loading" :data="orderStaffList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="唯一标识" align="center" prop="id" />
-      <el-table-column label="关联订单ID" align="center" prop="orderId" />
-      <el-table-column label="关联服务人员ID" align="center" prop="staffId" />
+      <el-table-column label="订单编号" align="center" prop="orderNo" />
+      <el-table-column label="服务人员姓名" align="center" prop="staffName" />
       <el-table-column label="是否主要服务人员" align="center" prop="isPrimary">
         <template #default="scope">
           <dict-tag :options="sys_yes_no" :value="scope.row.isPrimary"/>
@@ -109,11 +109,21 @@
     <!-- 添加或修改订单-服务人员关联对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="orderStaffRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联订单ID" prop="orderId">
-          <el-input v-model="form.orderId" placeholder="请输入关联订单ID" />
+        <el-form-item label="关联订单" prop="orderId">
+          <el-select v-model="form.orderId" filterable remote reserve-keyword
+            placeholder="请输入订单编号搜索" :remote-method="remoteSearchOrder"
+            :loading="orderLoading" style="width: 100%">
+            <el-option v-for="item in orderOptions" :key="item.orderId"
+              :label="item.orderNo" :value="item.orderId" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="关联服务人员ID" prop="staffId">
-          <el-input v-model="form.staffId" placeholder="请输入关联服务人员ID" />
+        <el-form-item label="服务人员" prop="staffId">
+          <el-select v-model="form.staffId" filterable remote reserve-keyword
+            placeholder="请输入服务人员姓名搜索" :remote-method="remoteSearchStaff"
+            :loading="staffLoading" style="width: 100%">
+            <el-option v-for="item in staffOptions" :key="item.staffId"
+              :label="item.staffName" :value="item.staffId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="是否主要服务人员" prop="isPrimary">
           <el-select v-model="form.isPrimary" placeholder="请选择是否主要服务人员">
@@ -138,6 +148,8 @@
 
 <script setup name="OrderStaff">
 import { listOrderStaff, getOrderStaff, delOrderStaff, addOrderStaff, updateOrderStaff } from "@/api/order/orderStaff"
+import { listServiceOrder } from "@/api/order/serviceOrder"
+import { listServiceStaff } from "@/api/service/serviceStaff"
 
 const { proxy } = getCurrentInstance()
 const { sys_yes_no } = proxy.useDict('sys_yes_no')
@@ -151,6 +163,10 @@ const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
+const orderOptions = ref([])
+const orderLoading = ref(false)
+const staffOptions = ref([])
+const staffLoading = ref(false)
 
 const data = reactive({
   form: {},
@@ -158,7 +174,9 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     orderId: null,
+    orderNo: null,
     staffId: null,
+    staffName: null,
     isPrimary: null,
   },
   rules: {
@@ -203,6 +221,28 @@ function reset() {
   proxy.resetForm("orderStaffRef")
 }
 
+/** 远程搜索订单 */
+function remoteSearchOrder(query) {
+  if (query) {
+    orderLoading.value = true
+    listServiceOrder({ orderNo: query, pageNum: 1, pageSize: 20 }).then(res => {
+      orderOptions.value = res.rows
+      orderLoading.value = false
+    })
+  } else { orderOptions.value = [] }
+}
+
+/** 远程搜索服务人员 */
+function remoteSearchStaff(query) {
+  if (query) {
+    staffLoading.value = true
+    listServiceStaff({ staffName: query, pageNum: 1, pageSize: 20 }).then(res => {
+      staffOptions.value = res.rows
+      staffLoading.value = false
+    })
+  } else { staffOptions.value = [] }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -235,6 +275,12 @@ function handleUpdate(row) {
   const _id = row.id || ids.value
   getOrderStaff(_id).then(response => {
     form.value = response.data
+    if (form.value.orderId) {
+      listServiceOrder({ orderId: form.value.orderId, pageNum: 1, pageSize: 10 }).then(res => { orderOptions.value = res.rows })
+    }
+    if (form.value.staffId) {
+      listServiceStaff({ staffId: form.value.staffId, pageNum: 1, pageSize: 10 }).then(res => { staffOptions.value = res.rows })
+    }
     open.value = true
     title.value = "修改订单-服务人员关联"
   })

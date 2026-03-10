@@ -13,8 +13,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TElderlyChronic extends BaseEntity
-{
+public class TElderlyChronic extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 唯一标识 */
@@ -37,66 +36,68 @@ public class TElderlyChronic extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setId(Long id) 
-    {
+    /** 老人姓名（关联查询） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    public String getElderlyName() {
+        return elderlyName;
+    }
+
+    public void setElderlyName(String elderlyName) {
+        this.elderlyName = elderlyName;
+    }
+
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public Long getId() 
-    {
+    public Long getId() {
         return id;
     }
 
-    public void setElderlyId(Long elderlyId) 
-    {
+    public void setElderlyId(Long elderlyId) {
         this.elderlyId = elderlyId;
     }
 
-    public Long getElderlyId() 
-    {
+    public Long getElderlyId() {
         return elderlyId;
     }
 
-    public void setChronicType(String chronicType) 
-    {
+    public void setChronicType(String chronicType) {
         this.chronicType = chronicType;
     }
 
-    public String getChronicType() 
-    {
+    public String getChronicType() {
         return chronicType;
     }
 
-    public void setDiagnosisDate(Date diagnosisDate) 
-    {
+    public void setDiagnosisDate(Date diagnosisDate) {
         this.diagnosisDate = diagnosisDate;
     }
 
-    public Date getDiagnosisDate() 
-    {
+    public Date getDiagnosisDate() {
         return diagnosisDate;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("id", getId())
-            .append("elderlyId", getElderlyId())
-            .append("chronicType", getChronicType())
-            .append("diagnosisDate", getDiagnosisDate())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("id", getId())
+                .append("elderlyId", getElderlyId())
+                .append("chronicType", getChronicType())
+                .append("diagnosisDate", getDiagnosisDate())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

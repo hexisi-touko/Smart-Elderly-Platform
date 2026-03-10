@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联服务商ID" prop="providerId">
+      <el-form-item label="服务商名称" prop="providerName">
         <el-input
-          v-model="queryParams.providerId"
-          placeholder="请输入关联服务商ID"
+          v-model="queryParams.providerName"
+          placeholder="请输入服务商名称"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -86,7 +86,7 @@
     <el-table v-loading="loading" :data="settlementList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="结算id" align="center" prop="settlementId" />
-      <el-table-column label="关联服务商ID" align="center" prop="providerId" />
+      <el-table-column label="服务商名称" align="center" prop="providerName" />
       <el-table-column label="结算周期" align="center" prop="settlementPeriod" />
       <el-table-column label="订单数量" align="center" prop="orderCount" />
       <el-table-column label="结算总金额" align="center" prop="totalAmount" />
@@ -137,8 +137,13 @@
     <!-- 添加或修改服务商结算管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="settlementRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联服务商ID" prop="providerId">
-          <el-input v-model="form.providerId" placeholder="请输入关联服务商ID" />
+        <el-form-item label="关联服务商" prop="providerId">
+          <el-select v-model="form.providerId" filterable remote reserve-keyword
+            placeholder="请输入服务商名称搜索" :remote-method="remoteSearchProvider"
+            :loading="providerLoading" style="width: 100%">
+            <el-option v-for="item in providerOptions" :key="item.providerId"
+              :label="item.providerName" :value="item.providerId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="结算周期" prop="settlementPeriod">
           <el-input v-model="form.settlementPeriod" placeholder="请输入结算周期" />
@@ -202,6 +207,7 @@
 
 <script setup name="Settlement">
 import { listSettlement, getSettlement, delSettlement, addSettlement, updateSettlement } from "@/api/order/settlement"
+import { listServiceProvider } from "@/api/service/serviceProvider"
 
 const { proxy } = getCurrentInstance()
 const { settlement_status } = proxy.useDict('settlement_status')
@@ -215,6 +221,8 @@ const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
+const providerOptions = ref([])
+const providerLoading = ref(false)
 
 const data = reactive({
   form: {},
@@ -222,6 +230,7 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     providerId: null,
+    providerName: null,
     settlementPeriod: null,
     orderCount: null,
     settlementStatus: null,
@@ -276,6 +285,17 @@ function reset() {
   proxy.resetForm("settlementRef")
 }
 
+/** 远程搜索服务商 */
+function remoteSearchProvider(query) {
+  if (query) {
+    providerLoading.value = true
+    listServiceProvider({ providerName: query, pageNum: 1, pageSize: 20 }).then(res => {
+      providerOptions.value = res.rows
+      providerLoading.value = false
+    })
+  } else { providerOptions.value = [] }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -308,6 +328,11 @@ function handleUpdate(row) {
   const _settlementId = row.settlementId || ids.value
   getSettlement(_settlementId).then(response => {
     form.value = response.data
+    if (form.value.providerId) {
+      listServiceProvider({ providerId: form.value.providerId, pageNum: 1, pageSize: 10 }).then(res => {
+        providerOptions.value = res.rows
+      })
+    }
     open.value = true
     title.value = "修改服务商结算管理"
   })

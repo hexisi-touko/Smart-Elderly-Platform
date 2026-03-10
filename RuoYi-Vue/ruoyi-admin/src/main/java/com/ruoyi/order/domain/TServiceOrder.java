@@ -14,8 +14,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author zhangTing
  * @date 2026-02-25
  */
-public class TServiceOrder extends BaseEntity
-{
+public class TServiceOrder extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 订单id */
@@ -72,176 +71,185 @@ public class TServiceOrder extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
-    public void setOrderId(Long orderId) 
-    {
+    /** 老人姓名（JOIN查询用） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    /** 服务商名称（JOIN查询用） */
+    @Excel(name = "服务商名称")
+    private String providerName;
+
+    /** 服务项目名称（JOIN查询用） */
+    @Excel(name = "服务项目")
+    private String itemName;
+
+    public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
 
-    public Long getOrderId() 
-    {
+    public Long getOrderId() {
         return orderId;
     }
 
-    public void setElderlyId(Long elderlyId) 
-    {
+    public void setElderlyId(Long elderlyId) {
         this.elderlyId = elderlyId;
     }
 
-    public Long getElderlyId() 
-    {
+    public Long getElderlyId() {
         return elderlyId;
     }
 
-    public void setProviderId(Long providerId) 
-    {
+    public void setProviderId(Long providerId) {
         this.providerId = providerId;
     }
 
-    public Long getProviderId() 
-    {
+    public Long getProviderId() {
         return providerId;
     }
 
-    public void setServiceItemId(Long serviceItemId) 
-    {
+    public void setServiceItemId(Long serviceItemId) {
         this.serviceItemId = serviceItemId;
     }
 
-    public Long getServiceItemId() 
-    {
+    public Long getServiceItemId() {
         return serviceItemId;
     }
 
-    public void setOrderNo(String orderNo) 
-    {
+    public void setOrderNo(String orderNo) {
         this.orderNo = orderNo;
     }
 
-    public String getOrderNo() 
-    {
+    public String getOrderNo() {
         return orderNo;
     }
 
-    public void setOrderAmount(BigDecimal orderAmount) 
-    {
+    public void setOrderAmount(BigDecimal orderAmount) {
         this.orderAmount = orderAmount;
     }
 
-    public BigDecimal getOrderAmount() 
-    {
+    public BigDecimal getOrderAmount() {
         return orderAmount;
     }
 
-    public void setServiceTime(Date serviceTime) 
-    {
+    public void setServiceTime(Date serviceTime) {
         this.serviceTime = serviceTime;
     }
 
-    public Date getServiceTime() 
-    {
+    public Date getServiceTime() {
         return serviceTime;
     }
 
-    public void setServiceAddress(String serviceAddress) 
-    {
+    public void setServiceAddress(String serviceAddress) {
         this.serviceAddress = serviceAddress;
     }
 
-    public String getServiceAddress() 
-    {
+    public String getServiceAddress() {
         return serviceAddress;
     }
 
-    public void setServiceRequirements(String serviceRequirements) 
-    {
+    public void setServiceRequirements(String serviceRequirements) {
         this.serviceRequirements = serviceRequirements;
     }
 
-    public String getServiceRequirements() 
-    {
+    public String getServiceRequirements() {
         return serviceRequirements;
     }
 
-    public void setOrderStatus(Long orderStatus) 
-    {
+    public void setOrderStatus(Long orderStatus) {
         this.orderStatus = orderStatus;
     }
 
-    public Long getOrderStatus() 
-    {
+    public Long getOrderStatus() {
         return orderStatus;
     }
 
-    public void setAcceptTime(Date acceptTime) 
-    {
+    public void setAcceptTime(Date acceptTime) {
         this.acceptTime = acceptTime;
     }
 
-    public Date getAcceptTime() 
-    {
+    public Date getAcceptTime() {
         return acceptTime;
     }
 
-    public void setStartTime(Date startTime) 
-    {
+    public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
-    public Date getStartTime() 
-    {
+    public Date getStartTime() {
         return startTime;
     }
 
-    public void setCompleteTime(Date completeTime) 
-    {
+    public void setCompleteTime(Date completeTime) {
         this.completeTime = completeTime;
     }
 
-    public Date getCompleteTime() 
-    {
+    public Date getCompleteTime() {
         return completeTime;
     }
 
-    public void setCancelReason(String cancelReason) 
-    {
+    public void setCancelReason(String cancelReason) {
         this.cancelReason = cancelReason;
     }
 
-    public String getCancelReason() 
-    {
+    public String getCancelReason() {
         return cancelReason;
     }
 
-    public void setIsDeleted(Long isDeleted) 
-    {
+    public void setIsDeleted(Long isDeleted) {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
-    {
+    public Long getIsDeleted() {
         return isDeleted;
+    }
+
+    public void setElderlyName(String elderlyName) {
+        this.elderlyName = elderlyName;
+    }
+
+    public String getElderlyName() {
+        return elderlyName;
+    }
+
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
+    }
+
+    public String getProviderName() {
+        return providerName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public String getItemName() {
+        return itemName;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("orderId", getOrderId())
-            .append("elderlyId", getElderlyId())
-            .append("providerId", getProviderId())
-            .append("serviceItemId", getServiceItemId())
-            .append("orderNo", getOrderNo())
-            .append("orderAmount", getOrderAmount())
-            .append("serviceTime", getServiceTime())
-            .append("serviceAddress", getServiceAddress())
-            .append("serviceRequirements", getServiceRequirements())
-            .append("orderStatus", getOrderStatus())
-            .append("acceptTime", getAcceptTime())
-            .append("startTime", getStartTime())
-            .append("completeTime", getCompleteTime())
-            .append("cancelReason", getCancelReason())
-            .append("isDeleted", getIsDeleted())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("orderId", getOrderId())
+                .append("elderlyId", getElderlyId())
+                .append("elderlyName", getElderlyName())
+                .append("providerId", getProviderId())
+                .append("providerName", getProviderName())
+                .append("serviceItemId", getServiceItemId())
+                .append("itemName", getItemName())
+                .append("orderNo", getOrderNo())
+                .append("orderAmount", getOrderAmount())
+                .append("serviceTime", getServiceTime())
+                .append("serviceAddress", getServiceAddress())
+                .append("serviceRequirements", getServiceRequirements())
+                .append("orderStatus", getOrderStatus())
+                .append("acceptTime", getAcceptTime())
+                .append("startTime", getStartTime())
+                .append("completeTime", getCompleteTime())
+                .append("cancelReason", getCancelReason())
+                .append("isDeleted", getIsDeleted())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }
