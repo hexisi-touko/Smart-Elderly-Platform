@@ -1,18 +1,18 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联老人ID" prop="elderlyId">
+      <el-form-item label="老人姓名" prop="elderlyName">
         <el-input
-          v-model="queryParams.elderlyId"
-          placeholder="请输入关联老人ID"
+          v-model="queryParams.elderlyName"
+          placeholder="请输入老人姓名"
           clearable
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="关联课程ID" prop="courseId">
+      <el-form-item label="课程名称" prop="courseName">
         <el-input
-          v-model="queryParams.courseId"
-          placeholder="请输入关联课程ID"
+          v-model="queryParams.courseName"
+          placeholder="请输入课程名称"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -20,7 +20,7 @@
       <el-form-item label="报名状态" prop="enrollmentStatus">
         <el-select v-model="queryParams.enrollmentStatus" placeholder="请选择报名状态" clearable>
           <el-option
-            v-for="dict in activity_enrollment_status"
+            v-for="dict in course_enrollment_status"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -78,11 +78,11 @@
     <el-table v-loading="loading" :data="elderlyCourseList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="唯一标识" align="center" prop="id" />
-      <el-table-column label="关联老人ID" align="center" prop="elderlyId" />
-      <el-table-column label="关联课程ID" align="center" prop="courseId" />
+      <el-table-column label="老人姓名" align="center" prop="elderlyName" />
+      <el-table-column label="课程名称" align="center" prop="courseName" />
       <el-table-column label="报名状态" align="center" prop="enrollmentStatus">
         <template #default="scope">
-          <dict-tag :options="activity_enrollment_status" :value="scope.row.enrollmentStatus"/>
+          <dict-tag :options="course_enrollment_status" :value="scope.row.enrollmentStatus"/>
         </template>
       </el-table-column>
       <el-table-column label="学习进度" align="center" prop="learningProgress" />
@@ -120,16 +120,26 @@
     <!-- 添加或修改老人-课程报名对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="elderlyCourseRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联老人ID" prop="elderlyId">
-          <el-input v-model="form.elderlyId" placeholder="请输入关联老人ID" />
+        <el-form-item label="关联老人" prop="elderlyId">
+          <el-select v-model="form.elderlyId" filterable remote reserve-keyword
+            placeholder="请输入老人姓名搜索" :remote-method="remoteSearchElderly"
+            :loading="elderlyLoading" style="width: 100%">
+            <el-option v-for="item in elderlyOptions" :key="item.elderlyId"
+              :label="item.name" :value="item.elderlyId" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="关联课程ID" prop="courseId">
-          <el-input v-model="form.courseId" placeholder="请输入关联课程ID" />
+        <el-form-item label="关联课程" prop="courseId">
+          <el-select v-model="form.courseId" filterable remote reserve-keyword
+            placeholder="请输入课程名称搜索" :remote-method="remoteSearchCourse"
+            :loading="courseLoading" style="width: 100%">
+            <el-option v-for="item in courseOptions" :key="item.courseId"
+              :label="item.courseName" :value="item.courseId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="报名状态" prop="enrollmentStatus">
           <el-select v-model="form.enrollmentStatus" placeholder="请选择报名状态">
             <el-option
-              v-for="dict in activity_enrollment_status"
+              v-for="dict in course_enrollment_status"
               :key="dict.value"
               :label="dict.label"
               :value="parseInt(dict.value)"
@@ -152,9 +162,11 @@
 
 <script setup name="ElderlyCourse">
 import { listElderlyCourse, getElderlyCourse, delElderlyCourse, addElderlyCourse, updateElderlyCourse } from "@/api/spirit/elderlyCourse"
+import { listElderly } from "@/api/elderly/elderly"
+import { listOnlineCourse } from "@/api/spirit/onlineCourse"
 
 const { proxy } = getCurrentInstance()
-const { activity_enrollment_status } = proxy.useDict('activity_enrollment_status')
+const { course_enrollment_status } = proxy.useDict('course_enrollment_status')
 
 const elderlyCourseList = ref([])
 const open = ref(false)
@@ -165,6 +177,10 @@ const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
+const elderlyOptions = ref([])
+const elderlyLoading = ref(false)
+const courseOptions = ref([])
+const courseLoading = ref(false)
 
 const data = reactive({
   form: {},
@@ -172,7 +188,9 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     elderlyId: null,
+    elderlyName: null,
     courseId: null,
+    courseName: null,
     enrollmentStatus: null,
   },
   rules: {
@@ -220,6 +238,28 @@ function reset() {
   proxy.resetForm("elderlyCourseRef")
 }
 
+/** 远程搜索老人 */
+function remoteSearchElderly(query) {
+  if (query) {
+    elderlyLoading.value = true
+    listElderly({ name: query, pageNum: 1, pageSize: 20 }).then(res => {
+      elderlyOptions.value = res.rows
+      elderlyLoading.value = false
+    })
+  } else { elderlyOptions.value = [] }
+}
+
+/** 远程搜索课程 */
+function remoteSearchCourse(query) {
+  if (query) {
+    courseLoading.value = true
+    listOnlineCourse({ courseName: query, pageNum: 1, pageSize: 20 }).then(res => {
+      courseOptions.value = res.rows
+      courseLoading.value = false
+    })
+  } else { courseOptions.value = [] }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -252,6 +292,12 @@ function handleUpdate(row) {
   const _id = row.id || ids.value
   getElderlyCourse(_id).then(response => {
     form.value = response.data
+    if (form.value.elderlyId) {
+      listElderly({ elderlyId: form.value.elderlyId, pageNum: 1, pageSize: 10 }).then(res => { elderlyOptions.value = res.rows })
+    }
+    if (form.value.courseId) {
+      listOnlineCourse({ courseId: form.value.courseId, pageNum: 1, pageSize: 10 }).then(res => { courseOptions.value = res.rows })
+    }
     open.value = true
     title.value = "修改老人-课程报名"
   })

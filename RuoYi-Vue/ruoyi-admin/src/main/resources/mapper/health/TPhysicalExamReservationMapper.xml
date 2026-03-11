@@ -20,26 +20,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="isDeleted"    column="is_deleted"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
+        <result property="elderlyName"  column="elderly_name"  />
     </resultMap>
 
     <sql id="selectTPhysicalExamReservationVo">
-        select reservation_id, elderly_id, exam_type, exam_institution, third_party_org_id, reservation_time, exam_address, exam_items, reservation_status, report_status, report_url, report_interpret, is_deleted, create_time, update_time from t_physical_exam_reservation
+        select r.reservation_id, r.elderly_id, r.exam_type, r.exam_institution, r.third_party_org_id, r.reservation_time, r.exam_address, r.exam_items, r.reservation_status, r.report_status, r.report_url, r.report_interpret, r.is_deleted, r.create_time, r.update_time,
+               e.name as elderly_name
+        from t_physical_exam_reservation r
+        LEFT JOIN t_elderly e ON r.elderly_id = e.elderly_id
     </sql>
 
     <select id="selectTPhysicalExamReservationList" parameterType="TPhysicalExamReservation" resultMap="TPhysicalExamReservationResult">
         <include refid="selectTPhysicalExamReservationVo"/>
         <where>  
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="examType != null  and examType != ''"> and exam_type = #{examType}</if>
-            <if test="examInstitution != null  and examInstitution != ''"> and exam_institution like concat('%', #{examInstitution}, '%')</if>
-            <if test="params.beginReservationTime != null and params.beginReservationTime != '' and params.endReservationTime != null and params.endReservationTime != ''"> and reservation_time between #{params.beginReservationTime} and #{params.endReservationTime}</if>
-            <if test="reservationStatus != null "> and reservation_status = #{reservationStatus}</if>
+            <if test="elderlyId != null "> and r.elderly_id = #{elderlyId}</if>
+            <if test="examType != null  and examType != ''"> and r.exam_type = #{examType}</if>
+            <if test="examInstitution != null  and examInstitution != ''"> and r.exam_institution like concat('%', #{examInstitution}, '%')</if>
+            <if test="params.beginReservationTime != null and params.beginReservationTime != '' and params.endReservationTime != null and params.endReservationTime != ''"> and r.reservation_time between #{params.beginReservationTime} and #{params.endReservationTime}</if>
+            <if test="reservationStatus != null "> and r.reservation_status = #{reservationStatus}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
         </where>
     </select>
     
     <select id="selectTPhysicalExamReservationByReservationId" parameterType="Long" resultMap="TPhysicalExamReservationResult">
         <include refid="selectTPhysicalExamReservationVo"/>
-        where reservation_id = #{reservationId}
+        where r.reservation_id = #{reservationId}
     </select>
 
     <insert id="insertTPhysicalExamReservation" parameterType="TPhysicalExamReservation" useGeneratedKeys="true" keyProperty="reservationId">

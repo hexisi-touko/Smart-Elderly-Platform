@@ -49,6 +49,19 @@ public class TElderlyCourse extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
+    /** 老人姓名（关联查询） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    /** 课程名称（关联查询） */
+    @Excel(name = "课程名称")
+    private String courseName;
+
+    public String getElderlyName() { return elderlyName; }
+    public void setElderlyName(String elderlyName) { this.elderlyName = elderlyName; }
+    public String getCourseName() { return courseName; }
+    public void setCourseName(String courseName) { this.courseName = courseName; }
+
     public void setId(Long id) 
     {
         this.id = id;

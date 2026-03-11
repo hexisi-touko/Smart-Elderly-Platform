@@ -13,24 +13,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="isDeleted"    column="is_deleted"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
+        <result property="elderlyName"  column="elderly_name"  />
+        <result property="activityName" column="activity_name" />
     </resultMap>
 
     <sql id="selectTActivityEnrollmentVo">
-        select id, elderly_id, activity_id, enrollment_status, check_in_time, is_deleted, create_time, update_time from t_activity_enrollment
+        select ae.id, ae.elderly_id, ae.activity_id, ae.enrollment_status, ae.check_in_time, ae.is_deleted, ae.create_time, ae.update_time,
+               e.name as elderly_name, oa.activity_name
+        from t_activity_enrollment ae
+        LEFT JOIN t_elderly e ON ae.elderly_id = e.elderly_id
+        LEFT JOIN t_offline_activity oa ON ae.activity_id = oa.activity_id
     </sql>
 
     <select id="selectTActivityEnrollmentList" parameterType="TActivityEnrollment" resultMap="TActivityEnrollmentResult">
         <include refid="selectTActivityEnrollmentVo"/>
         <where>  
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="activityId != null "> and activity_id = #{activityId}</if>
-            <if test="enrollmentStatus != null "> and enrollment_status = #{enrollmentStatus}</if>
+            <if test="elderlyId != null "> and ae.elderly_id = #{elderlyId}</if>
+            <if test="activityId != null "> and ae.activity_id = #{activityId}</if>
+            <if test="enrollmentStatus != null "> and ae.enrollment_status = #{enrollmentStatus}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
+            <if test="activityName != null  and activityName != ''"> and oa.activity_name like concat('%', #{activityName}, '%')</if>
         </where>
     </select>
     
     <select id="selectTActivityEnrollmentById" parameterType="Long" resultMap="TActivityEnrollmentResult">
         <include refid="selectTActivityEnrollmentVo"/>
-        where id = #{id}
+        where ae.id = #{id}
     </select>
 
     <insert id="insertTActivityEnrollment" parameterType="TActivityEnrollment" useGeneratedKeys="true" keyProperty="id">

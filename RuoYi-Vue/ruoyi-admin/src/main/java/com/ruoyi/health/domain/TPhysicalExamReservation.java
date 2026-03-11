@@ -65,6 +65,13 @@ public class TPhysicalExamReservation extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
+    /** 老人姓名（关联查询） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    public String getElderlyName() { return elderlyName; }
+    public void setElderlyName(String elderlyName) { this.elderlyName = elderlyName; }
+
     public void setReservationId(Long reservationId) 
     {
         this.reservationId = reservationId;

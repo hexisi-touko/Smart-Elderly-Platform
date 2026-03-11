@@ -15,24 +15,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="isDeleted"    column="is_deleted"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
+        <result property="elderlyName"  column="elderly_name"  />
+        <result property="courseName"   column="course_name"   />
     </resultMap>
 
     <sql id="selectTElderlyCourseVo">
-        select id, elderly_id, course_id, enrollment_status, learning_progress, enrollment_time, completion_time, is_deleted, create_time, update_time from t_elderly_course
+        select ec.id, ec.elderly_id, ec.course_id, ec.enrollment_status, ec.learning_progress, ec.enrollment_time, ec.completion_time, ec.is_deleted, ec.create_time, ec.update_time,
+               e.name as elderly_name, oc.course_name
+        from t_elderly_course ec
+        LEFT JOIN t_elderly e ON ec.elderly_id = e.elderly_id
+        LEFT JOIN t_online_course oc ON ec.course_id = oc.course_id
     </sql>
 
     <select id="selectTElderlyCourseList" parameterType="TElderlyCourse" resultMap="TElderlyCourseResult">
         <include refid="selectTElderlyCourseVo"/>
         <where>  
-            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
-            <if test="courseId != null "> and course_id = #{courseId}</if>
-            <if test="enrollmentStatus != null "> and enrollment_status = #{enrollmentStatus}</if>
+            <if test="elderlyId != null "> and ec.elderly_id = #{elderlyId}</if>
+            <if test="courseId != null "> and ec.course_id = #{courseId}</if>
+            <if test="enrollmentStatus != null "> and ec.enrollment_status = #{enrollmentStatus}</if>
+            <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
+            <if test="courseName != null  and courseName != ''"> and oc.course_name like concat('%', #{courseName}, '%')</if>
         </where>
     </select>
     
     <select id="selectTElderlyCourseById" parameterType="Long" resultMap="TElderlyCourseResult">
         <include refid="selectTElderlyCourseVo"/>
-        where id = #{id}
+        where ec.id = #{id}
     </select>
 
     <insert id="insertTElderlyCourse" parameterType="TElderlyCourse" useGeneratedKeys="true" keyProperty="id">

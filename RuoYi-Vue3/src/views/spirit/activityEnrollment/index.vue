@@ -1,18 +1,18 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联老人ID" prop="elderlyId">
+      <el-form-item label="老人姓名" prop="elderlyName">
         <el-input
-          v-model="queryParams.elderlyId"
-          placeholder="请输入关联老人ID"
+          v-model="queryParams.elderlyName"
+          placeholder="请输入老人姓名"
           clearable
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="关联活动ID" prop="activityId">
+      <el-form-item label="活动名称" prop="activityName">
         <el-input
-          v-model="queryParams.activityId"
-          placeholder="请输入关联活动ID"
+          v-model="queryParams.activityName"
+          placeholder="请输入活动名称"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -78,8 +78,8 @@
     <el-table v-loading="loading" :data="activityEnrollmentList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="唯一标识" align="center" prop="id" />
-      <el-table-column label="关联老人ID" align="center" prop="elderlyId" />
-      <el-table-column label="关联活动ID" align="center" prop="activityId" />
+      <el-table-column label="老人姓名" align="center" prop="elderlyName" />
+      <el-table-column label="活动名称" align="center" prop="activityName" />
       <el-table-column label="报名状态" align="center" prop="enrollmentStatus">
         <template #default="scope">
           <dict-tag :options="activity_enrollment_status" :value="scope.row.enrollmentStatus"/>
@@ -114,11 +114,21 @@
     <!-- 添加或修改活动报名管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="activityEnrollmentRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联老人ID" prop="elderlyId">
-          <el-input v-model="form.elderlyId" placeholder="请输入关联老人ID" />
+        <el-form-item label="关联老人" prop="elderlyId">
+          <el-select v-model="form.elderlyId" filterable remote reserve-keyword
+            placeholder="请输入老人姓名搜索" :remote-method="remoteSearchElderly"
+            :loading="elderlyLoading" style="width: 100%">
+            <el-option v-for="item in elderlyOptions" :key="item.elderlyId"
+              :label="item.name" :value="item.elderlyId" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="关联活动ID" prop="activityId">
-          <el-input v-model="form.activityId" placeholder="请输入关联活动ID" />
+        <el-form-item label="关联活动" prop="activityId">
+          <el-select v-model="form.activityId" filterable remote reserve-keyword
+            placeholder="请输入活动名称搜索" :remote-method="remoteSearchActivity"
+            :loading="activityLoading" style="width: 100%">
+            <el-option v-for="item in activityOptions" :key="item.activityId"
+              :label="item.activityName" :value="item.activityId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="报名状态" prop="enrollmentStatus">
           <el-select v-model="form.enrollmentStatus" placeholder="请选择报名状态">
@@ -143,6 +153,8 @@
 
 <script setup name="ActivityEnrollment">
 import { listActivityEnrollment, getActivityEnrollment, delActivityEnrollment, addActivityEnrollment, updateActivityEnrollment } from "@/api/spirit/activityEnrollment"
+import { listElderly } from "@/api/elderly/elderly"
+import { listOfflineActivity } from "@/api/spirit/offlineActivity"
 
 const { proxy } = getCurrentInstance()
 const { activity_enrollment_status } = proxy.useDict('activity_enrollment_status')
@@ -156,6 +168,10 @@ const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
+const elderlyOptions = ref([])
+const elderlyLoading = ref(false)
+const activityOptions = ref([])
+const activityLoading = ref(false)
 
 const data = reactive({
   form: {},
@@ -163,7 +179,9 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     elderlyId: null,
+    elderlyName: null,
     activityId: null,
+    activityName: null,
     enrollmentStatus: null,
   },
   rules: {
@@ -209,6 +227,28 @@ function reset() {
   proxy.resetForm("activityEnrollmentRef")
 }
 
+/** 远程搜索老人 */
+function remoteSearchElderly(query) {
+  if (query) {
+    elderlyLoading.value = true
+    listElderly({ name: query, pageNum: 1, pageSize: 20 }).then(res => {
+      elderlyOptions.value = res.rows
+      elderlyLoading.value = false
+    })
+  } else { elderlyOptions.value = [] }
+}
+
+/** 远程搜索活动 */
+function remoteSearchActivity(query) {
+  if (query) {
+    activityLoading.value = true
+    listOfflineActivity({ activityName: query, pageNum: 1, pageSize: 20 }).then(res => {
+      activityOptions.value = res.rows
+      activityLoading.value = false
+    })
+  } else { activityOptions.value = [] }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -241,6 +281,12 @@ function handleUpdate(row) {
   const _id = row.id || ids.value
   getActivityEnrollment(_id).then(response => {
     form.value = response.data
+    if (form.value.elderlyId) {
+      listElderly({ elderlyId: form.value.elderlyId, pageNum: 1, pageSize: 10 }).then(res => { elderlyOptions.value = res.rows })
+    }
+    if (form.value.activityId) {
+      listOfflineActivity({ activityId: form.value.activityId, pageNum: 1, pageSize: 10 }).then(res => { activityOptions.value = res.rows })
+    }
     open.value = true
     title.value = "修改活动报名管理"
   })

@@ -41,6 +41,19 @@ public class TActivityEnrollment extends BaseEntity
     /** 逻辑删除 */
     private Long isDeleted;
 
+    /** 老人姓名（关联查询） */
+    @Excel(name = "老人姓名")
+    private String elderlyName;
+
+    /** 活动名称（关联查询） */
+    @Excel(name = "活动名称")
+    private String activityName;
+
+    public String getElderlyName() { return elderlyName; }
+    public void setElderlyName(String elderlyName) { this.elderlyName = elderlyName; }
+    public String getActivityName() { return activityName; }
+    public void setActivityName(String activityName) { this.activityName = activityName; }
+
     public void setId(Long id) 
     {
         this.id = id;
