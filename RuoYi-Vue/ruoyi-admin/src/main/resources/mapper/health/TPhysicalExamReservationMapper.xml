@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.health.mapper.TPhysicalExamReservationMapper">
+    
+    <resultMap type="TPhysicalExamReservation" id="TPhysicalExamReservationResult">
+        <result property="reservationId"    column="reservation_id"    />
+        <result property="elderlyId"    column="elderly_id"    />
+        <result property="examType"    column="exam_type"    />
+        <result property="examInstitution"    column="exam_institution"    />
+        <result property="thirdPartyOrgId"    column="third_party_org_id"    />
+        <result property="reservationTime"    column="reservation_time"    />
+        <result property="examAddress"    column="exam_address"    />
+        <result property="examItems"    column="exam_items"    />
+        <result property="reservationStatus"    column="reservation_status"    />
+        <result property="reportStatus"    column="report_status"    />
+        <result property="reportUrl"    column="report_url"    />
+        <result property="reportInterpret"    column="report_interpret"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTPhysicalExamReservationVo">
+        select reservation_id, elderly_id, exam_type, exam_institution, third_party_org_id, reservation_time, exam_address, exam_items, reservation_status, report_status, report_url, report_interpret, is_deleted, create_time, update_time from t_physical_exam_reservation
+    </sql>
+
+    <select id="selectTPhysicalExamReservationList" parameterType="TPhysicalExamReservation" resultMap="TPhysicalExamReservationResult">
+        <include refid="selectTPhysicalExamReservationVo"/>
+        <where>  
+            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
+            <if test="examType != null  and examType != ''"> and exam_type = #{examType}</if>
+            <if test="examInstitution != null  and examInstitution != ''"> and exam_institution like concat('%', #{examInstitution}, '%')</if>
+            <if test="params.beginReservationTime != null and params.beginReservationTime != '' and params.endReservationTime != null and params.endReservationTime != ''"> and reservation_time between #{params.beginReservationTime} and #{params.endReservationTime}</if>
+            <if test="reservationStatus != null "> and reservation_status = #{reservationStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectTPhysicalExamReservationByReservationId" parameterType="Long" resultMap="TPhysicalExamReservationResult">
+        <include refid="selectTPhysicalExamReservationVo"/>
+        where reservation_id = #{reservationId}
+    </select>
+
+    <insert id="insertTPhysicalExamReservation" parameterType="TPhysicalExamReservation" useGeneratedKeys="true" keyProperty="reservationId">
+        insert into t_physical_exam_reservation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id,</if>
+            <if test="examType != null and examType != ''">exam_type,</if>
+            <if test="examInstitution != null and examInstitution != ''">exam_institution,</if>
+            <if test="thirdPartyOrgId != null">third_party_org_id,</if>
+            <if test="reservationTime != null">reservation_time,</if>
+            <if test="examAddress != null and examAddress != ''">exam_address,</if>
+            <if test="examItems != null">exam_items,</if>
+            <if test="reservationStatus != null">reservation_status,</if>
+            <if test="reportStatus != null">report_status,</if>
+            <if test="reportUrl != null">report_url,</if>
+            <if test="reportInterpret != null">report_interpret,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">#{elderlyId},</if>
+            <if test="examType != null and examType != ''">#{examType},</if>
+            <if test="examInstitution != null and examInstitution != ''">#{examInstitution},</if>
+            <if test="thirdPartyOrgId != null">#{thirdPartyOrgId},</if>
+            <if test="reservationTime != null">#{reservationTime},</if>
+            <if test="examAddress != null and examAddress != ''">#{examAddress},</if>
+            <if test="examItems != null">#{examItems},</if>
+            <if test="reservationStatus != null">#{reservationStatus},</if>
+            <if test="reportStatus != null">#{reportStatus},</if>
+            <if test="reportUrl != null">#{reportUrl},</if>
+            <if test="reportInterpret != null">#{reportInterpret},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTPhysicalExamReservation" parameterType="TPhysicalExamReservation">
+        update t_physical_exam_reservation
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id = #{elderlyId},</if>
+            <if test="examType != null and examType != ''">exam_type = #{examType},</if>
+            <if test="examInstitution != null and examInstitution != ''">exam_institution = #{examInstitution},</if>
+            <if test="thirdPartyOrgId != null">third_party_org_id = #{thirdPartyOrgId},</if>
+            <if test="reservationTime != null">reservation_time = #{reservationTime},</if>
+            <if test="examAddress != null and examAddress != ''">exam_address = #{examAddress},</if>
+            <if test="examItems != null">exam_items = #{examItems},</if>
+            <if test="reservationStatus != null">reservation_status = #{reservationStatus},</if>
+            <if test="reportStatus != null">report_status = #{reportStatus},</if>
+            <if test="reportUrl != null">report_url = #{reportUrl},</if>
+            <if test="reportInterpret != null">report_interpret = #{reportInterpret},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where reservation_id = #{reservationId}
+    </update>
+
+    <delete id="deleteTPhysicalExamReservationByReservationId" parameterType="Long">
+        delete from t_physical_exam_reservation where reservation_id = #{reservationId}
+    </delete>
+
+    <delete id="deleteTPhysicalExamReservationByReservationIds" parameterType="String">
+        delete from t_physical_exam_reservation where reservation_id in 
+        <foreach item="reservationId" collection="array" open="(" separator="," close=")">
+            #{reservationId}
+        </foreach>
+    </delete>
+</mapper>
