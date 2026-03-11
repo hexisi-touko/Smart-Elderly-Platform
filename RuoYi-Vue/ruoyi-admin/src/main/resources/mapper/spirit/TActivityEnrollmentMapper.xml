@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.spirit.mapper.TActivityEnrollmentMapper">
+    
+    <resultMap type="TActivityEnrollment" id="TActivityEnrollmentResult">
+        <result property="id"    column="id"    />
+        <result property="elderlyId"    column="elderly_id"    />
+        <result property="activityId"    column="activity_id"    />
+        <result property="enrollmentStatus"    column="enrollment_status"    />
+        <result property="checkInTime"    column="check_in_time"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTActivityEnrollmentVo">
+        select id, elderly_id, activity_id, enrollment_status, check_in_time, is_deleted, create_time, update_time from t_activity_enrollment
+    </sql>
+
+    <select id="selectTActivityEnrollmentList" parameterType="TActivityEnrollment" resultMap="TActivityEnrollmentResult">
+        <include refid="selectTActivityEnrollmentVo"/>
+        <where>  
+            <if test="elderlyId != null "> and elderly_id = #{elderlyId}</if>
+            <if test="activityId != null "> and activity_id = #{activityId}</if>
+            <if test="enrollmentStatus != null "> and enrollment_status = #{enrollmentStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectTActivityEnrollmentById" parameterType="Long" resultMap="TActivityEnrollmentResult">
+        <include refid="selectTActivityEnrollmentVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertTActivityEnrollment" parameterType="TActivityEnrollment" useGeneratedKeys="true" keyProperty="id">
+        insert into t_activity_enrollment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id,</if>
+            <if test="activityId != null">activity_id,</if>
+            <if test="enrollmentStatus != null">enrollment_status,</if>
+            <if test="checkInTime != null">check_in_time,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="elderlyId != null">#{elderlyId},</if>
+            <if test="activityId != null">#{activityId},</if>
+            <if test="enrollmentStatus != null">#{enrollmentStatus},</if>
+            <if test="checkInTime != null">#{checkInTime},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTActivityEnrollment" parameterType="TActivityEnrollment">
+        update t_activity_enrollment
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="elderlyId != null">elderly_id = #{elderlyId},</if>
+            <if test="activityId != null">activity_id = #{activityId},</if>
+            <if test="enrollmentStatus != null">enrollment_status = #{enrollmentStatus},</if>
+            <if test="checkInTime != null">check_in_time = #{checkInTime},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTActivityEnrollmentById" parameterType="Long">
+        delete from t_activity_enrollment where id = #{id}
+    </delete>
+
+    <delete id="deleteTActivityEnrollmentByIds" parameterType="String">
+        delete from t_activity_enrollment where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
