@@ -95,7 +95,6 @@
 
     <el-table v-loading="loading" :data="serviceStaffList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="服务人员id" align="center" prop="staffId" />
       <el-table-column label="服务人员姓名" align="center" prop="staffName" />
       <el-table-column label="服务商名称" align="center" prop="providerName" />
       <el-table-column label="服务人员手机号" align="center" prop="phone" />

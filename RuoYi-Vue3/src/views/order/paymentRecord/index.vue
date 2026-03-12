@@ -105,7 +105,6 @@
 
     <el-table v-loading="loading" :data="paymentRecordList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="支付记录id" align="center" prop="paymentId" />
       <el-table-column label="订单编号" align="center" prop="orderNo" />
       <el-table-column label="支付金额" align="center" prop="paymentAmount" />
       <el-table-column label="支付时间" align="center" prop="paymentTime" width="180">

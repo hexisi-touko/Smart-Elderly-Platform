@@ -1,14 +1,6 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联C端用户ID" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入关联C端用户ID"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="服务商名称" prop="providerName">
         <el-input
           v-model="queryParams.providerName"
@@ -103,8 +95,6 @@
 
     <el-table v-loading="loading" :data="serviceProviderList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="服务商id" align="center" prop="providerId" />
-      <el-table-column label="关联C端用户ID" align="center" prop="userId" />
       <el-table-column label="服务商名称" align="center" prop="providerName" />
       <el-table-column label="资质许可证号" align="center" prop="licenseCode" />
       <el-table-column label="联系人姓名" align="center" prop="contactPerson" />
@@ -140,9 +130,6 @@
     <!-- 添加或修改服务商管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="serviceProviderRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联C端用户ID" prop="userId">
-          <el-input v-model="form.userId" placeholder="请输入关联C端用户ID" />
-        </el-form-item>
         <el-form-item label="服务商名称" prop="providerName">
           <el-input v-model="form.providerName" placeholder="请输入服务商名称" />
         </el-form-item>

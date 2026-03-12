@@ -15,7 +15,9 @@ const user = {
     name: storage.get(constant.name),
     avatar: storage.get(constant.avatar),
     roles: storage.get(constant.roles),
-    permissions: storage.get(constant.permissions)
+    roles: storage.get(constant.roles),
+    permissions: storage.get(constant.permissions),
+    profileCompleted: false
   },
 
   mutations: {
@@ -41,6 +43,9 @@ const user = {
     SET_PERMISSIONS: (state, permissions) => {
       state.permissions = permissions
       storage.set(constant.permissions, permissions)
+    },
+    SET_PROFILE_COMPLETED: (state, completed) => {
+      state.profileCompleted = completed
     }
   },
 
@@ -80,6 +85,7 @@ const user = {
           commit('SET_ID', userid)
           commit('SET_NAME', username)
           commit('SET_AVATAR', avatar)
+          commit('SET_PROFILE_COMPLETED', res.profileCompleted === true)
           resolve(res)
         }).catch(error => {
           reject(error)

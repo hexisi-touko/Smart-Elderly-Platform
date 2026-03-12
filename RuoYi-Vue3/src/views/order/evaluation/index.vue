@@ -77,7 +77,6 @@
 
     <el-table v-loading="loading" :data="evaluationList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="评价id" align="center" prop="evaluationId" />
       <el-table-column label="订单编号" align="center" prop="orderNo" />
       <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="星级评分" align="center" prop="starLevel" />

@@ -87,7 +87,6 @@
 
     <el-table v-loading="loading" :data="physicalExamReservationList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="预约id" align="center" prop="reservationId" />
       <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="体检类型" align="center" prop="examType">
         <template #default="scope">

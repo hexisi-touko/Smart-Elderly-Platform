@@ -85,7 +85,6 @@
 
     <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="用户id" align="center" prop="userId" />
       <el-table-column label="手机号" align="center" prop="phone" />
       <el-table-column label="真实姓名" align="center" prop="realName" />
       <el-table-column label="用户类型" align="center" prop="userType">
@@ -93,12 +92,11 @@
           <dict-tag :options="app_user_type" :value="scope.row.userType"/>
         </template>
       </el-table-column>
-      <el-table-column label="头像URL" align="center" prop="avatar" width="100">
+      <el-table-column label="账号状态" align="center" prop="status" width="100">
         <template #default="scope">
-          <image-preview :src="scope.row.avatar" :width="50" :height="50"/>
+          <el-tag :type="scope.row.status === 0 ? 'success' : 'danger'">{{ scope.row.status === 0 ? '正常' : '禁用' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="账号状态" align="center" prop="status" />
       <el-table-column label="最后登录时间" align="center" prop="lastLoginTime" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.lastLoginTime, '{y}-{m}-{d}') }}</span>
@@ -113,6 +111,8 @@
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['elderly:user:edit']">修改</el-button>
+          <el-button v-if="scope.row.status === 0" link type="warning" @click="handleStatusChange(scope.row, 1)" v-hasPermi="['elderly:user:edit']">禁用</el-button>
+          <el-button v-else link type="success" @click="handleStatusChange(scope.row, 0)" v-hasPermi="['elderly:user:edit']">启用</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['elderly:user:remove']">删除</el-button>
         </template>
       </el-table-column>
@@ -133,7 +133,7 @@
           <el-input v-model="form.phone" placeholder="请输入手机号" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="form.password" placeholder="请输入密码" />
+          <el-input v-model="form.password" placeholder="请输入密码" type="password" show-password />
         </el-form-item>
         <el-form-item label="真实姓名" prop="realName">
           <el-input v-model="form.realName" placeholder="请输入真实姓名" />
@@ -147,9 +147,6 @@
               :value="dict.value"
             ></el-option>
           </el-select>
-        </el-form-item>
-        <el-form-item label="头像URL" prop="avatar">
-          <image-upload v-model="form.avatar"/>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -308,6 +305,17 @@ function handleDelete(row) {
   }).then(() => {
     getList()
     proxy.$modal.msgSuccess("删除成功")
+  }).catch(() => {})
+}
+
+/** 启用/禁用操作 */
+function handleStatusChange(row, newStatus) {
+  const statusText = newStatus === 0 ? '启用' : '禁用'
+  proxy.$modal.confirm('确认要' + statusText + '用户"' + row.realName + '"的账号吗？').then(() => {
+    return updateUser({ userId: row.userId, status: newStatus })
+  }).then(() => {
+    getList()
+    proxy.$modal.msgSuccess(statusText + '成功')
   }).catch(() => {})
 }
 

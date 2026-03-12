@@ -107,7 +107,6 @@
 
     <el-table v-loading="loading" :data="offlineActivityList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="活动id" align="center" prop="activityId" />
       <el-table-column label="活动名称" align="center" prop="activityName" />
       <el-table-column label="活动类型" align="center" prop="activityType">
         <template #default="scope">

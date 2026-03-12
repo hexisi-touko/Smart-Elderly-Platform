@@ -59,8 +59,7 @@
 
     <el-table v-loading="loading" :data="healthThresholdList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="阈值id" align="center" prop="thresholdId" />
-      <el-table-column label="关联老人ID" align="center" prop="elderlyId" />
+      <el-table-column label="关联老人" align="center" prop="elderlyName" />
       <el-table-column label="收缩压上限阈值" align="center" prop="sysBpMax" />
       <el-table-column label="收缩压下限阈值" align="center" prop="sysBpMin" />
       <el-table-column label="舒张压上限阈值" align="center" prop="diaBpMax" />

@@ -77,7 +77,6 @@
 
     <el-table v-loading="loading" :data="medicationReminderList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="提醒id" align="center" prop="reminderId" />
       <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="药品名称" align="center" prop="medicationName" />
       <el-table-column label="药品类型" align="center" prop="medicationType" />

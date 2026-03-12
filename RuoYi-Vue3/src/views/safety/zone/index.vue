@@ -77,7 +77,6 @@
 
     <el-table v-loading="loading" :data="zoneList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="安全区域id" align="center" prop="zoneId" />
       <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="区域名称" align="center" prop="zoneName" />
       <el-table-column label="区域中心经度" align="center" prop="centerLng" />

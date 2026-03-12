@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.DashboardMapper">
+
+    <!-- 1. 核心指标概览 -->
+    <select id="countElderly" resultType="int">
+        select count(*) from t_elderly
+    </select>
+
+    <select id="countProviders" resultType="int">
+        select count(*) from t_service_provider
+    </select>
+
+    <select id="countOrders" resultType="int">
+        select count(*) from t_service_order
+    </select>
+
+    <select id="countTodayOrders" resultType="int">
+        select count(*) from t_service_order where DATE(create_time) = CURDATE()
+    </select>
+
+    <select id="countTodayAlerts" resultType="int">
+        select count(*) from t_safety_alert where DATE(alert_time) = CURDATE()
+    </select>
+
+    <select id="avgSatisfaction" resultType="java.math.BigDecimal">
+        select IFNULL(ROUND(AVG(star_level), 1), 0) from t_service_evaluation
+    </select>
+
+    <!-- 2. 订单趋势（近N天） -->
+    <select id="orderTrend" resultType="java.util.Map">
+        SELECT DATE(create_time) as date, COUNT(*) as count
+        FROM t_service_order
+        WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(create_time)
+        ORDER BY date
+    </select>
+
+    <!-- 3. 预警类型统计 -->
+    <select id="alertTypeStats" resultType="java.util.Map">
+        SELECT alert_type as name, COUNT(*) as value
+        FROM t_safety_alert
+        GROUP BY alert_type
+    </select>
+
+    <!-- 4. 订单状态分布 -->
+    <select id="orderStatusDistribution" resultType="java.util.Map">
+        SELECT order_status as name, COUNT(*) as value
+        FROM t_service_order
+        GROUP BY order_status
+    </select>
+
+    <!-- 5. 服务评分分布 -->
+    <select id="satisfactionDistribution" resultType="java.util.Map">
+        SELECT star_level as name, COUNT(*) as value
+        FROM t_service_evaluation
+        GROUP BY star_level
+        ORDER BY star_level
+    </select>
+
+</mapper>

@@ -12,7 +12,7 @@
   }, {
     "path": "pages/index",
     "style": {
-      "navigationBarTitleText": "若依移动端框架",
+      "navigationBarTitleText": "智慧居家养老",
       "navigationStyle": "custom"
     }
   }, {
@@ -39,6 +39,20 @@
     "path": "pages/mine/info/edit",
     "style": {
       "navigationBarTitleText": "编辑资料"
+    }
+  }, {
+    "path": "pages/mine/info/elderly_setup",
+    "style": {
+      "navigationBarTitleText": "完善老人资料",
+      "navigationBarBackgroundColor": "#0081ff",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/mine/info/guardian_setup",
+    "style": {
+      "navigationBarTitleText": "完善监护人资料",
+      "navigationBarBackgroundColor": "#0081ff",
+      "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/mine/pwd/index",

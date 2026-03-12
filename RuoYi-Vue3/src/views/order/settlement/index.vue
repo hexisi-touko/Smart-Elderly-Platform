@@ -85,7 +85,6 @@
 
     <el-table v-loading="loading" :data="settlementList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="结算id" align="center" prop="settlementId" />
       <el-table-column label="服务商名称" align="center" prop="providerName" />
       <el-table-column label="结算周期" align="center" prop="settlementPeriod" />
       <el-table-column label="订单数量" align="center" prop="orderCount" />

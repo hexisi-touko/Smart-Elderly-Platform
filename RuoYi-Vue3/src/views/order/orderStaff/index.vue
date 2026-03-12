@@ -77,7 +77,6 @@
 
     <el-table v-loading="loading" :data="orderStaffList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="唯一标识" align="center" prop="id" />
       <el-table-column label="订单编号" align="center" prop="orderNo" />
       <el-table-column label="服务人员姓名" align="center" prop="staffName" />
       <el-table-column label="是否主要服务人员" align="center" prop="isPrimary">

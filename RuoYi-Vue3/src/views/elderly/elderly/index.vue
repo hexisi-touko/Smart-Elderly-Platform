@@ -1,14 +1,6 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联C端用户ID" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入关联C端用户ID"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="老人姓名" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -103,8 +95,6 @@
 
     <el-table v-loading="loading" :data="elderlyList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="老人id" align="center" prop="elderlyId" />
-      <el-table-column label="关联C端用户ID" align="center" prop="userId" />
       <el-table-column label="老人姓名" align="center" prop="name" />
       <el-table-column label="老人手机号" align="center" prop="phone" />
       <el-table-column label="性别" align="center" prop="gender">
@@ -149,9 +139,7 @@
     <!-- 添加或修改老人基础信息对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="elderlyRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联C端用户ID" prop="userId">
-          <el-input v-model="form.userId" placeholder="请输入关联C端用户ID" />
-        </el-form-item>
+
         <el-form-item label="老人姓名" prop="name">
           <el-input v-model="form.name" placeholder="请输入老人姓名" />
         </el-form-item>
@@ -238,14 +226,15 @@ const data = reactive({
     createTime: null,
   },
   rules: {
-    userId: [
-      { required: true, message: "关联C端用户ID不能为空", trigger: "blur" }
-    ],
+
     name: [
       { required: true, message: "老人姓名不能为空", trigger: "blur" }
     ],
     idCard: [
       { required: true, message: "身份证号不能为空", trigger: "blur" }
+    ],
+    phone: [
+      { required: true, message: "老人手机号不能为空", trigger: "blur" }
     ],
     healthStatus: [
       { required: true, message: "健康状态不能为空", trigger: "change" }

@@ -97,7 +97,6 @@
 
     <el-table v-loading="loading" :data="onlineCourseList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="课程id" align="center" prop="courseId" />
       <el-table-column label="课程名称" align="center" prop="courseName" />
       <el-table-column label="课程类型" align="center" prop="courseType">
         <template #default="scope">

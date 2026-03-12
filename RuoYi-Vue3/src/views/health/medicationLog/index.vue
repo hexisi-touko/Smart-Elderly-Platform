@@ -85,8 +85,6 @@
 
     <el-table v-loading="loading" :data="medicationLogList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="记录id" align="center" prop="logId" />
-      <el-table-column label="关联用药提醒ID" align="center" prop="reminderId" />
       <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="药品名称" align="center" prop="medicationName" />
       <el-table-column label="计划服药时间" align="center" prop="scheduledTime" width="180">

@@ -107,7 +107,6 @@
 
     <el-table v-loading="loading" :data="deviceList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="设备id" align="center" prop="deviceId" />
       <el-table-column label="设备硬件编码" align="center" prop="deviceCode" />
       <el-table-column label="设备类型" align="center" prop="deviceType">
         <template #default="scope">

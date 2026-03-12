@@ -50,6 +50,12 @@ public class AppLoginController {
         return AjaxResult.success("注册成功");
     }
 
+    @Autowired
+    private com.ruoyi.elderly.mapper.TElderlyMapper tElderlyMapper;
+
+    @Autowired
+    private com.ruoyi.elderly.mapper.TGuardianMapper tGuardianMapper;
+
     /**
      * 获取C端用户信息
      */
@@ -57,8 +63,24 @@ public class AppLoginController {
     public AjaxResult getInfo() {
         LoginUser loginUser = SecurityUtils.getLoginUser();
         TAppUser appUser = appLoginService.getAppUserInfo(loginUser);
+        
+        // 检查是否已完善资料
+        boolean profileCompleted = false;
+        if ("elderly".equals(appUser.getUserType())) {
+            com.ruoyi.elderly.domain.TElderly query = new com.ruoyi.elderly.domain.TElderly();
+            query.setUserId(appUser.getUserId());
+            java.util.List<com.ruoyi.elderly.domain.TElderly> list = tElderlyMapper.selectTElderlyList(query);
+            profileCompleted = list != null && !list.isEmpty();
+        } else if ("guardian".equals(appUser.getUserType())) {
+            com.ruoyi.elderly.domain.TGuardian query = new com.ruoyi.elderly.domain.TGuardian();
+            query.setUserId(appUser.getUserId());
+            java.util.List<com.ruoyi.elderly.domain.TGuardian> list = tGuardianMapper.selectTGuardianList(query);
+            profileCompleted = list != null && !list.isEmpty();
+        }
+
         AjaxResult ajax = AjaxResult.success();
         ajax.put("user", appUser);
+        ajax.put("profileCompleted", profileCompleted);
         return ajax;
     }
 

@@ -87,7 +87,6 @@
 
     <el-table v-loading="loading" :data="serviceItemList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="服务项目id" align="center" prop="itemId" />
       <el-table-column label="服务商名称" align="center" prop="providerName" />
       <el-table-column label="服务项目名称" align="center" prop="itemName" />
       <el-table-column label="服务类别" align="center" prop="itemCategory">

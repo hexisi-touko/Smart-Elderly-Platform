@@ -1,14 +1,6 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联C端用户ID" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入关联C端用户ID"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="监护人姓名" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -95,8 +87,6 @@
 
     <el-table v-loading="loading" :data="guardianList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="监护人id" align="center" prop="guardianId" />
-      <el-table-column label="关联C端用户ID" align="center" prop="userId" />
       <el-table-column label="监护人姓名" align="center" prop="name" />
       <el-table-column label="监护人手机号" align="center" prop="phone" />
       <el-table-column label="与老人关系" align="center" prop="relationship">
@@ -133,9 +123,7 @@
     <!-- 添加或修改监护人信息对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="guardianRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联C端用户ID" prop="userId">
-          <el-input v-model="form.userId" placeholder="请输入关联C端用户ID" />
-        </el-form-item>
+
         <el-form-item label="监护人姓名" prop="name">
           <el-input v-model="form.name" placeholder="请输入监护人姓名" />
         </el-form-item>
@@ -204,9 +192,7 @@ const data = reactive({
     isPrimary: null,
   },
   rules: {
-    userId: [
-      { required: true, message: "关联C端用户ID不能为空", trigger: "blur" }
-    ],
+
     name: [
       { required: true, message: "监护人姓名不能为空", trigger: "blur" }
     ],

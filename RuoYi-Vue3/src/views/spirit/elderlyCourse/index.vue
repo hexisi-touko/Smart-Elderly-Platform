@@ -77,7 +77,6 @@
 
     <el-table v-loading="loading" :data="elderlyCourseList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="唯一标识" align="center" prop="id" />
       <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="课程名称" align="center" prop="courseName" />
       <el-table-column label="报名状态" align="center" prop="enrollmentStatus">

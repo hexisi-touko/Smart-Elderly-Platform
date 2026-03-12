@@ -83,7 +83,6 @@
 
     <el-table v-loading="loading" :data="serviceOrderList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="订单id" align="center" prop="orderId" />
       <el-table-column label="订单编号" align="center" prop="orderNo" />
       <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="服务商" align="center" prop="providerName" />

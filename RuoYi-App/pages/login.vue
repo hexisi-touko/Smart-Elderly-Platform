@@ -90,7 +90,19 @@
       loginSuccess(result) {
         // 设置用户信息
         this.$store.dispatch('GetInfo').then(res => {
-          this.$tab.reLaunch('/pages/index')
+          if (res.profileCompleted) {
+            this.$tab.reLaunch('/pages/index')
+          } else {
+            // 根据角色跳到不同的完善资料页
+            const userType = res.user.userType;
+            if (userType === 'elderly') {
+              this.$tab.reLaunch('/pages/mine/info/elderly_setup')
+            } else if (userType === 'guardian') {
+              this.$tab.reLaunch('/pages/mine/info/guardian_setup')
+            } else {
+              this.$tab.reLaunch('/pages/index')
+            }
+          }
         })
       }
     }

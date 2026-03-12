@@ -99,7 +99,6 @@
 
     <el-table v-loading="loading" :data="alertList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="预警id" align="center" prop="alertId" />
       <el-table-column label="老人姓名" align="center" prop="elderlyName" />
       <el-table-column label="设备编码" align="center" prop="deviceCode" />
       <el-table-column label="预警类型" align="center" prop="alertType">
@@ -123,7 +122,6 @@
         </template>
       </el-table-column>
       <el-table-column label="子女一键催促次数" align="center" prop="urgeCount" />
-      <el-table-column label="处理人ID" align="center" prop="handlerId" />
       <el-table-column label="处理人角色" align="center" prop="handlerRole">
         <template #default="scope">
           <dict-tag :options="handler_role" :value="scope.row.handlerRole"/>
