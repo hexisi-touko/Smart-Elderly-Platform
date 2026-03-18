@@ -49,6 +49,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="orderNo != null  and orderNo != ''"> and so.order_no = #{orderNo}</if>
             <if test="serviceTime != null "> and so.service_time = #{serviceTime}</if>
             <if test="serviceAddress != null  and serviceAddress != ''"> and so.service_address = #{serviceAddress}</if>
+            <if test="orderStatus != null "> and so.order_status = #{orderStatus}</if>
         </where>
     </select>
     

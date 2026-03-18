@@ -5,7 +5,24 @@
       <text class="subtitle">用心陪伴您的每一天</text>
     </view>
 
+    <!-- 健康看板入口 - 磁贴样式 -->
+    <view class="quick-nav">
+      <view class="nav-card health" @click="navToHealth">
+        <view class="nav-content">
+          <uni-icons type="heart-filled" size="40" color="#fff"></uni-icons>
+          <view class="nav-text">
+            <text class="nav-title">健康看板</text>
+            <text class="nav-desc">查看您的血压、心率数据</text>
+          </view>
+        </view>
+        <uni-icons type="right" size="24" color="#fff"></uni-icons>
+      </view>
+    </view>
+
     <view class="service-list">
+      <view class="section-header">
+        <text class="section-title">预约服务</text>
+      </view>
       <view class="service-card" v-for="(item, index) in serviceList" :key="index" @click="openOrderPopup(item)">
         <view class="service-info">
           <text class="service-name">{{ item.itemName }}</text>
@@ -152,6 +169,11 @@
             }
           }
         });
+      },
+      navToHealth() {
+        uni.navigateTo({
+          url: '/pages/health/index'
+        });
       }
     }
   }
@@ -185,9 +207,53 @@
     }
   }
 
-  .service-list {
+  .quick-nav {
     padding: 20px;
     margin-top: -20px;
+    
+    .nav-card {
+      background: linear-gradient(135deg, #6739b6, #a5673f);
+      border-radius: 20px;
+      padding: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 10rpx 30rpx rgba(103, 57, 182, 0.3);
+      
+      .nav-content {
+        display: flex;
+        align-items: center;
+        
+        .nav-text {
+          margin-left: 20px;
+          .nav-title {
+            font-size: 36rpx;
+            font-weight: bold;
+            color: #fff;
+            display: block;
+          }
+          .nav-desc {
+            font-size: 26rpx;
+            color: rgba(255,255,255,0.8);
+            margin-top: 5rpx;
+          }
+        }
+      }
+    }
+  }
+
+  .service-list {
+    padding: 20px;
+    margin-top: 0;
+
+    .section-header {
+      margin-bottom: 15px;
+      .section-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+      }
+    }
   }
 
   .service-card {

@@ -8,3 +8,19 @@ export function addServiceOrder(data) {
     data: data
   })
 }
+
+// C端查询我的订单列表
+export function listMyOrders(query) {
+  return request({
+    url: '/app/order/list',
+    method: 'get',
+    params: query
+  })
+}
+// C端取消服务订单
+export function cancelServiceOrder(orderId) {
+  return request({
+    url: '/app/order/cancel/' + orderId,
+    method: 'put'
+  })
+}

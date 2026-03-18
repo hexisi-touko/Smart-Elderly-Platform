@@ -58,4 +58,31 @@ public interface ITServiceOrderService
      * @return 结果
      */
     public int deleteTServiceOrderByOrderId(Long orderId);
+
+    /**
+     * App端查询服务订单列表（包含身份辅助识别逻辑）
+     * 
+     * @param tServiceOrder 服务订单
+     * @param userId 当前登录用户ID
+     * @return 服务订单集合
+     */
+    public List<TServiceOrder> selectAppServiceOrderList(TServiceOrder tServiceOrder, Long userId);
+
+    /**
+     * App端新增服务订单（包含身份校验逻辑）
+     * 
+     * @param tServiceOrder 服务订单
+     * @param userId 当前登录用户ID
+     * @return 结果
+     */
+    public int insertAppServiceOrder(TServiceOrder tServiceOrder, Long userId);
+
+    /**
+     * App端取消服务订单
+     * 
+     * @param orderId 订单ID
+     * @param userId 当前登录用户ID
+     * @return 结果
+     */
+    public int cancelAppServiceOrder(Long orderId, Long userId);
 }
