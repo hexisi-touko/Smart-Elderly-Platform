@@ -217,58 +217,96 @@
         const ctx = uni.createCanvasContext('trendCanvas', this)
         const width = uni.upx2px(600)
         const height = uni.upx2px(350)
-        const padding = 40
+        const paddingLeft = 60 // 留出 Y 轴空间
+        const paddingBottom = 40 // 留出 X 轴空间
+        const paddingTop = 30
+        const paddingRight = 30
         
         // 1. 数据准备 (提取数值并排序)
-        const dataPoints = this.chartData
-          .map(row => {
-            if (this.currentMetric === 'blood_pressure') return row.systolicBp;
-            const key = this.currentMetric.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-            return row[key] || row[this.currentMetric] || 0;
-          })
-          .filter(v => v > 0)
-          .reverse(); // 时间正序
-        
-        if (dataPoints.length < 2) return
+        const rawPoints = this.chartData.map(row => {
+          let val = 0;
+          if (this.currentMetric === 'blood_pressure') val = row.systolicBp;
+          else if (this.currentMetric === 'heart_rate') val = row.heartRate;
+          else if (this.currentMetric === 'blood_sugar') val = row.bloodSugar;
+          else if (this.currentMetric === 'temperature') val = row.temperature;
+          else if (this.currentMetric === 'blood_oxygen') val = row.bloodOxygen;
+          
+          return {
+            val: parseFloat(val) || 0,
+            date: (row.collectTime || row.createTime || '').split(' ')[0].substring(5) // 取 MM-DD
+          };
+        }).filter(p => p.val > 0).reverse(); // 时间正序
 
-        const maxVal = Math.max(...dataPoints) * 1.2
-        const minVal = Math.min(...dataPoints) * 0.8
-        const range = maxVal - minVal
+        if (rawPoints.length === 0) return
         
-        // 2. 绘制背景网格
-        ctx.setStrokeStyle('#f0f0f0')
-        ctx.setLineWidth(1)
-        for(let i=0; i<=4; i++) {
-          const y = padding + (height - 2*padding) * i / 4
-          ctx.moveTo(padding, y)
-          ctx.lineTo(width - padding, y)
+        const dataValues = rawPoints.map(p => p.val);
+        const dates = rawPoints.map(p => p.date);
+
+        let maxVal = Math.max(...dataValues)
+        let minVal = Math.min(...dataValues)
+        
+        // 防止最大最小值相等导致除以0
+        if (maxVal === minVal) {
+          maxVal += 10;
+          minVal -= 10;
         }
+        
+        const range = maxVal - minVal
+        const chartWidth = width - paddingLeft - paddingRight
+        const chartHeight = height - paddingTop - paddingBottom
+
+        // 2. 绘制坐标轴
+        ctx.setStrokeStyle('#ccc')
+        ctx.setLineWidth(1)
+        ctx.moveTo(paddingLeft, paddingTop)
+        ctx.lineTo(paddingLeft, height - paddingBottom) // Y 轴
+        ctx.lineTo(width - paddingRight, height - paddingBottom) // X 轴
         ctx.stroke()
 
-        // 3. 绘制趋势线
+        // 3. 绘制 Y 轴刻度与文字
+        ctx.setFontSize(10)
+        ctx.setFillStyle('#999')
+        ctx.setTextAlign('right')
+        const yLabels = [maxVal.toFixed(1), ((maxVal + minVal) / 2).toFixed(1), minVal.toFixed(1)]
+        yLabels.forEach((label, i) => {
+          const y = paddingTop + (chartHeight * i / 2)
+          ctx.fillText(label, paddingLeft - 5, y + 4)
+        })
+
+        // 4. 绘制趋势线与区域
         ctx.beginPath()
         ctx.setStrokeStyle('#0081ff')
-        ctx.setLineWidth(3)
-        ctx.setLineCap('round')
-        ctx.setLineJoin('round')
-
-        const stepX = (width - 2*padding) / (dataPoints.length - 1)
-        dataPoints.forEach((val, i) => {
-          const x = padding + i * stepX
-          const y = height - padding - ((val - minVal) / range) * (height - 2*padding)
+        ctx.setLineWidth(2)
+        
+        const stepX = rawPoints.length > 1 ? chartWidth / (rawPoints.length - 1) : 0
+        
+        rawPoints.forEach((p, i) => {
+          const x = paddingLeft + i * stepX
+          const y = height - paddingBottom - ((p.val - minVal) / range) * chartHeight
           if (i === 0) ctx.moveTo(x, y)
           else ctx.lineTo(x, y)
         })
         ctx.stroke()
-        
-        // 4. 绘制渐变层
-        const grd = ctx.createLinearGradient(0, padding, 0, height - padding)
-        grd.addColorStop(0, 'rgba(0,129,255,0.2)')
-        grd.addColorStop(1, 'rgba(0,129,255,0)')
-        ctx.setFillStyle(grd)
-        ctx.lineTo(padding + (dataPoints.length-1) * stepX, height - padding)
-        ctx.lineTo(padding, height - padding)
-        ctx.fill()
+
+        // 5. 绘制数据锚点（小圆圈）
+        rawPoints.forEach((p, i) => {
+          const x = paddingLeft + i * stepX
+          const y = height - paddingBottom - ((p.val - minVal) / range) * chartHeight
+          ctx.beginPath()
+          ctx.setFillStyle('#fff')
+          ctx.setStrokeStyle('#0081ff')
+          ctx.arc(x, y, 3, 0, 2 * Math.PI)
+          ctx.fill()
+          ctx.stroke()
+          
+          // X 轴日期标注 (抽样显示，避免太挤)
+          if (i === 0 || i === rawPoints.length - 1 || (rawPoints.length > 3 && i === Math.floor(rawPoints.length/2))) {
+            ctx.setFontSize(10)
+            ctx.setFillStyle('#999')
+            ctx.setTextAlign('center')
+            ctx.fillText(p.date, x, height - 10)
+          }
+        })
 
         ctx.draw()
       },
