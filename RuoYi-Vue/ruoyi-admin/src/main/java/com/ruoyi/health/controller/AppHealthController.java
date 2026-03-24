@@ -46,16 +46,16 @@ public class AppHealthController extends BaseController {
             @RequestParam(required = false) String recordType,
             @RequestParam(required = false) String beginTime,
             @RequestParam(required = false) String endTime) {
-        
+
         Long userId = SecurityUtils.getUserId();
-        
+
         // 1. 识别身份并获取 elderlyId (逻辑复用)
         Long currentElderlyId = null;
-        
+
         TElderly elderlyParams = new TElderly();
         elderlyParams.setUserId(userId);
         List<TElderly> elderlyList = tElderlyService.selectTElderlyList(elderlyParams);
-        
+
         if (elderlyList != null && !elderlyList.isEmpty()) {
             currentElderlyId = elderlyList.get(0).getElderlyId();
         } else {
@@ -81,8 +81,14 @@ public class AppHealthController extends BaseController {
         THealthRecord query = new THealthRecord();
         query.setElderlyId(currentElderlyId);
         query.setRecordType(recordType);
-        query.getParams().put("beginCollectTime", beginTime);
-        query.getParams().put("endCollectTime", endTime);
+        
+        // 只有当时间参数不为空时才加入查询
+        if (beginTime != null && !beginTime.trim().isEmpty()) {
+            query.getParams().put("beginCollectTime", beginTime);
+        }
+        if (endTime != null && !endTime.trim().isEmpty()) {
+            query.getParams().put("endCollectTime", endTime);
+        }
 
         // 3. 查询
         startPage();

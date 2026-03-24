@@ -9,8 +9,7 @@ import com.ruoyi.elderly.domain.TElderly;
  * @author zhangTing
  * @date 2026-02-24
  */
-public interface ITElderlyService 
-{
+public interface ITElderlyService {
     /**
      * 查询老人基础信息
      * 
