@@ -9,8 +9,7 @@ import com.ruoyi.safety.domain.TSafetyAlert;
  * @author zhangTing
  * @date 2026-02-25
  */
-public interface ITSafetyAlertService 
-{
+public interface ITSafetyAlertService {
     /**
      * 查询安全预警管理
      * 

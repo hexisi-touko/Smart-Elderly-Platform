@@ -41,8 +41,10 @@
           </view>
         </view>
         
-        <view class="card-footer" v-if="item.orderStatus === 0 || item.orderStatus === 1">
-          <button class="footer-btn plain" @click="handleCancel(item)">取消订单</button>
+        <view class="card-footer">
+          <button class="footer-btn plain" v-if="item.orderStatus === 0 || item.orderStatus === 1" @click="handleCancel(item)">取消订单</button>
+          <button class="footer-btn primary" v-if="item.orderStatus === 3" @click="handleEval(item)">去评价</button>
+          <text class="footer-tip" v-if="item.orderStatus === 5">感谢评价！</text>
         </view>
       </view>
 
@@ -57,11 +59,37 @@
         <text>{{ finished ? '没有更多订单了' : '正在加载中...' }}</text>
       </view>
     </view>
+
+    <!-- 评价弹窗 -->
+    <uni-popup ref="evalPopup" type="bottom">
+      <view class="eval-popup-content">
+        <view class="eval-header">
+          <text class="title">服务评价</text>
+          <uni-icons type="closeempty" size="24" color="#999" @click="$refs.evalPopup.close()"></uni-icons>
+        </view>
+        <view class="eval-body">
+          <view class="rate-section">
+            <text class="rate-label">服务满意度</text>
+            <uni-rate v-model="evalForm.starLevel" :size="40" active-color="#ff9900" />
+          </view>
+          <view class="input-section">
+            <textarea 
+              v-model="evalForm.evaluationContent" 
+              placeholder="请留下您的意见或建议..." 
+              class="eval-textarea"
+              maxlength="200"
+            />
+          </view>
+          <button class="submit-btn" @click="submitEval" :loading="submitting">提交评价</button>
+        </view>
+      </view>
+    </uni-popup>
   </view>
 </template>
 
 <script>
   import { listMyOrders, cancelServiceOrder } from "@/api/order/serviceOrder"
+  import { addEvaluation } from "@/api/order/evaluation"
 
   export default {
     data() {
@@ -79,7 +107,13 @@
           pageSize: 10
         },
         loading: false,
-        finished: false
+        finished: false,
+        submitting: false,
+        evalForm: {
+          orderId: null,
+          starLevel: 5,
+          evaluationContent: ''
+        }
       }
     },
     onShow() {
@@ -141,7 +175,8 @@
           1: { text: '待接单', class: 'status-pending' },
           2: { text: '服务中', class: 'status-process' },
           3: { text: '已完成', class: 'status-success' },
-          4: { text: '已取消', class: 'status-cancel' }
+          4: { text: '已取消', class: 'status-cancel' },
+          5: { text: '已评价', class: 'status-success' }
         }
         return {
           statusText: map[status]?.text || '未知',
@@ -158,6 +193,26 @@
           }).catch(() => {
             this.$modal.closeLoading();
           });
+        })
+      },
+      handleEval(item) {
+        this.evalForm.orderId = item.orderId
+        this.evalForm.starLevel = 5
+        this.evalForm.evaluationContent = ''
+        this.$refs.evalPopup.open()
+      },
+      submitEval() {
+        if (!this.evalForm.starLevel) {
+          return this.$modal.msgError('请选择评分')
+        }
+        this.submitting = true
+        addEvaluation(this.evalForm).then(res => {
+          this.$modal.msgSuccess('感谢您的评价！')
+          this.$refs.evalPopup.close()
+          this.submitting = false
+          this.refreshList()
+        }).catch(() => {
+          this.submitting = false
         })
       }
     }
@@ -308,6 +363,74 @@
           background: #fff;
           color: #666;
         }
+        
+        &.primary {
+          background-color: #0081ff;
+          color: #fff;
+        }
+      }
+
+      .footer-tip {
+        font-size: 26rpx;
+        color: #39b54a;
+        font-style: italic;
+      }
+    }
+  }
+
+  /* 评价弹窗样式 */
+  .eval-popup-content {
+    background-color: #fff;
+    border-top-left-radius: 40rpx;
+    border-top-right-radius: 40rpx;
+    padding: 40rpx;
+    
+    .eval-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40rpx;
+      .title {
+        font-size: 36rpx;
+        font-weight: bold;
+        color: #333;
+      }
+    }
+    
+    .eval-body {
+      .rate-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 40rpx;
+        .rate-label {
+          font-size: 32rpx;
+          color: #666;
+          margin-bottom: 20rpx;
+        }
+      }
+      
+      .input-section {
+        background-color: #f8f9fb;
+        border-radius: 16rpx;
+        padding: 20rpx;
+        margin-bottom: 40rpx;
+        .eval-textarea {
+          width: 100%;
+          height: 200rpx;
+          font-size: 30rpx;
+          color: #333;
+        }
+      }
+      
+      .submit-btn {
+        background-color: #0081ff;
+        color: #fff;
+        height: 100rpx;
+        line-height: 100rpx;
+        border-radius: 50rpx;
+        font-size: 34rpx;
+        font-weight: bold;
       }
     }
   }

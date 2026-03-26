@@ -15,8 +15,7 @@ import com.ruoyi.safety.service.ITSafetyAlertService;
  * @date 2026-02-25
  */
 @Service
-public class TSafetyAlertServiceImpl implements ITSafetyAlertService 
-{
+public class TSafetyAlertServiceImpl implements ITSafetyAlertService {
     @Autowired
     private TSafetyAlertMapper tSafetyAlertMapper;
 
@@ -27,8 +26,7 @@ public class TSafetyAlertServiceImpl implements ITSafetyAlertService
      * @return 安全预警管理
      */
     @Override
-    public TSafetyAlert selectTSafetyAlertByAlertId(Long alertId)
-    {
+    public TSafetyAlert selectTSafetyAlertByAlertId(Long alertId) {
         return tSafetyAlertMapper.selectTSafetyAlertByAlertId(alertId);
     }
 
@@ -39,8 +37,7 @@ public class TSafetyAlertServiceImpl implements ITSafetyAlertService
      * @return 安全预警管理
      */
     @Override
-    public List<TSafetyAlert> selectTSafetyAlertList(TSafetyAlert tSafetyAlert)
-    {
+    public List<TSafetyAlert> selectTSafetyAlertList(TSafetyAlert tSafetyAlert) {
         return tSafetyAlertMapper.selectTSafetyAlertList(tSafetyAlert);
     }
 
@@ -51,8 +48,7 @@ public class TSafetyAlertServiceImpl implements ITSafetyAlertService
      * @return 结果
      */
     @Override
-    public int insertTSafetyAlert(TSafetyAlert tSafetyAlert)
-    {
+    public int insertTSafetyAlert(TSafetyAlert tSafetyAlert) {
         tSafetyAlert.setCreateTime(DateUtils.getNowDate());
         return tSafetyAlertMapper.insertTSafetyAlert(tSafetyAlert);
     }
@@ -64,8 +60,7 @@ public class TSafetyAlertServiceImpl implements ITSafetyAlertService
      * @return 结果
      */
     @Override
-    public int updateTSafetyAlert(TSafetyAlert tSafetyAlert)
-    {
+    public int updateTSafetyAlert(TSafetyAlert tSafetyAlert) {
         tSafetyAlert.setUpdateTime(DateUtils.getNowDate());
         return tSafetyAlertMapper.updateTSafetyAlert(tSafetyAlert);
     }
@@ -77,8 +72,7 @@ public class TSafetyAlertServiceImpl implements ITSafetyAlertService
      * @return 结果
      */
     @Override
-    public int deleteTSafetyAlertByAlertIds(Long[] alertIds)
-    {
+    public int deleteTSafetyAlertByAlertIds(Long[] alertIds) {
         return tSafetyAlertMapper.deleteTSafetyAlertByAlertIds(alertIds);
     }
 
@@ -89,8 +83,7 @@ public class TSafetyAlertServiceImpl implements ITSafetyAlertService
      * @return 结果
      */
     @Override
-    public int deleteTSafetyAlertByAlertId(Long alertId)
-    {
+    public int deleteTSafetyAlertByAlertId(Long alertId) {
         return tSafetyAlertMapper.deleteTSafetyAlertByAlertId(alertId);
     }
 }

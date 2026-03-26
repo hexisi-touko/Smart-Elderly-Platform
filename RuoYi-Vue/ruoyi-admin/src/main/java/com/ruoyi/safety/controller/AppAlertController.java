@@ -72,7 +72,7 @@ public class AppAlertController extends BaseController {
         alert.setAlertLng(new BigDecimal("0.0"));
         alert.setAlertLat(new BigDecimal("0.0"));
         alert.setAlertAddress("移动端一键呼救位置");
-        
+
         return toAjax(tSafetyAlertService.insertTSafetyAlert(alert));
     }
 }

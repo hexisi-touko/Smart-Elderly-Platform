@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.order.mapper.TServiceEvaluationMapper;
 import com.ruoyi.order.domain.TServiceEvaluation;
+import com.ruoyi.order.domain.TServiceOrder;
 import com.ruoyi.order.service.ITServiceEvaluationService;
+import com.ruoyi.order.service.ITServiceOrderService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 服务评价管理Service业务层处理
@@ -15,10 +18,12 @@ import com.ruoyi.order.service.ITServiceEvaluationService;
  * @date 2026-02-25
  */
 @Service
-public class TServiceEvaluationServiceImpl implements ITServiceEvaluationService 
-{
+public class TServiceEvaluationServiceImpl implements ITServiceEvaluationService {
     @Autowired
     private TServiceEvaluationMapper tServiceEvaluationMapper;
+
+    @Autowired
+    private ITServiceOrderService tServiceOrderService;
 
     /**
      * 查询服务评价管理
@@ -27,8 +32,7 @@ public class TServiceEvaluationServiceImpl implements ITServiceEvaluationService
      * @return 服务评价管理
      */
     @Override
-    public TServiceEvaluation selectTServiceEvaluationByEvaluationId(Long evaluationId)
-    {
+    public TServiceEvaluation selectTServiceEvaluationByEvaluationId(Long evaluationId) {
         return tServiceEvaluationMapper.selectTServiceEvaluationByEvaluationId(evaluationId);
     }
 
@@ -39,8 +43,7 @@ public class TServiceEvaluationServiceImpl implements ITServiceEvaluationService
      * @return 服务评价管理
      */
     @Override
-    public List<TServiceEvaluation> selectTServiceEvaluationList(TServiceEvaluation tServiceEvaluation)
-    {
+    public List<TServiceEvaluation> selectTServiceEvaluationList(TServiceEvaluation tServiceEvaluation) {
         return tServiceEvaluationMapper.selectTServiceEvaluationList(tServiceEvaluation);
     }
 
@@ -51,10 +54,21 @@ public class TServiceEvaluationServiceImpl implements ITServiceEvaluationService
      * @return 结果
      */
     @Override
-    public int insertTServiceEvaluation(TServiceEvaluation tServiceEvaluation)
-    {
+    @Transactional(rollbackFor = Exception.class)
+    public int insertTServiceEvaluation(TServiceEvaluation tServiceEvaluation) {
         tServiceEvaluation.setCreateTime(DateUtils.getNowDate());
-        return tServiceEvaluationMapper.insertTServiceEvaluation(tServiceEvaluation);
+        tServiceEvaluation.setEvaluationTime(DateUtils.getNowDate());
+        int rows = tServiceEvaluationMapper.insertTServiceEvaluation(tServiceEvaluation);
+
+        // 联动更新订单状态为 5:已评价
+        if (rows > 0 && tServiceEvaluation.getOrderId() != null) {
+            TServiceOrder order = new TServiceOrder();
+            order.setOrderId(tServiceEvaluation.getOrderId());
+            order.setOrderStatus(5L);
+            tServiceOrderService.updateTServiceOrder(order);
+        }
+
+        return rows;
     }
 
     /**
@@ -64,8 +78,7 @@ public class TServiceEvaluationServiceImpl implements ITServiceEvaluationService
      * @return 结果
      */
     @Override
-    public int updateTServiceEvaluation(TServiceEvaluation tServiceEvaluation)
-    {
+    public int updateTServiceEvaluation(TServiceEvaluation tServiceEvaluation) {
         tServiceEvaluation.setUpdateTime(DateUtils.getNowDate());
         return tServiceEvaluationMapper.updateTServiceEvaluation(tServiceEvaluation);
     }
@@ -77,8 +90,7 @@ public class TServiceEvaluationServiceImpl implements ITServiceEvaluationService
      * @return 结果
      */
     @Override
-    public int deleteTServiceEvaluationByEvaluationIds(Long[] evaluationIds)
-    {
+    public int deleteTServiceEvaluationByEvaluationIds(Long[] evaluationIds) {
         return tServiceEvaluationMapper.deleteTServiceEvaluationByEvaluationIds(evaluationIds);
     }
 
@@ -89,8 +101,7 @@ public class TServiceEvaluationServiceImpl implements ITServiceEvaluationService
      * @return 结果
      */
     @Override
-    public int deleteTServiceEvaluationByEvaluationId(Long evaluationId)
-    {
+    public int deleteTServiceEvaluationByEvaluationId(Long evaluationId) {
         return tServiceEvaluationMapper.deleteTServiceEvaluationByEvaluationId(evaluationId);
     }
 }
