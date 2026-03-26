@@ -57,4 +57,9 @@ public interface ITSafetyAlertService {
      * @return 结果
      */
     public int deleteTSafetyAlertByAlertId(Long alertId);
+
+    /**
+     * App端上报安全预警
+     */
+    public int insertAppSafetyAlert(TSafetyAlert tSafetyAlert, Long userId);
 }

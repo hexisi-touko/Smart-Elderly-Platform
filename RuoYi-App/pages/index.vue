@@ -5,17 +5,25 @@
       <text class="subtitle">用心陪伴您的每一天</text>
     </view>
 
-    <!-- 健康看板入口 - 磁贴样式 -->
+    <!-- 快捷看板入口 - 磁贴样式 -->
     <view class="quick-nav">
       <view class="nav-card health" @click="navToHealth">
         <view class="nav-content">
-          <uni-icons type="heart-filled" size="40" color="#fff"></uni-icons>
+          <uni-icons type="heart-filled" size="36" color="#fff"></uni-icons>
           <view class="nav-text">
             <text class="nav-title">健康看板</text>
-            <text class="nav-desc">查看您的血压、心率数据</text>
+            <text class="nav-desc">血压心率</text>
           </view>
         </view>
-        <uni-icons type="right" size="24" color="#fff"></uni-icons>
+      </view>
+      <view class="nav-card safety" @click="navToAlert">
+        <view class="nav-content">
+          <uni-icons type="notification-filled" size="36" color="#fff"></uni-icons>
+          <view class="nav-text">
+            <text class="nav-title">预警历史</text>
+            <text class="nav-desc">紧急呼救</text>
+          </view>
+        </view>
       </view>
     </view>
 
@@ -159,12 +167,33 @@
           cancelText: '取消',
           success: (res) => {
             if (res.confirm) {
-              this.$modal.loading('正在发送紧急求救信号...');
-              triggerSOS().then(() => {
-                this.$modal.closeLoading();
-                this.$modal.msgSuccess('报警已发出！请保持电话通畅！');
-              }).catch(() => {
-                this.$modal.closeLoading();
+              this.$modal.loading('正在定位并发送求救信号...');
+              // 获取定位并上报
+              uni.getLocation({
+                type: 'wgs84',
+                success: (loc) => {
+                  const data = {
+                    alertLng: loc.longitude,
+                    alertLat: loc.latitude,
+                    alertAddress: '移动端App一键呼救位置'
+                  };
+                  triggerSOS(data).then(() => {
+                    this.$modal.closeLoading();
+                    this.$modal.msgSuccess('报警已发出！请保持电话通畅！');
+                  }).catch(() => {
+                    this.$modal.closeLoading();
+                  });
+                },
+                fail: (err) => {
+                  console.error('定位获取失败', err);
+                  // 即使定位失败也强制发出报警信号
+                  triggerSOS({ alertLng: 0, alertLat: 0, alertAddress: '定位失败，请速联系客户' }).then(() => {
+                    this.$modal.closeLoading();
+                    this.$modal.msgWarning('报警已发出，但定位获取失败');
+                  }).catch(() => {
+                    this.$modal.closeLoading();
+                  });
+                }
               });
             }
           }
@@ -173,6 +202,11 @@
       navToHealth() {
         uni.navigateTo({
           url: '/pages/health/index'
+        });
+      },
+      navToAlert() {
+        uni.navigateTo({
+          url: '/pages/health/alert_list'
         });
       }
     }
@@ -210,32 +244,44 @@
   .quick-nav {
     padding: 20px;
     margin-top: -20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 15px;
     
     .nav-card {
-      background: linear-gradient(135deg, #6739b6, #a5673f);
       border-radius: 20px;
-      padding: 30px;
+      padding: 20px 15px;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      box-shadow: 0 10rpx 30rpx rgba(103, 57, 182, 0.3);
+      box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
       
+      &.health {
+        background: linear-gradient(135deg, #6739b6, #a5673f);
+      }
+      &.safety {
+        background: linear-gradient(135deg, #e54d42, #f37b1d);
+      }
+
       .nav-content {
         display: flex;
+        flex-direction: column;
         align-items: center;
         
         .nav-text {
-          margin-left: 20px;
+          margin-top: 10px;
+          text-align: center;
           .nav-title {
-            font-size: 36rpx;
+            font-size: 32rpx;
             font-weight: bold;
             color: #fff;
             display: block;
           }
           .nav-desc {
-            font-size: 26rpx;
+            font-size: 24rpx;
             color: rgba(255,255,255,0.8);
-            margin-top: 5rpx;
+            margin-top: 4rpx;
           }
         }
       }

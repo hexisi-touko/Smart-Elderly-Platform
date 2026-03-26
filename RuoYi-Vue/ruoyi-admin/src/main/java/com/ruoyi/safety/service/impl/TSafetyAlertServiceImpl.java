@@ -7,6 +7,13 @@ import org.springframework.stereotype.Service;
 import com.ruoyi.safety.mapper.TSafetyAlertMapper;
 import com.ruoyi.safety.domain.TSafetyAlert;
 import com.ruoyi.safety.service.ITSafetyAlertService;
+import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.elderly.domain.TElderly;
+import com.ruoyi.elderly.domain.TGuardian;
+import com.ruoyi.elderly.service.ITElderlyService;
+import com.ruoyi.elderly.service.ITGuardianService;
+import org.springframework.transaction.annotation.Transactional;
+
 
 /**
  * 安全预警管理Service业务层处理
@@ -18,6 +25,13 @@ import com.ruoyi.safety.service.ITSafetyAlertService;
 public class TSafetyAlertServiceImpl implements ITSafetyAlertService {
     @Autowired
     private TSafetyAlertMapper tSafetyAlertMapper;
+
+    @Autowired
+    private ITElderlyService tElderlyService;
+
+    @Autowired
+    private ITGuardianService tGuardianService;
+
 
     /**
      * 查询安全预警管理
@@ -85,5 +99,39 @@ public class TSafetyAlertServiceImpl implements ITSafetyAlertService {
     @Override
     public int deleteTSafetyAlertByAlertId(Long alertId) {
         return tSafetyAlertMapper.deleteTSafetyAlertByAlertId(alertId);
+    }
+
+    /**
+     * App端上报安全预警
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int insertAppSafetyAlert(TSafetyAlert tSafetyAlert, Long userId) {
+        // 1. 识别身份并校验
+        TElderly elderlyParams = new TElderly();
+        elderlyParams.setUserId(userId);
+        List<TElderly> elderlyList = tElderlyService.selectTElderlyList(elderlyParams);
+
+        if (elderlyList != null && !elderlyList.isEmpty()) {
+            tSafetyAlert.setElderlyId(elderlyList.get(0).getElderlyId());
+        } else {
+            TGuardian guardianParams = new TGuardian();
+            guardianParams.setUserId(userId);
+            List<TGuardian> guardianList = tGuardianService.selectTGuardianList(guardianParams);
+            if (guardianList != null && !guardianList.isEmpty()) {
+                if (tSafetyAlert.getElderlyId() == null) {
+                    throw new ServiceException("监护人上报预警失败：未指定老人ID");
+                }
+            } else {
+                throw new ServiceException("上报失败：未找到您的角色档案，请先完善身份资料");
+            }
+        }
+
+        // 2. 补全预警基本信息
+        tSafetyAlert.setAlertTime(DateUtils.getNowDate());
+        tSafetyAlert.setAlertStatus(0L); // 0-待处理
+        tSafetyAlert.setCreateTime(DateUtils.getNowDate());
+
+        return tSafetyAlertMapper.insertTSafetyAlert(tSafetyAlert);
     }
 }

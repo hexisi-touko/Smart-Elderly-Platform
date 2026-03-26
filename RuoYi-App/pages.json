@@ -26,6 +26,12 @@
       }
     },
     {
+      "path": "pages/health/alert_list",
+      "style": {
+        "navigationBarTitleText": "预警历史"
+      }
+    },
+    {
       "path": "pages/work/index",
       "style": {
         "navigationBarTitleText": "我的订单"
