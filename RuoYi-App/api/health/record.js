@@ -8,3 +8,12 @@ export function listHealthRecords(query) {
     params: query
   })
 }
+
+// 上报健康数据（设备/手动）
+export function reportHealthData(data) {
+  return request({
+    url: '/app/health/report',
+    method: 'post',
+    data: data
+  })
+}

@@ -43,7 +43,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="elderlyId != null "> and r.elderly_id = #{elderlyId}</if>
             <if test="elderlyName != null  and elderlyName != ''"> and e.name like concat('%', #{elderlyName}, '%')</if>
             <if test="deviceId != null "> and r.device_id = #{deviceId}</if>
-            <if test="params.beginCollectTime != null and params.beginCollectTime != '' and params.endCollectTime != null and params.endCollectTime != ''"> and r.collect_time between #{params.beginCollectTime} and #{params.endCollectTime}</if>
+            <if test="params.beginCollectTime != null and params.endCollectTime != null"> and r.collect_time between #{params.beginCollectTime} and #{params.endCollectTime}</if>
             <if test="recordType != null  and recordType != ''"> and r.record_type = #{recordType}</if>
             <if test="collectMethod != null "> and r.collect_method = #{collectMethod}</if>
             <if test="dataStatus != null "> and r.data_status = #{dataStatus}</if>

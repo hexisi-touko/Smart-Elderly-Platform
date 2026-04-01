@@ -47,35 +47,97 @@
       </view>
     </view>
 
-    <!-- 预约弹层 -->
+    <!-- 预约弹层 (底部抽屉样式) -->
     <view class="overlay" v-if="showPopup" @click="closeOrderPopup"></view>
-    <view class="popup-box" v-if="showPopup">
-      <view class="popup-header">
-        <text class="popup-title">呼叫：{{ currentService.itemName }}</text>
-        <text class="close-btn" @click="closeOrderPopup">关闭</text>
-      </view>
-      
-      <view class="popup-body">
-        <view class="form-group">
-          <text class="label">服务日期</text>
-          <picker mode="date" :value="orderForm.serviceTime" @change="bindDateChange">
-            <view class="input-large picker-view">{{ orderForm.serviceTime || '请点击这里选择日期' }}</view>
-          </picker>
-        </view>
-        <view class="form-group">
-          <text class="label">上门地址</text>
-          <input class="input-large" type="text" v-model="orderForm.serviceAddress" placeholder="输入具体的上门楼栋门牌号" />
-        </view>
-        <view class="form-group">
-          <text class="label">照顾要求(选填)</text>
-          <input class="input-large" type="text" v-model="orderForm.serviceRequirements" placeholder="如：需要带轮椅、行动不便等..." />
+    <view class="drawer-box" v-if="showPopup" :class="{'drawer-show': showPopup}">
+      <view class="drawer-header">
+        <view class="header-line"></view>
+        <text class="drawer-title">预约服务</text>
+        <view class="close-icon" @click="closeOrderPopup">
+          <uni-icons type="closeempty" size="24" color="#999"></uni-icons>
         </view>
       </view>
       
-      <button class="submit-btn" @click="submitOrder" :disabled="submitting">确认下订单</button>
+      <view class="drawer-body">
+        <!-- 服务摘要预览 -->
+        <view class="service-summary">
+          <view class="summary-left">
+            <text class="item-name">{{ currentService.itemName }}</text>
+            <text class="item-type">{{ currentService.providerName || '专业服务' }}</text>
+          </view>
+          <view class="summary-right">
+            <text class="price-label">预计费用</text>
+            <text class="price-val">￥{{ currentService.standardPrice }}</text>
+          </view>
+        </view>
+
+        <view class="booking-form">
+          <view class="form-item">
+            <view class="item-label">
+              <uni-icons type="calendar" size="18" color="#0081ff"></uni-icons>
+              <text>服务预约日期</text>
+            </view>
+            <picker mode="date" :value="orderForm.serviceTime" @change="bindDateChange">
+              <view class="picker-content">
+                <text>{{ orderForm.serviceTime || '点击选择日期' }}</text>
+                <uni-icons type="right" size="16" color="#ccc"></uni-icons>
+              </view>
+            </picker>
+          </view>
+          
+          <view class="form-item">
+            <view class="item-label">
+              <uni-icons type="location-filled" size="18" color="#0081ff"></uni-icons>
+              <text>具体上门地址</text>
+            </view>
+            <textarea 
+              class="address-input" 
+              v-model="orderForm.serviceAddress" 
+              placeholder="请输入楼栋、门牌号等详细信息"
+              :auto-height="true"
+            />
+          </view>
+
+          <view class="form-item">
+            <view class="item-label">
+              <uni-icons type="chat-filled" size="18" color="#0081ff"></uni-icons>
+              <text>特殊要求说明 (选填)</text>
+            </view>
+            <input 
+              class="memo-input" 
+              type="text" 
+              v-model="orderForm.serviceRequirements" 
+              placeholder="如有轮椅需求、忌口等请注明" 
+            />
+          </view>
+        </view>
+      </view>
+      
+      <view class="drawer-footer">
+        <button class="booking-btn" @click="submitOrder" :disabled="submitting">
+          {{ submitting ? '正在为您呼叫...' : '立即预约服务' }}
+        </button>
+      </view>
     </view>
+
+    <!-- 预约成功反馈卡片 -->
+    <view class="overlay" v-if="showSuccessCard" @click="closeSuccessCard"></view>
+    <view class="success-card" v-if="showSuccessCard">
+      <view class="success-icon">
+        <uni-icons type="checkbox-filled" size="80" color="#52c41a"></uni-icons>
+      </view>
+      <text class="success-title">预约成功！</text>
+      <text class="success-desc">我们已为您通知专业服务人员，请保持电话畅通。</text>
+      
+      <view class="card-btns">
+        <button class="btn-check" @click="navToOrder">查看订单</button>
+        <button class="btn-close" @click="closeSuccessCard">返回首页</button>
+      </view>
+    </view>
+
     <!-- SOS 悬浮呼叫按钮 -->
     <view class="sos-btn" @click="handleSOS">
+      <view class="sos-pulse"></view>
       <text>SOS</text>
     </view>
   </view>
@@ -97,6 +159,7 @@
           serviceRequirements: ''
         },
         showPopup: false,
+        showSuccessCard: false,
         submitting: false
       }
     },
@@ -137,7 +200,6 @@
         if (!this.orderForm.serviceAddress) return this.$modal.msgError('请输入服务地址');
         
         this.submitting = true;
-        this.$modal.loading('正在为您派发订单...');
         
         const data = {
           serviceItemId: this.currentService.itemId,
@@ -149,13 +211,20 @@
         };
         
         addServiceOrder(data).then(res => {
-          this.$modal.closeLoading();
           this.submitting = false;
-          this.closeOrderPopup();
-          this.$modal.msgSuccess('预约成功，等待平台服务人员接单！');
+          this.showPopup = false;
+          this.showSuccessCard = true;
         }).catch(() => {
-          this.$modal.closeLoading();
           this.submitting = false;
+        });
+      },
+      closeSuccessCard() {
+        this.showSuccessCard = false;
+      },
+      navToOrder() {
+        this.showSuccessCard = false;
+        uni.switchTab({
+          url: '/pages/work/index'
         });
       },
       handleSOS() {
@@ -359,7 +428,228 @@
     font-size: 18px;
   }
 
-  /* 弹层样式 */
+  /* 抽屉式预约弹窗 */
+  .drawer-box {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    border-radius: 40rpx 40rpx 0 0;
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    
+    &.drawer-show {
+      transform: translateY(0);
+    }
+
+    .drawer-header {
+      padding: 30rpx;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      
+      .header-line {
+        width: 80rpx;
+        height: 8rpx;
+        background-color: #eee;
+        border-radius: 4rpx;
+        margin-bottom: 20rpx;
+      }
+      
+      .drawer-title {
+        font-size: 36rpx;
+        font-weight: bold;
+        color: #333;
+      }
+      
+      .close-icon {
+        position: absolute;
+        right: 30rpx;
+        top: 30rpx;
+      }
+    }
+
+    .drawer-body {
+      padding: 0 40rpx 40rpx;
+
+      .service-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f8f9fa;
+        padding: 30rpx;
+        border-radius: 20rpx;
+        margin-bottom: 40rpx;
+        
+        .item-name {
+          font-size: 34rpx;
+          font-weight: bold;
+          color: #333;
+          display: block;
+        }
+        .item-type {
+          font-size: 26rpx;
+          color: #999;
+          margin-top: 5rpx;
+        }
+        
+        .price-label {
+          font-size: 24rpx;
+          color: #999;
+          display: block;
+          text-align: right;
+        }
+        .price-val {
+          font-size: 40rpx;
+          color: #e54d42;
+          font-weight: bold;
+        }
+      }
+
+      .booking-form {
+        .form-item {
+          margin-bottom: 30rpx;
+          
+          .item-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15rpx;
+            
+            text {
+              font-size: 30rpx;
+              font-weight: bold;
+              color: #333;
+              margin-left: 10rpx;
+            }
+          }
+          
+          .picker-content {
+            background-color: #f1f1f1;
+            padding: 25rpx 30rpx;
+            border-radius: 12rpx;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 32rpx;
+          }
+          
+          .address-input {
+            width: 100%;
+            background-color: #f1f1f1;
+            padding: 25rpx 30rpx;
+            border-radius: 12rpx;
+            font-size: 32rpx;
+            box-sizing: border-box;
+            min-height: 120rpx;
+          }
+          
+          .memo-input {
+            width: 100%;
+            background-color: #f1f1f1;
+            padding: 25rpx 30rpx;
+            border-radius: 12rpx;
+            font-size: 32rpx;
+            box-sizing: border-box;
+            height: 90rpx;
+          }
+        }
+      }
+    }
+
+    .drawer-footer {
+      padding: 0 40rpx 40rpx;
+      
+      .booking-btn {
+        background-color: #0081ff;
+        color: #fff;
+        height: 100rpx;
+        line-height: 100rpx;
+        border-radius: 50rpx;
+        font-size: 34rpx;
+        font-weight: bold;
+        box-shadow: 0 10rpx 20rpx rgba(0, 129, 255, 0.3);
+        
+        &[disabled] {
+          opacity: 0.7;
+          background-color: #ccc;
+        }
+      }
+    }
+  }
+
+  /* 成功卡片 */
+  .success-card {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600rpx;
+    background-color: #fff;
+    border-radius: 40rpx;
+    z-index: 1001;
+    padding: 60rpx 40rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 20rpx 60rpx rgba(0,0,0,0.2);
+    
+    .success-icon {
+      margin-bottom: 30rpx;
+      animation: scaleIn 0.5s ease-out;
+    }
+    
+    .success-title {
+      font-size: 44rpx;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20rpx;
+    }
+    
+    .success-desc {
+      font-size: 30rpx;
+      color: #666;
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 50rpx;
+    }
+    
+    .card-btns {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20rpx;
+      
+      button {
+        width: 100%;
+        height: 90rpx;
+        line-height: 90rpx;
+        border-radius: 45rpx;
+        font-size: 32rpx;
+        font-weight: bold;
+      }
+      
+      .btn-check {
+        background-color: #0081ff;
+        color: #fff;
+      }
+      
+      .btn-close {
+        background-color: #f1f1f1;
+        color: #666;
+      }
+    }
+  }
+
+  @keyframes scaleIn {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
   .overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -367,105 +657,38 @@
     z-index: 998;
   }
 
-  .popup-box {
-    position: fixed;
-    left: 0; right: 0; bottom: 0;
-    background: #fff;
-    z-index: 999;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
-    padding: 25px;
-    animation: slideUp 0.3s ease-out;
-
-    .popup-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 25px;
-      
-      .popup-title {
-        font-size: 22px;
-        font-weight: bold;
-        color: #333;
-      }
-      .close-btn {
-        font-size: 18px;
-        color: #999;
-        padding: 5px;
-      }
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-      .label {
-        font-size: 18px;
-        color: #333;
-        font-weight: bold;
-        display: block;
-        margin-bottom: 10px;
-      }
-      
-      .input-large {
-        width: 100%;
-        height: 56px;
-        line-height: normal; /* Fix line jumping */
-        background-color: #f5f6f7;
-        border-radius: 12px;
-        padding: 0 15px;
-        font-size: 20px;
-        color: #333;
-        /* Align text in picker */
-        display: flex;
-        align-items: center; 
-      }
-    }
-
-    .submit-btn {
-      margin-top: 30px;
-      background-color: #e54d42; /* 紧急感红色 */
-      color: #fff;
-      font-size: 22px;
-      font-weight: bold;
-      height: 60px;
-      line-height: 60px;
-      border-radius: 30px;
-      width: 100%;
-    }
-  }
-
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
-
-  /* SOS 悬浮按钮，采用绝对的震撼红色与大阴影 */
   .sos-btn {
     position: fixed;
-    right: 20px;
-    bottom: 50px;
-    width: 80px;
-    height: 80px;
+    right: 40rpx;
+    bottom: 60rpx;
+    width: 140rpx;
+    height: 140rpx;
     background: radial-gradient(circle, #ff4d4f, #cf1322);
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 15px rgba(229, 77, 66, 0.6);
-    z-index: 100;
-    animation: pulse 2s infinite;
+    color: #fff;
+    font-size: 40rpx;
+    font-weight: bold;
+    box-shadow: 0 10rpx 40rpx rgba(230, 0, 0, 0.4);
+    z-index: 99;
+    border: 4rpx solid rgba(255,255,255,0.3);
 
-    text {
-      color: white;
-      font-size: 26px;
-      font-weight: 900;
-      letter-spacing: 2px;
+    .sos-pulse {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: #ff4d4f;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: pulse 2s infinite;
+      z-index: -1;
     }
   }
 
-  /* 心跳动画增加紧急感 */
   @keyframes pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229, 77, 66, 0.7); }
-    70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(229, 77, 66, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229, 77, 66, 0); }
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.8); opacity: 0; }
   }
 </style>
