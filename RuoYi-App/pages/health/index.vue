@@ -8,7 +8,7 @@
       </view>
     </view>
 
-    <!-- 健康建议卡片 (Health 2.0 新增) -->
+    <!-- 健康建议卡片 -->
     <view class="advice-card" v-if="healthAdvice">
       <view class="advice-header">
         <uni-icons type="info-filled" size="20" color="#0081ff"></uni-icons>
@@ -58,6 +58,28 @@
       </view>
     </view>
 
+    <!-- 健康服务快捷入口 -->
+    <view class="service-nav">
+      <view class="nav-item" @click="navTo('/pages/health/medication')">
+        <view class="nav-icon med-icon-bg">
+          <text class="nav-emoji">💊</text>
+        </view>
+        <text class="nav-label">用药提醒</text>
+      </view>
+      <view class="nav-item" @click="navTo('/pages/health/exam')">
+        <view class="nav-icon exam-icon-bg">
+          <text class="nav-emoji">🏥</text>
+        </view>
+        <text class="nav-label">体检预约</text>
+      </view>
+      <view class="nav-item" @click="navTo('/pages/health/alert_list')">
+        <view class="nav-icon alert-icon-bg">
+          <text class="nav-emoji">🚨</text>
+        </view>
+        <text class="nav-label">预警历史</text>
+      </view>
+    </view>
+
     <!-- 数据趋势 -->
     <view class="chart-section">
       <view class="section-header">
@@ -88,7 +110,7 @@
           <text>近{{ getRangeName }}暂无{{ getMetricName }}数据</text>
         </view>
         <view v-else class="chart-wrap">
-          <canvas canvas-id="trendCanvas" id="trendCanvas" class="trend-canvas" @error="canvasError"></canvas>
+          <canvas canvas-id="trendCanvas" id="trendCanvas" class="trend-canvas"></canvas>
           <text class="chart-tip">红色点表示数据状态异常（超标或剧变）</text>
         </view>
       </view>
@@ -120,7 +142,7 @@
         currentRange: 'week',
         chartData: [],
         healthAdvice: '基于您过去一周的血压波动（平均155/90），建议减少盐分摄入，保持作息规律。',
-        isDebugMode: true, // 开启调试模式以显示模拟按钮
+        isDebugMode: true, 
         metrics: [
           { name: '血压', key: 'blood_pressure', icon: 'heart-filled' },
           { name: '心率', key: 'heart_rate', icon: 'pulse' },
@@ -141,6 +163,10 @@
       this.getTrendData()
     },
     methods: {
+      /** 页面跳转 */
+      navTo(url) {
+        uni.navigateTo({ url })
+      },
       initDate() {
         const d = new Date()
         this.todayDate = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
@@ -149,12 +175,10 @@
         listHealthRecords({ pageSize: 10 }).then(res => {
           const allRows = res.rows || []
           if (allRows.length > 0) {
-            // 取最新一条作为展示
             this.latestHealth = allRows[0] 
           }
         })
       },
-      // 获取趋势数据
       getTrendData() {
         this.loadingChart = true
         listHealthRecords({ 
@@ -162,12 +186,11 @@
           pageSize: 20 
         }).then(res => {
           this.chartData = res.rows || []
-          this.loadingChart = false
+          this.generateAdvice()
           this.$nextTick(() => {
             this.drawChart()
           })
-          this.generateAdvice()
-        }).catch(() => {
+        }).finally(() => {
           this.loadingChart = false
         })
       },
@@ -189,10 +212,8 @@
         this.currentRange = val
         this.getTrendData()
       },
-      // 绘制原生 Canvas 图表
       drawChart() {
         if (this.chartData.length === 0) return
-        
         const ctx = uni.createCanvasContext('trendCanvas', this)
         const width = uni.upx2px(600)
         const height = uni.upx2px(350)
@@ -201,7 +222,6 @@
         const paddingTop = 30
         const paddingRight = 30
         
-        // 1. 数据准备
         const rawPoints = this.chartData.map(row => {
           let val = 0;
           if (this.currentMetric === 'blood_pressure') val = row.systolicBp;
@@ -213,22 +233,19 @@
           return {
             val: parseFloat(val) || 0,
             date: (row.collectTime || row.createTime || '').split(' ')[0].substring(5),
-            status: row.dataStatus // 算法判定出的状态
+            status: row.dataStatus 
           };
         }).filter(p => p.val > 0).reverse(); 
 
         if (rawPoints.length === 0) return
-        
         const dataValues = rawPoints.map(p => p.val);
         let maxVal = Math.max(...dataValues)
         let minVal = Math.min(...dataValues)
         if (maxVal === minVal) { maxVal += 10; minVal -= 10; }
-        
         const range = maxVal - minVal
         const chartWidth = width - paddingLeft - paddingRight
         const chartHeight = height - paddingTop - paddingBottom
 
-        // 2. 绘制坐标轴
         ctx.setStrokeStyle('#ccc')
         ctx.setLineWidth(1)
         ctx.moveTo(paddingLeft, paddingTop)
@@ -236,7 +253,6 @@
         ctx.lineTo(width - paddingRight, height - paddingBottom) 
         ctx.stroke()
 
-        // 3. 绘制趋势线
         ctx.beginPath()
         ctx.setStrokeStyle('#0081ff')
         ctx.setLineWidth(2)
@@ -249,7 +265,6 @@
         })
         ctx.stroke()
 
-        // 4. 绘制数据锚点（异常点变红）
         rawPoints.forEach((p, i) => {
           const x = paddingLeft + i * stepX
           const y = height - paddingBottom - ((p.val - minVal) / range) * chartHeight
@@ -260,7 +275,6 @@
           ctx.fill()
           ctx.stroke()
         })
-
         ctx.draw()
       },
       mockReport() {
@@ -353,6 +367,36 @@
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229,77,66,0); }
   }
 
+  /* 健康服务快捷入口 */
+  .service-nav {
+    display: flex;
+    justify-content: space-around;
+    background: #fff;
+    margin: 20rpx 0 40rpx;
+    padding: 30rpx 16rpx;
+    border-radius: 24rpx;
+    box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .nav-icon {
+    width: 90rpx;
+    height: 90rpx;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12rpx;
+  }
+  .med-icon-bg { background: linear-gradient(135deg, #e8eaf6, #c5cae9); }
+  .exam-icon-bg { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); }
+  .alert-icon-bg { background: linear-gradient(135deg, #fce4ec, #f8bbd0); }
+  .nav-emoji { font-size: 38rpx; }
+  .nav-label { font-size: 26rpx; color: #333; font-weight: 500; }
+
   .chart-section {
     background-color: #fff; border-radius: 24rpx; padding: 30rpx;
     .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30rpx; .section-title { font-size: 36rpx; font-weight: bold; } }
@@ -362,474 +406,4 @@
 
   .debug-section { margin-top: 40rpx; .btn-mock { background-color: #333; color: #fff; border-radius: 50rpx; font-size: 28rpx; } }
   .bottom-tips { text-align: center; padding: 60rpx 0; color: #bbb; font-size: 26rpx; }
-</style>
-
-<script>
-  import { listHealthRecords } from "@/api/health/record"
-
-  export default {
-    data() {
-      return {
-        todayDate: '',
-        latestHealth: {},
-        recordList: [],
-        loading: false,
-        loadingChart: false,
-        currentMetric: 'blood_pressure',
-        currentRange: 'week',
-        chartData: [],
-        metrics: [
-          { name: '血压', key: 'blood_pressure', icon: 'heart-filled' },
-          { name: '心率', key: 'heart_rate', icon: 'pulse' },
-          { name: '血糖', key: 'blood_sugar', icon: 'fire-filled' },
-          { name: '体温', key: 'temperature', icon: 'staff-filled' },
-          { name: '血氧', key: 'blood_oxygen', icon: 'paperplane-filled' }
-        ],
-        rangeOptions: [
-          { label: '周', value: 'week' },
-          { label: '月', value: 'month' },
-          { label: '季', value: 'quarter' }
-        ]
-      }
-    },
-    onShow() {
-      this.initDate()
-      this.getHealthData()
-      this.getTrendData()
-    },
-    methods: {
-      initDate() {
-        const d = new Date()
-        this.todayDate = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
-      },
-      // 获取今日数据（严格过滤本日）
-      getHealthData() {
-        const todayStr = new Date().toISOString().split('T')[0]
-        listHealthRecords({ pageSize: 100 }).then(res => {
-          const allRows = res.rows || []
-          // 1. 过滤出今日数据
-          const todayRows = allRows.filter(row => {
-            const rowDate = (row.collectTime || row.createTime || '').split(' ')[0]
-            return rowDate === todayStr
-          })
-
-          // 2. 聚合本日指标最新值
-          const latest = {
-            systolicBp: null,
-            diastolicBp: null,
-            heartRate: null,
-            bloodSugar: null,
-            temperature: null,
-            bloodOxygen: null
-          }
-
-          // 从旧到新遍历聚合，这样后面覆盖前面的
-          todayRows.sort((a, b) => new Date(a.createTime) - new Date(b.createTime)).forEach(row => {
-            if (row.systolicBp) latest.systolicBp = row.systolicBp
-            if (row.diastolicBp) latest.diastolicBp = row.diastolicBp
-            if (row.heartRate) latest.heartRate = row.heartRate
-            if (row.bloodSugar) latest.bloodSugar = row.bloodSugar
-            if (row.temperature) latest.temperature = row.temperature
-            if (row.bloodOxygen) latest.bloodOxygen = row.bloodOxygen
-          })
-
-          this.latestHealth = latest
-        })
-      },
-      // 获取趋势数据
-      getTrendData() {
-        this.loadingChart = true
-        // 根据 currentRange 计算 beginTime (此处逻辑简化，实际需计算具体日期)
-        listHealthRecords({ 
-          recordType: this.currentMetric,
-          pageSize: 50 
-        }).then(res => {
-          this.chartData = res.rows || []
-          this.loadingChart = false
-          this.$nextTick(() => {
-            this.drawChart()
-          })
-        }).catch(() => {
-          this.loadingChart = false
-        })
-      },
-      changeMetric(key) {
-        this.currentMetric = key
-        this.getTrendData()
-      },
-      changeRange(val) {
-        this.currentRange = val
-        this.getTrendData()
-      },
-      // 绘制原生 Canvas 图表
-      drawChart() {
-        if (this.chartData.length === 0) return
-        
-        const ctx = uni.createCanvasContext('trendCanvas', this)
-        const width = uni.upx2px(600)
-        const height = uni.upx2px(350)
-        const paddingLeft = 60 // 留出 Y 轴空间
-        const paddingBottom = 40 // 留出 X 轴空间
-        const paddingTop = 30
-        const paddingRight = 30
-        
-        // 1. 数据准备 (提取数值并排序)
-        const rawPoints = this.chartData.map(row => {
-          let val = 0;
-          if (this.currentMetric === 'blood_pressure') val = row.systolicBp;
-          else if (this.currentMetric === 'heart_rate') val = row.heartRate;
-          else if (this.currentMetric === 'blood_sugar') val = row.bloodSugar;
-          else if (this.currentMetric === 'temperature') val = row.temperature;
-          else if (this.currentMetric === 'blood_oxygen') val = row.bloodOxygen;
-          
-          return {
-            val: parseFloat(val) || 0,
-            date: (row.collectTime || row.createTime || '').split(' ')[0].substring(5) // 取 MM-DD
-          };
-        }).filter(p => p.val > 0).reverse(); // 时间正序
-
-        if (rawPoints.length === 0) return
-        
-        const dataValues = rawPoints.map(p => p.val);
-        const dates = rawPoints.map(p => p.date);
-
-        let maxVal = Math.max(...dataValues)
-        let minVal = Math.min(...dataValues)
-        
-        // 防止最大最小值相等导致除以0
-        if (maxVal === minVal) {
-          maxVal += 10;
-          minVal -= 10;
-        }
-        
-        const range = maxVal - minVal
-        const chartWidth = width - paddingLeft - paddingRight
-        const chartHeight = height - paddingTop - paddingBottom
-
-        // 2. 绘制坐标轴
-        ctx.setStrokeStyle('#ccc')
-        ctx.setLineWidth(1)
-        ctx.moveTo(paddingLeft, paddingTop)
-        ctx.lineTo(paddingLeft, height - paddingBottom) // Y 轴
-        ctx.lineTo(width - paddingRight, height - paddingBottom) // X 轴
-        ctx.stroke()
-
-        // 3. 绘制 Y 轴刻度与文字
-        ctx.setFontSize(10)
-        ctx.setFillStyle('#999')
-        ctx.setTextAlign('right')
-        const yLabels = [maxVal.toFixed(1), ((maxVal + minVal) / 2).toFixed(1), minVal.toFixed(1)]
-        yLabels.forEach((label, i) => {
-          const y = paddingTop + (chartHeight * i / 2)
-          ctx.fillText(label, paddingLeft - 5, y + 4)
-        })
-
-        // 4. 绘制趋势线与区域
-        ctx.beginPath()
-        ctx.setStrokeStyle('#0081ff')
-        ctx.setLineWidth(2)
-        
-        const stepX = rawPoints.length > 1 ? chartWidth / (rawPoints.length - 1) : 0
-        
-        rawPoints.forEach((p, i) => {
-          const x = paddingLeft + i * stepX
-          const y = height - paddingBottom - ((p.val - minVal) / range) * chartHeight
-          if (i === 0) ctx.moveTo(x, y)
-          else ctx.lineTo(x, y)
-        })
-        ctx.stroke()
-
-        // 5. 绘制数据锚点（小圆圈）
-        rawPoints.forEach((p, i) => {
-          const x = paddingLeft + i * stepX
-          const y = height - paddingBottom - ((p.val - minVal) / range) * chartHeight
-          ctx.beginPath()
-          ctx.setFillStyle('#fff')
-          ctx.setStrokeStyle('#0081ff')
-          ctx.arc(x, y, 3, 0, 2 * Math.PI)
-          ctx.fill()
-          ctx.stroke()
-          
-          // X 轴日期标注 (抽样显示，避免太挤)
-          if (i === 0 || i === rawPoints.length - 1 || (rawPoints.length > 3 && i === Math.floor(rawPoints.length/2))) {
-            ctx.setFontSize(10)
-            ctx.setFillStyle('#999')
-            ctx.setTextAlign('center')
-            ctx.fillText(p.date, x, height - 10)
-          }
-        })
-
-        ctx.draw()
-      },
-      canvasError(e) {
-        console.error('Canvas Error:', e)
-      },
-      goDetail(type) {
-        // 后续扩展详情曲线页
-        this.$modal.msg("详情功能即将上线")
-      }
-    },
-    computed: {
-      getRangeName() {
-        return this.rangeOptions.find(o => o.value === this.currentRange)?.label || ''
-      },
-      getMetricName() {
-        return this.metrics.find(m => m.key === this.currentMetric)?.name || ''
-      },
-      getBpStatusText() {
-        if (!this.latestHealth.systolicBp) return '无数据'
-        const s = this.latestHealth.systolicBp
-        if (s > 140) return '偏高'
-        if (s < 90) return '偏低'
-        return '正常'
-      },
-      getBpStatusClass() {
-        const text = this.getBpStatusText
-        if (text === '偏高') return 'warn'
-        if (text === '正常') return 'normal'
-        return 'info'
-      },
-      getHrStatusText() {
-        if (!this.latestHealth.heartRate) return '无数据'
-        const h = this.latestHealth.heartRate
-        if (h > 100) return '过快'
-        if (h < 60) return '过慢'
-        return '正常'
-      },
-      getHrStatusClass() {
-        const text = this.getHrStatusText
-        return text === '正常' ? 'normal' : 'warn'
-      },
-      getBsStatusText() {
-        if (!this.latestHealth.bloodSugar) return '无数据'
-        return '正常' // 演示简化
-      },
-      getBsStatusClass() {
-        return 'normal'
-      },
-      getTempStatusText() {
-        if (!this.latestHealth.temperature) return '无数据'
-        const t = this.latestHealth.temperature
-        if (t > 37.3) return '发热'
-        if (t < 36.0) return '偏低'
-        return '正常'
-      },
-      getTempStatusClass() {
-        const text = this.getTempStatusText
-        return text === '正常' ? 'normal' : 'warn'
-      },
-      getOxyStatusText() {
-        if (!this.latestHealth.bloodOxygen) return '无数据'
-        const o = this.latestHealth.bloodOxygen
-        if (o < 95) return '偏低'
-        return '正常'
-      },
-      getOxyStatusClass() {
-        const text = this.getOxyStatusText
-        return text === '正常' ? 'normal' : 'warn'
-      },
-      getTempStatusText() {
-        if (!this.latestHealth.temperature) return '无数据'
-        const t = this.latestHealth.temperature
-        if (t > 37.3) return '发热'
-        if (t < 36.0) return '偏低'
-        return '正常'
-      },
-      getTempStatusClass() {
-        const text = this.getTempStatusText
-        return text === '正常' ? 'normal' : 'warn'
-      },
-      getOxyStatusText() {
-        if (!this.latestHealth.bloodOxygen) return '无数据'
-        const o = this.latestHealth.bloodOxygen
-        if (o < 95) return '偏低'
-        return '正常'
-      },
-      getOxyStatusClass() {
-        const text = this.getOxyStatusText
-        return text === '正常' ? 'normal' : 'warn'
-      }
-    }
-  }
-</script>
-
-<style lang="scss" scoped>
-  .health-container {
-    background-color: #f8f9fb;
-    min-height: 100vh;
-    padding: 30rpx;
-  }
-
-  .health-header {
-    margin-bottom: 40rpx;
-    .title {
-      font-size: 48rpx;
-      font-weight: bold;
-      color: #333;
-      display: block;
-    }
-    .date {
-      font-size: 32rpx;
-      color: #999;
-      margin-top: 10rpx;
-    }
-  }
-
-  .data-section {
-    .data-card {
-      background-color: #fff;
-      border-radius: 24rpx;
-      padding: 40rpx;
-      margin-bottom: 30rpx;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.03);
-
-      .card-left {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 200rpx;
-        .card-label {
-          font-size: 30rpx;
-          color: #666;
-          margin-top: 15rpx;
-        }
-      }
-
-      .card-right {
-        text-align: right;
-        .main-value {
-          font-size: 60rpx;
-          font-weight: bold;
-          color: #333;
-          display: block;
-          margin-bottom: 10rpx;
-        }
-        .status-tag {
-          font-size: 28rpx;
-          padding: 6rpx 20rpx;
-          border-radius: 30rpx;
-          &.normal { background-color: #e7f7e9; color: #39b54a; }
-          &.warn { background-color: #fff1f0; color: #e54d42; }
-          &.info { background-color: #f0f0f0; color: #999; }
-        }
-      }
-    }
-  }
-
-  .chart-section {
-    background-color: #fff;
-    border-radius: 24rpx;
-    padding: 30rpx;
-    margin-top: 20rpx;
-    
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30rpx;
-      
-      .section-title {
-        font-size: 36rpx;
-        font-weight: bold;
-      }
-      
-      .range-selector {
-        display: flex;
-        background-color: #f0f0f0;
-        border-radius: 30rpx;
-        padding: 4rpx;
-        
-        .range-item {
-          padding: 8rpx 24rpx;
-          font-size: 24rpx;
-          color: #666;
-          border-radius: 26rpx;
-          &.active {
-            background-color: #fff;
-            color: #0081ff;
-            font-weight: bold;
-            box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
-          }
-        }
-      }
-    }
-
-    .metric-selector {
-      white-space: nowrap;
-      margin-bottom: 30rpx;
-      .metric-item {
-        display: inline-flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20rpx 30rpx;
-        margin-right: 20rpx;
-        background-color: #f8f9fb;
-        border-radius: 20rpx;
-        min-width: 120rpx;
-        transition: all 0.3s;
-        
-        &.active {
-          background-color: #0081ff;
-          .metric-name { color: #fff; }
-        }
-        
-        .metric-name {
-          font-size: 24rpx;
-          margin-top: 8rpx;
-          color: #666;
-        }
-      }
-    }
-
-    .chart-box {
-      height: 450rpx;
-      background-color: #fcfcfc;
-      border-radius: 16rpx;
-      position: relative;
-      
-      .empty-chart {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #999;
-        font-size: 28rpx;
-      }
-      
-      .chart-loading {
-        padding-top: 150rpx;
-      }
-
-      .chart-wrap {
-        height: 100%;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        
-        .trend-canvas {
-          width: 600rpx;
-          height: 350rpx;
-          background-color: transparent;
-        }
-
-        .chart-tip {
-          font-size: 24rpx;
-          color: #999;
-          margin-top: 10rpx;
-        }
-      }
-    }
-  }
-
-  .bottom-tips {
-    text-align: center;
-    padding: 60rpx 0;
-    color: #bbb;
-    font-size: 26rpx;
-  }
 </style>

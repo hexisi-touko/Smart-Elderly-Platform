@@ -32,9 +32,33 @@
       }
     },
     {
+      "path": "pages/health/medication",
+      "style": {
+        "navigationBarTitleText": "用药提醒"
+      }
+    },
+    {
+      "path": "pages/health/exam",
+      "style": {
+        "navigationBarTitleText": "体检预约"
+      }
+    },
+    {
+      "path": "pages/safety/alert_detail",
+      "style": {
+        "navigationBarTitleText": "预警详情"
+      }
+    },
+    {
       "path": "pages/work/index",
       "style": {
         "navigationBarTitleText": "我的订单"
+      }
+    },
+    {
+      "path": "pages/order/detail",
+      "style": {
+        "navigationBarTitleText": "订单详情"
       }
     },
     {

@@ -16,7 +16,7 @@
 
     <!-- 订单列表区 -->
     <view class="order-list">
-      <view class="order-card" v-for="(item, index) in orderList" :key="index">
+      <view class="order-card" v-for="(item, index) in orderList" :key="index" @click="goDetail(item)">
         <view class="card-header">
           <text class="order-no">订单号：{{ item.orderNo }}</text>
           <text class="status-tag" :class="item.statusClass">{{ item.statusText }}</text>
@@ -166,6 +166,12 @@
         }).catch(() => {
           this.loading = false
           uni.stopPullDownRefresh()
+        })
+      },
+      /** 跳转订单详情 */
+      goDetail(item) {
+        uni.navigateTo({
+          url: '/pages/order/detail?orderId=' + item.orderId
         })
       },
       formatStatus(status) {

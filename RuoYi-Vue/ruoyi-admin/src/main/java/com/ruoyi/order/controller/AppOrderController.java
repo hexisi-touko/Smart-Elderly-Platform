@@ -62,4 +62,12 @@ public class AppOrderController extends BaseController {
         Long userId = SecurityUtils.getUserId();
         return toAjax(tServiceOrderService.cancelAppServiceOrder(orderId, userId));
     }
+
+    /**
+     * 获取订单详情
+     */
+    @GetMapping("/{orderId}")
+    public AjaxResult getOrderDetail(@PathVariable Long orderId) {
+        return success(tServiceOrderService.selectTServiceOrderByOrderId(orderId));
+    }
 }

@@ -7,7 +7,7 @@
 
     <!-- 列表区域 -->
     <view class="list-wrapper">
-      <view class="alert-item" v-for="(item, index) in alertList" :key="index">
+      <view class="alert-item" v-for="(item, index) in alertList" :key="index" @click="goDetail(item)">
         <view class="item-header">
           <view class="type-box" :class="item.typeClass">
             <text>{{ item.alertType || '安全预警' }}</text>
@@ -146,6 +146,12 @@
           statusText: statusData.text,
           statusClass: statusData.class
         };
+      },
+      /** 跳转预警详情 */
+      goDetail(item) {
+        uni.navigateTo({
+          url: '/pages/safety/alert_detail?alertId=' + item.alertId
+        })
       }
     }
   }

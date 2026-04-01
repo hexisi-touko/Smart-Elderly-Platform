@@ -1,6 +1,8 @@
 import request from '@/utils/request'
 
-// C端新增服务订单
+/**
+ * C端新增服务订单
+ */
 export function addServiceOrder(data) {
   return request({
     url: '/app/order',
@@ -9,7 +11,9 @@ export function addServiceOrder(data) {
   })
 }
 
-// C端查询我的订单列表
+/**
+ * C端查询我的订单列表
+ */
 export function listMyOrders(query) {
   return request({
     url: '/app/order/list',
@@ -17,10 +21,23 @@ export function listMyOrders(query) {
     params: query
   })
 }
-// C端取消服务订单
+
+/**
+ * C端取消服务订单
+ */
 export function cancelServiceOrder(orderId) {
   return request({
     url: '/app/order/cancel/' + orderId,
     method: 'put'
+  })
+}
+
+/**
+ * 获取订单详情
+ */
+export function getOrderDetail(orderId) {
+  return request({
+    url: '/app/order/' + orderId,
+    method: 'get'
   })
 }
