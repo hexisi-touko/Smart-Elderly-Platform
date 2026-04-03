@@ -320,7 +320,7 @@ public class TServiceOrderServiceImpl implements ITServiceOrderService {
      * 员工完成服务
      */
     @Override
-    public int completeService(Long orderId, Long userId) {
+    public int completeService(Long orderId, Long userId, String serviceRecord, String servicePhotos) {
         Long staffId = getStaffIdByUserId(userId);
 
         TServiceOrder order = tServiceOrderMapper.selectTServiceOrderByOrderId(orderId);
@@ -334,6 +334,8 @@ public class TServiceOrderServiceImpl implements ITServiceOrderService {
         verifyStaffOwnership(orderId, staffId);
 
         order.setOrderStatus(3L); // 3-已完成
+        order.setServiceRecord(serviceRecord);
+        order.setServicePhotos(servicePhotos);
         order.setCompleteTime(DateUtils.getNowDate());
         order.setUpdateTime(DateUtils.getNowDate());
         return tServiceOrderMapper.updateTServiceOrder(order);

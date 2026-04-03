@@ -101,7 +101,7 @@ public interface ITServiceOrderService
     /**
      * 员工完成服务
      */
-    public int completeService(Long orderId, Long userId);
+    public int completeService(Long orderId, Long userId, String serviceRecord, String servicePhotos);
 
     /**
      * 查询员工的待接/进行中订单列表

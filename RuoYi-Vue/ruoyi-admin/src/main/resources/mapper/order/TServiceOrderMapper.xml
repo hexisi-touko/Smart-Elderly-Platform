@@ -23,6 +23,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="completeTime"    column="complete_time"    />
         <result property="cancelReason"    column="cancel_reason"    />
         <result property="isDeleted"    column="is_deleted"    />
+        <result property="serviceRecord"    column="service_record"    />
+        <result property="servicePhotos"    column="service_photos"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
     </resultMap>
@@ -32,7 +34,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                so.provider_id, sp.provider_name, so.service_item_id, si.item_name,
                so.order_no, so.order_amount, so.service_time, so.service_address,
                so.service_requirements, so.order_status, so.accept_time, so.start_time,
-               so.complete_time, so.cancel_reason, so.is_deleted, so.create_time, so.update_time
+               so.complete_time, so.service_record, so.service_photos, so.cancel_reason, so.is_deleted, so.create_time, so.update_time
         from t_service_order so
         left join t_elderly e on so.elderly_id = e.elderly_id
         left join t_service_provider sp on so.provider_id = sp.provider_id
@@ -73,6 +75,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="acceptTime != null">accept_time,</if>
             <if test="startTime != null">start_time,</if>
             <if test="completeTime != null">complete_time,</if>
+            <if test="serviceRecord != null">service_record,</if>
+            <if test="servicePhotos != null">service_photos,</if>
             <if test="cancelReason != null">cancel_reason,</if>
             <if test="isDeleted != null">is_deleted,</if>
             <if test="createTime != null">create_time,</if>
@@ -91,6 +95,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="acceptTime != null">#{acceptTime},</if>
             <if test="startTime != null">#{startTime},</if>
             <if test="completeTime != null">#{completeTime},</if>
+            <if test="serviceRecord != null">#{serviceRecord},</if>
+            <if test="servicePhotos != null">#{servicePhotos},</if>
             <if test="cancelReason != null">#{cancelReason},</if>
             <if test="isDeleted != null">#{isDeleted},</if>
             <if test="createTime != null">#{createTime},</if>
@@ -113,6 +119,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="acceptTime != null">accept_time = #{acceptTime},</if>
             <if test="startTime != null">start_time = #{startTime},</if>
             <if test="completeTime != null">complete_time = #{completeTime},</if>
+            <if test="serviceRecord != null">service_record = #{serviceRecord},</if>
+            <if test="servicePhotos != null">service_photos = #{servicePhotos},</if>
             <if test="cancelReason != null">cancel_reason = #{cancelReason},</if>
             <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
             <if test="createTime != null">create_time = #{createTime},</if>

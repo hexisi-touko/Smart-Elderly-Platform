@@ -18,6 +18,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.file.FileUploadUtils;
 import com.ruoyi.common.utils.file.FileUtils;
+import com.ruoyi.common.utils.file.AliyunOSSUtils;
 import com.ruoyi.framework.config.ServerConfig;
 
 /**
@@ -33,6 +34,9 @@ public class CommonController
 
     @Autowired
     private ServerConfig serverConfig;
+
+    @Autowired
+    private AliyunOSSUtils ossUtils;
 
     private static final String FILE_DELIMITER = ",";
 
@@ -76,11 +80,22 @@ public class CommonController
     {
         try
         {
-            // 上传文件路径
+            // 优先尝试上传到阿里云 OSS
+            String url = ossUtils.upload(file);
+            
+            if (StringUtils.isNotEmpty(url)) {
+                AjaxResult ajax = AjaxResult.success();
+                ajax.put("url", url);
+                ajax.put("fileName", url); // OSS 场景下使用 URL 作为标识
+                ajax.put("newFileName", FileUtils.getName(url));
+                ajax.put("originalFilename", file.getOriginalFilename());
+                return ajax;
+            }
+
+            // 如果 OSS 上传失败或未配置，退回到本地上传
             String filePath = RuoYiConfig.getUploadPath();
-            // 上传并返回新文件名称
             String fileName = FileUploadUtils.upload(filePath, file);
-            String url = serverConfig.getUrl() + fileName;
+            url = serverConfig.getUrl() + fileName;
             AjaxResult ajax = AjaxResult.success();
             ajax.put("url", url);
             ajax.put("fileName", fileName);

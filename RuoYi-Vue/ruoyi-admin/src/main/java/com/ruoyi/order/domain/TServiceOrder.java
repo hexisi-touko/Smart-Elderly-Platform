@@ -71,6 +71,13 @@ public class TServiceOrder extends BaseEntity {
     /** 逻辑删除 */
     private Long isDeleted;
 
+    /** 服务过程记录总结 */
+    @Excel(name = "服务记录")
+    private String serviceRecord;
+
+    /** 服务过程照片 (逗号隔开) */
+    private String servicePhotos;
+
     /** 老人姓名（JOIN查询用） */
     @Excel(name = "老人姓名")
     private String elderlyName;
@@ -227,6 +234,22 @@ public class TServiceOrder extends BaseEntity {
         return itemName;
     }
 
+    public void setServiceRecord(String serviceRecord) {
+        this.serviceRecord = serviceRecord;
+    }
+
+    public String getServiceRecord() {
+        return serviceRecord;
+    }
+
+    public void setServicePhotos(String servicePhotos) {
+        this.servicePhotos = servicePhotos;
+    }
+
+    public String getServicePhotos() {
+        return servicePhotos;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -248,6 +271,8 @@ public class TServiceOrder extends BaseEntity {
                 .append("completeTime", getCompleteTime())
                 .append("cancelReason", getCancelReason())
                 .append("isDeleted", getIsDeleted())
+                .append("serviceRecord", getServiceRecord())
+                .append("servicePhotos", getServicePhotos())
                 .append("createTime", getCreateTime())
                 .append("updateTime", getUpdateTime())
                 .toString();

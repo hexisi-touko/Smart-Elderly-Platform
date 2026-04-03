@@ -26,9 +26,10 @@ export function startService(orderId) {
 }
 
 // 完成服务
-export function completeService(orderId) {
+export function completeService(data) {
   return request({
-    url: '/app/worker/order/complete/' + orderId,
-    method: 'put'
+    url: '/app/worker/order/complete',
+    method: 'put',
+    data: data
   })
 }

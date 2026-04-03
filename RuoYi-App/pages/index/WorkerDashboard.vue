@@ -62,11 +62,43 @@
 				<view class="flex justify-end margin-top-sm border-top padding-top-sm">
 					<button v-if="item.orderStatus == 1" @click="handleAccept(item.orderId)" class="cu-btn bg-blue round sm ghost">立即抢单</button>
 					<button v-if="item.orderStatus == 2 && !item.startTime" @click="handleStart(item.orderId)" class="cu-btn bg-orange round sm">开始服务</button>
-					<button v-if="item.orderStatus == 2" @click="handleComplete(item.orderId)" class="cu-btn bg-green round sm margin-left-sm">确认完成</button>
+					<button v-if="item.orderStatus == 2" @click="openCompletePopup(item.orderId)" class="cu-btn bg-green round sm margin-left-sm">确认完成</button>
 					<button @click="navToDetail(item.orderId)" class="cu-btn line-blue round sm margin-left-sm">查看详情</button>
 				</view>
 			</view>
 		</scroll-view>
+
+		<!-- 完成服务确认弹窗 -->
+		<uni-popup ref="completePopup" type="bottom">
+			<view class="complete-popup bg-white padding-xl radius-top">
+				<view class="text-xl text-bold margin-bottom">服务完成确认</view>
+				
+				<view class="margin-bottom">
+					<view class="text-df margin-bottom-xs">服务总结内容：</view>
+					<textarea v-model="completeForm.serviceRecord" placeholder="请输入本次服务的总结说明..." class="bg-gray padding-sm radius w-100" style="height: 200rpx;"></textarea>
+				</view>
+
+				<view class="margin-bottom">
+					<view class="text-df margin-bottom-xs">现场照片 (最多3张)：</view>
+					<view class="grid col-3 grid-square">
+						<view class="bg-img" v-for="(img, index) in fileList" :key="index" @tap="viewImage(index)">
+							<image :src="img" mode="aspectFill"></image>
+							<view class="cu-tag bg-red" @tap.stop="delImg(index)">
+								<text class="cuIcon-close"></text>
+							</view>
+						</view>
+						<view class="solids" @tap="chooseImage" v-if="fileList.length < 3">
+							<text class="cuIcon-cameraadd"></text>
+						</view>
+					</view>
+				</view>
+
+				<view class="flex flex-direction">
+					<button @click="handleComplete" class="cu-btn bg-green lg" :loading="submitting">确认提交</button>
+					<button @tap="$refs.completePopup.close()" class="cu-btn line-gray lg margin-top">取消</button>
+				</view>
+			</view>
+		</uni-popup>
 	</view>
 </template>
 
@@ -82,7 +114,15 @@
 					pendingCount: 0,
 					rating: '5.0'
 				},
-				orderList: []
+				orderList: [],
+				// 完成订单表单
+				completeForm: {
+					orderId: null,
+					serviceRecord: '',
+					servicePhotos: ''
+				},
+				fileList: [], // 存放临时图片路径或上传后的 URL
+				submitting: false
 			}
 		},
 		created() {
@@ -130,10 +170,70 @@
 					this.loadData();
 				});
 			},
-			handleComplete(orderId) {
-				completeService(orderId).then(() => {
-					this.$modal.msgSuccess("服务完成");
+			openCompletePopup(orderId) {
+				this.completeForm.orderId = orderId;
+				this.completeForm.serviceRecord = '';
+				this.completeForm.servicePhotos = '';
+				this.fileList = [];
+				this.$refs.completePopup.open();
+			},
+			// 选择图片
+			chooseImage() {
+				uni.chooseImage({
+					count: 3 - this.fileList.length,
+					sizeType: ['compressed'],
+					success: (res) => {
+						// 循环上传图片
+						res.tempFilePaths.forEach(path => {
+							this.uploadImg(path);
+						});
+					}
+				});
+			},
+			// 上传图片到后端（后端会代转 OSS）
+			uploadImg(path) {
+				const baseUrl = process.env.VUE_APP_BASE_API;
+				uni.uploadFile({
+					url: baseUrl + '/common/upload',
+					filePath: path,
+					name: 'file',
+					header: {
+						Authorization: "Bearer " + this.$store.state.user.token
+					},
+					success: (uploadRes) => {
+						const data = JSON.parse(uploadRes.data);
+						if (data.code === 200) {
+							this.fileList.push(data.url);
+						} else {
+							this.$modal.msgError(data.msg || "上传失败");
+						}
+					}
+				});
+			},
+			delImg(index) {
+				this.fileList.splice(index, 1);
+			},
+			viewImage(index) {
+				uni.previewImage({
+					urls: this.fileList,
+					current: index
+				});
+			},
+			handleComplete() {
+				if (!this.completeForm.serviceRecord) {
+					return this.$modal.msgError("请输入服务总结内容");
+				}
+				this.submitting = true;
+				// 将图片列表转为逗号隔开的字符串
+				this.completeForm.servicePhotos = this.fileList.join(",");
+				
+				completeService(this.completeForm).then(() => {
+					this.$modal.msgSuccess("服务已确认完成");
+					this.$refs.completePopup.close();
+					this.submitting = false;
 					this.loadData();
+				}).catch(() => {
+					this.submitting = false;
 				});
 			},
 			navToDetail(orderId) {

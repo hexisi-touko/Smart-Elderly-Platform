@@ -113,6 +113,12 @@
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
 
+        <!-- Aliyun OSS -->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
