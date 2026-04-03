@@ -18,6 +18,9 @@ public class TServiceStaff extends BaseEntity {
     @Excel(name = "服务人员id")
     private Long staffId;
 
+    /** 关联系统用户ID（t_app_user.user_id）*/
+    private Long userId;
+
     /** 服务人员姓名 */
     @Excel(name = "服务人员姓名")
     private String staffName;
@@ -58,6 +61,14 @@ public class TServiceStaff extends BaseEntity {
 
     public Long getStaffId() {
         return staffId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getUserId() {
+        return userId;
     }
 
     public void setStaffName(String staffName) {

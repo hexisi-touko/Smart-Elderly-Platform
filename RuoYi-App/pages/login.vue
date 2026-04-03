@@ -99,6 +99,8 @@
               this.$tab.reLaunch('/pages/mine/info/elderly_setup')
             } else if (userType === 'guardian') {
               this.$tab.reLaunch('/pages/mine/info/guardian_setup')
+            } else if (userType === 'worker') {
+              this.$tab.reLaunch('/pages/mine/info/worker_setup')
             } else {
               this.$tab.reLaunch('/pages/index')
             }

@@ -17,12 +17,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="isDeleted"    column="is_deleted"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
+        <result property="userId"    column="user_id"    />
     </resultMap>
 
     <sql id="selectTServiceStaffVo">
         select ss.staff_id, ss.staff_name, ss.provider_id, sp.provider_name,
                ss.phone, ss.id_card, ss.certificate, ss.staff_type,
-               ss.status, ss.is_deleted, ss.create_time, ss.update_time
+               ss.status, ss.is_deleted, ss.create_time, ss.update_time, ss.user_id
         from t_service_staff ss
         left join t_service_provider sp on ss.provider_id = sp.provider_id
     </sql>
@@ -57,6 +58,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="isDeleted != null">is_deleted,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
+            <if test="userId != null">user_id,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="staffName != null and staffName != ''">#{staffName},</if>
@@ -69,6 +71,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="isDeleted != null">#{isDeleted},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
+            <if test="userId != null">#{userId},</if>
          </trim>
     </insert>
 
@@ -85,6 +88,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="userId != null">user_id = #{userId},</if>
         </trim>
         where staff_id = #{staffId}
     </update>

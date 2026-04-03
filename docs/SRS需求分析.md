@@ -536,7 +536,7 @@ t_service_order（服务订单表）6
 | service_item_id | VARCHAR(36) | FK、NOT NULL | 关联服务项目ID |
 | order_amount | DECIMAL(10,2) | NOT NULL | 订单金额 |
 | service_time | DATETIME | NOT NULL | 约定服务时间 |
-| order_status | TINYINT | NOT NULL、枚举 | 订单状态（0-待支付、1-待接单、2-服务中、3-已完成、4-已取消、5-退款中、6-已退款） |
+| order_status | TINYINT | NOT NULL、枚举 | 订单状态（0-待支付、1-待派单、2-服务中、3-已完成、4-已取消、5-已评价、6-退款中、7-已退款） |
 
 索引设计：新增复合索引（provider_id+order_status+service_time），支撑服务商查询待接单订单、按时间统计服务量的需求；新增单字段索引（elderly_id+order_status），优化老人订单追溯效率。
 

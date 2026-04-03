@@ -7,6 +7,10 @@ import org.springframework.stereotype.Service;
 import com.ruoyi.service.mapper.TServiceStaffMapper;
 import com.ruoyi.service.domain.TServiceStaff;
 import com.ruoyi.service.service.ITServiceStaffService;
+import com.ruoyi.elderly.domain.TAppUser;
+import com.ruoyi.elderly.service.ITAppUserService;
+import com.ruoyi.common.utils.SecurityUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 服务人员管理Service业务层处理
@@ -19,6 +23,9 @@ public class TServiceStaffServiceImpl implements ITServiceStaffService
 {
     @Autowired
     private TServiceStaffMapper tServiceStaffMapper;
+
+    @Autowired
+    private ITAppUserService appUserService;
 
     /**
      * 查询服务人员管理
@@ -51,8 +58,35 @@ public class TServiceStaffServiceImpl implements ITServiceStaffService
      * @return 结果
      */
     @Override
+    @Transactional
     public int insertTServiceStaff(TServiceStaff tServiceStaff)
     {
+        // 自动开通小程序登录账号
+        if (tServiceStaff.getPhone() != null) {
+            TAppUser query = new TAppUser();
+            query.setPhone(tServiceStaff.getPhone());
+            List<TAppUser> users = appUserService.selectTAppUserList(query);
+            
+            Long userId;
+            if (users != null && !users.isEmpty()) {
+                // 如果账号已存在，直接获取userId
+                userId = users.get(0).getUserId();
+            } else {
+                // 如果不存在，则新建账号
+                TAppUser newUser = new TAppUser();
+                newUser.setPhone(tServiceStaff.getPhone());
+                newUser.setRealName(tServiceStaff.getStaffName());
+                // 默认初始密码 123456
+                newUser.setPassword(SecurityUtils.encryptPassword("123456"));
+                newUser.setUserType("worker");
+                newUser.setStatus(0L); // 正常
+                appUserService.insertTAppUser(newUser);
+                userId = newUser.getUserId();
+            }
+            // 绑定到员工表
+            tServiceStaff.setUserId(userId);
+        }
+        
         tServiceStaff.setCreateTime(DateUtils.getNowDate());
         return tServiceStaffMapper.insertTServiceStaff(tServiceStaff);
     }

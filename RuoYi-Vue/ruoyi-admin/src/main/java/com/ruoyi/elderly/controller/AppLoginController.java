@@ -56,6 +56,9 @@ public class AppLoginController {
     @Autowired
     private com.ruoyi.elderly.mapper.TGuardianMapper tGuardianMapper;
 
+    @Autowired
+    private com.ruoyi.service.mapper.TServiceStaffMapper tServiceStaffMapper;
+
     /**
      * 获取C端用户信息
      */
@@ -75,6 +78,11 @@ public class AppLoginController {
             com.ruoyi.elderly.domain.TGuardian query = new com.ruoyi.elderly.domain.TGuardian();
             query.setUserId(appUser.getUserId());
             java.util.List<com.ruoyi.elderly.domain.TGuardian> list = tGuardianMapper.selectTGuardianList(query);
+            profileCompleted = list != null && !list.isEmpty();
+        } else if ("worker".equals(appUser.getUserType())) {
+            com.ruoyi.service.domain.TServiceStaff query = new com.ruoyi.service.domain.TServiceStaff();
+            query.setUserId(appUser.getUserId());
+            java.util.List<com.ruoyi.service.domain.TServiceStaff> list = tServiceStaffMapper.selectTServiceStaffList(query);
             profileCompleted = list != null && !list.isEmpty();
         }
 

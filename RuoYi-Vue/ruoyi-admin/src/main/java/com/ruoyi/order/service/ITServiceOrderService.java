@@ -85,4 +85,26 @@ public interface ITServiceOrderService
      * @return 结果
      */
     public int cancelAppServiceOrder(Long orderId, Long userId);
+
+    // ========== 员工端方法 ==========
+
+    /**
+     * 员工接单
+     */
+    public int acceptOrder(Long orderId, Long userId);
+
+    /**
+     * 员工开始服务
+     */
+    public int startService(Long orderId, Long userId);
+
+    /**
+     * 员工完成服务
+     */
+    public int completeService(Long orderId, Long userId);
+
+    /**
+     * 查询员工的待接/进行中订单列表
+     */
+    public List<TServiceOrder> selectWorkerOrderList(TServiceOrder tServiceOrder, Long userId);
 }

@@ -42,9 +42,18 @@
         </view>
         
         <view class="card-footer">
-          <button class="footer-btn plain" v-if="item.orderStatus === 0 || item.orderStatus === 1" @click="handleCancel(item)">取消订单</button>
-          <button class="footer-btn primary" v-if="item.orderStatus === 3" @click="handleEval(item)">去评价</button>
-          <text class="footer-tip" v-if="item.orderStatus === 5">感谢评价！</text>
+          <!-- 老人/监护人操作 -->
+          <template v-if="userType !== 'worker'">
+            <button class="footer-btn plain" v-if="item.orderStatus === 0 || item.orderStatus === 1" @click="handleCancel(item)">取消订单</button>
+            <button class="footer-btn primary" v-if="item.orderStatus === 3" @click="handleEval(item)">去评价</button>
+            <text class="footer-tip" v-if="item.orderStatus === 5">感谢评价！</text>
+          </template>
+          
+          <!-- 服务人员（员工）操作 -->
+          <template v-else>
+            <text class="footer-tip grey" v-if="item.orderStatus === 3">等待客户评价</text>
+            <button class="footer-btn line-blue" v-if="item.orderStatus === 5" @click="goDetail(item)">查看评价</button>
+          </template>
         </view>
       </view>
 
@@ -96,7 +105,7 @@
       return {
         tabs: [
           { label: '全部', value: '' },
-          { label: '待接单', value: '1' },
+          { label: '待派单', value: '1' },
           { label: '服务中', value: '2' },
           { label: '已完成', value: '3' }
         ],
@@ -114,6 +123,11 @@
           starLevel: 5,
           evaluationContent: ''
         }
+      }
+    },
+    computed: {
+      userType() {
+        return this.$store.state.user.userType;
       }
     },
     onShow() {
@@ -178,11 +192,13 @@
         // 0:待接单, 1:服务中, 2:已完成, 3:已取消
         const map = {
           0: { text: '待支付', class: 'status-pending' },
-          1: { text: '待接单', class: 'status-pending' },
+          1: { text: '待派单', class: 'status-pending' },
           2: { text: '服务中', class: 'status-process' },
           3: { text: '已完成', class: 'status-success' },
           4: { text: '已取消', class: 'status-cancel' },
-          5: { text: '已评价', class: 'status-success' }
+          5: { text: '已评价', class: 'status-success' },
+          6: { text: '退款中', class: 'status-pending' },
+          7: { text: '已退款', class: 'status-cancel' }
         }
         return {
           statusText: map[status]?.text || '未知',

@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.order.mapper.TServiceOrderMapper;
 import com.ruoyi.order.domain.TServiceOrder;
+import com.ruoyi.order.domain.TOrderStaff;
+import com.ruoyi.order.mapper.TOrderStaffMapper;
 import com.ruoyi.order.service.ITServiceOrderService;
 import com.ruoyi.elderly.domain.TElderly;
 import com.ruoyi.elderly.service.ITElderlyService;
@@ -13,6 +15,8 @@ import com.ruoyi.elderly.domain.TGuardian;
 import com.ruoyi.elderly.service.ITGuardianService;
 import com.ruoyi.elderly.domain.TElderlyGuardian;
 import com.ruoyi.elderly.service.ITElderlyGuardianService;
+import com.ruoyi.service.domain.TServiceStaff;
+import com.ruoyi.service.service.ITServiceStaffService;
 import java.util.ArrayList;
 import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.common.exception.ServiceException;
@@ -29,6 +33,9 @@ public class TServiceOrderServiceImpl implements ITServiceOrderService {
     private TServiceOrderMapper tServiceOrderMapper;
 
     @Autowired
+    private TOrderStaffMapper tOrderStaffMapper;
+
+    @Autowired
     private ITElderlyService tElderlyService;
 
     @Autowired
@@ -36,6 +43,9 @@ public class TServiceOrderServiceImpl implements ITServiceOrderService {
 
     @Autowired
     private ITElderlyGuardianService tElderlyGuardianService;
+
+    @Autowired
+    private ITServiceStaffService tServiceStaffService;
 
     /**
      * 查询服务订单
@@ -135,8 +145,18 @@ public class TServiceOrderServiceImpl implements ITServiceOrderService {
                     return new ArrayList<>();
                 }
             } else {
-                // 既不是老人也不是监护人（理论上不应该，除非没完善资料）
-                return new ArrayList<>();
+                // 3. 识别身份：查是否为服务人员（员工）
+                TServiceStaff staffParams = new TServiceStaff();
+                staffParams.setUserId(userId);
+                List<TServiceStaff> staffList = tServiceStaffService.selectTServiceStaffList(staffParams);
+                
+                if (staffList != null && !staffList.isEmpty()) {
+                    // 是服务人员，查该人员的所有关联订单
+                    return tServiceOrderMapper.selectWorkerOwnOrders(staffList.get(0).getStaffId(), tServiceOrder.getOrderStatus());
+                } else {
+                    // 既不是老人、监护人，也不是服务人员
+                    return new ArrayList<>();
+                }
             }
         }
 
@@ -222,5 +242,129 @@ public class TServiceOrderServiceImpl implements ITServiceOrderService {
         order.setOrderStatus(4L); // 4-已取消 (符合SRS规范)
         order.setUpdateTime(DateUtils.getNowDate());
         return tServiceOrderMapper.updateTServiceOrder(order);
+    }
+
+    // ========== 员工端方法实现 ==========
+
+    /**
+     * 根据 userId 获取对应的 staffId
+     */
+    private Long getStaffIdByUserId(Long userId) {
+        TServiceStaff query = new TServiceStaff();
+        query.setUserId(userId);
+        List<TServiceStaff> staffList = tServiceStaffService.selectTServiceStaffList(query);
+        if (staffList == null || staffList.isEmpty()) {
+            throw new ServiceException("您不是服务人员，无权执行此操作");
+        }
+        return staffList.get(0).getStaffId();
+    }
+
+    /**
+     * 员工接单
+     */
+    @Override
+    public int acceptOrder(Long orderId, Long userId) {
+        Long staffId = getStaffIdByUserId(userId);
+
+        TServiceOrder order = tServiceOrderMapper.selectTServiceOrderByOrderId(orderId);
+        if (order == null) {
+            throw new ServiceException("订单不存在");
+        }
+        if (order.getOrderStatus() != 1L) {
+            throw new ServiceException("该订单当前状态不可接单（仅'待接单'状态可操作）");
+        }
+
+        // 更新订单状态 -> 2(服务中)
+        order.setOrderStatus(2L);
+        order.setAcceptTime(DateUtils.getNowDate());
+        order.setUpdateTime(DateUtils.getNowDate());
+        int rows = tServiceOrderMapper.updateTServiceOrder(order);
+
+        // 绑定订单-服务人员关联
+        TOrderStaff orderStaff = new TOrderStaff();
+        orderStaff.setOrderId(orderId);
+        orderStaff.setStaffId(staffId);
+        orderStaff.setIsPrimary(1L);
+        orderStaff.setCreateTime(DateUtils.getNowDate());
+        tOrderStaffMapper.insertTOrderStaff(orderStaff);
+
+        return rows;
+    }
+
+    /**
+     * 员工开始服务
+     */
+    @Override
+    public int startService(Long orderId, Long userId) {
+        Long staffId = getStaffIdByUserId(userId);
+
+        TServiceOrder order = tServiceOrderMapper.selectTServiceOrderByOrderId(orderId);
+        if (order == null) {
+            throw new ServiceException("订单不存在");
+        }
+        if (order.getOrderStatus() != 2L) {
+            throw new ServiceException("该订单当前状态不可开始服务（仅'已接单'状态可操作）");
+        }
+
+        // 校验：必须是本人接的单
+        verifyStaffOwnership(orderId, staffId);
+
+        // 状态保持为 2 (服务中)，仅记录开始时间
+        order.setOrderStatus(2L);
+        order.setStartTime(DateUtils.getNowDate());
+        order.setUpdateTime(DateUtils.getNowDate());
+        return tServiceOrderMapper.updateTServiceOrder(order);
+    }
+
+    /**
+     * 员工完成服务
+     */
+    @Override
+    public int completeService(Long orderId, Long userId) {
+        Long staffId = getStaffIdByUserId(userId);
+
+        TServiceOrder order = tServiceOrderMapper.selectTServiceOrderByOrderId(orderId);
+        if (order == null) {
+            throw new ServiceException("订单不存在");
+        }
+        if (order.getOrderStatus() != 2L) {
+            throw new ServiceException("该订单当前状态不可完成（仅'服务中'状态可操作）");
+        }
+
+        verifyStaffOwnership(orderId, staffId);
+
+        order.setOrderStatus(3L); // 3-已完成
+        order.setCompleteTime(DateUtils.getNowDate());
+        order.setUpdateTime(DateUtils.getNowDate());
+        return tServiceOrderMapper.updateTServiceOrder(order);
+    }
+
+    /**
+     * 查询员工的待接/进行中订单列表
+     */
+    @Override
+    public List<TServiceOrder> selectWorkerOrderList(TServiceOrder tServiceOrder, Long userId) {
+        Long staffId = getStaffIdByUserId(userId);
+        // 待接单(status=1)的所有订单都可见 + 自己已接的订单
+        // 简化实现：查全部待接单 + 自己关联的订单
+        if (tServiceOrder.getOrderStatus() != null && tServiceOrder.getOrderStatus() == 1L) {
+            // 查待接单池
+            return tServiceOrderMapper.selectTServiceOrderList(tServiceOrder);
+        }
+        // 其他状态：只查自己的
+        return tServiceOrderMapper.selectWorkerOwnOrders(staffId, tServiceOrder.getOrderStatus());
+    }
+
+    /**
+     * 校验该订单是否由当前员工接的
+     */
+    private void verifyStaffOwnership(Long orderId, Long staffId) {
+        TOrderStaff query = new TOrderStaff();
+        query.setOrderId(orderId);
+        query.setStaffId(staffId);
+        List<TOrderStaff> list = tOrderStaffMapper.selectTOrderStaffList(query);
+        if (list == null || list.isEmpty()) {
+            throw new ServiceException("您不是该订单的服务人员，无权操作");
+        }
     }
 }

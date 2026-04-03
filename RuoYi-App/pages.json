@@ -102,6 +102,14 @@
       }
     },
     {
+      "path": "pages/mine/info/worker_setup",
+      "style": {
+        "navigationBarTitleText": "完善助老员资料",
+        "navigationBarBackgroundColor": "#39b54a",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
       "path": "pages/mine/pwd/index",
       "style": {
         "navigationBarTitleText": "修改密码"

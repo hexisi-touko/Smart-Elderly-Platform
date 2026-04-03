@@ -131,4 +131,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{orderId}
         </foreach>
     </delete>
+
+    <!-- 查询员工自己关联的订单 -->
+    <select id="selectWorkerOwnOrders" resultMap="TServiceOrderResult">
+        <include refid="selectTServiceOrderVo"/>
+        inner join t_order_staff os on so.order_id = os.order_id
+        <where>
+            os.staff_id = #{staffId}
+            <if test="orderStatus != null"> and so.order_status = #{orderStatus}</if>
+        </where>
+        order by so.create_time desc
+    </select>
 </mapper>

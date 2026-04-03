@@ -2,6 +2,7 @@ package com.ruoyi.order.mapper;
 
 import java.util.List;
 import com.ruoyi.order.domain.TServiceOrder;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 服务订单Mapper接口
@@ -58,4 +59,13 @@ public interface TServiceOrderMapper
      * @return 结果
      */
     public int deleteTServiceOrderByOrderIds(Long[] orderIds);
+
+    /**
+     * 查询员工自己关联的订单（通过 t_order_staff 关联）
+     *
+     * @param staffId 员工ID
+     * @param orderStatus 订单状态（可为null）
+     * @return 订单列表
+     */
+    public List<TServiceOrder> selectWorkerOwnOrders(@Param("staffId") Long staffId, @Param("orderStatus") Long orderStatus);
 }

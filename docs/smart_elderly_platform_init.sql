@@ -481,7 +481,7 @@ CREATE TABLE t_service_order (
     service_time DATETIME NOT NULL COMMENT '约定服务时间',
     service_address VARCHAR(200) COMMENT '服务地址',
     service_requirements TEXT COMMENT '服务要求说明',
-    order_status TINYINT NOT NULL DEFAULT 0 COMMENT '订单状态（0-待支付、1-待接单、2-服务中、3-已完成、4-已取消、5-退款中、6-已退款）',
+    order_status TINYINT NOT NULL DEFAULT 0 COMMENT '订单状态（0-待支付、1-待派单、2-服务中、3-已完成、4-已取消、5-已评价、6-退款中、7-已退款）',
     accept_time DATETIME COMMENT '接单时间',
     start_time DATETIME COMMENT '服务开始时间',
     complete_time DATETIME COMMENT '服务完成时间',

@@ -1,145 +1,157 @@
 <template>
   <view class="container">
-    <view class="header">
-      <text class="title">居家养老服务</text>
-      <text class="subtitle">用心陪伴您的每一天</text>
-    </view>
+    <!-- 老人/监护人视图 -->
+    <block v-if="userType !== 'worker'">
+      <view class="header">
+        <text class="title">居家养老服务</text>
+        <text class="subtitle">用心陪伴您的每一天</text>
+      </view>
 
-    <!-- 快捷看板入口 - 磁贴样式 -->
-    <view class="quick-nav">
-      <view class="nav-card health" @click="navToHealth">
-        <view class="nav-content">
-          <uni-icons type="heart-filled" size="36" color="#fff"></uni-icons>
-          <view class="nav-text">
-            <text class="nav-title">健康看板</text>
-            <text class="nav-desc">血压心率</text>
-          </view>
-        </view>
-      </view>
-      <view class="nav-card safety" @click="navToAlert">
-        <view class="nav-content">
-          <uni-icons type="notification-filled" size="36" color="#fff"></uni-icons>
-          <view class="nav-text">
-            <text class="nav-title">预警历史</text>
-            <text class="nav-desc">紧急呼救</text>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <view class="service-list">
-      <view class="section-header">
-        <text class="section-title">预约服务</text>
-      </view>
-      <view class="service-card" v-for="(item, index) in serviceList" :key="index" @click="openOrderPopup(item)">
-        <view class="service-info">
-          <text class="service-name">{{ item.itemName }}</text>
-          <text class="service-desc">{{ item.itemDescription }}</text>
-          <view class="service-price-wrap">
-            <text class="price-val">￥{{ item.standardPrice || 0 }}</text>
-            <text class="price-unit"> / {{ item.serviceUnit || '次' }}</text>
-          </view>
-        </view>
-        <button class="book-btn">立即预约</button>
-      </view>
-      <view v-if="serviceList.length === 0" class="empty-state">
-         <text>暂无上架的服务项目，去管理后台添加一点吧！</text>
-      </view>
-    </view>
-
-    <!-- 预约弹层 (底部抽屉样式) -->
-    <view class="overlay" v-if="showPopup" @click="closeOrderPopup"></view>
-    <view class="drawer-box" v-if="showPopup" :class="{'drawer-show': showPopup}">
-      <view class="drawer-header">
-        <view class="header-line"></view>
-        <text class="drawer-title">预约服务</text>
-        <view class="close-icon" @click="closeOrderPopup">
-          <uni-icons type="closeempty" size="24" color="#999"></uni-icons>
-        </view>
-      </view>
-      
-      <view class="drawer-body">
-        <!-- 服务摘要预览 -->
-        <view class="service-summary">
-          <view class="summary-left">
-            <text class="item-name">{{ currentService.itemName }}</text>
-            <text class="item-type">{{ currentService.providerName || '专业服务' }}</text>
-          </view>
-          <view class="summary-right">
-            <text class="price-label">预计费用</text>
-            <text class="price-val">￥{{ currentService.standardPrice }}</text>
-          </view>
-        </view>
-
-        <view class="booking-form">
-          <view class="form-item">
-            <view class="item-label">
-              <uni-icons type="calendar" size="18" color="#0081ff"></uni-icons>
-              <text>服务预约日期</text>
+      <!-- 快捷看板入口 - 磁贴样式 -->
+      <view class="quick-nav">
+        <view class="nav-card health" @click="navToHealth">
+          <view class="nav-content">
+            <uni-icons type="heart-filled" size="36" color="#fff"></uni-icons>
+            <view class="nav-text">
+              <text class="nav-title">健康看板</text>
+              <text class="nav-desc">血压心率</text>
             </view>
-            <picker mode="date" :value="orderForm.serviceTime" @change="bindDateChange">
-              <view class="picker-content">
-                <text>{{ orderForm.serviceTime || '点击选择日期' }}</text>
-                <uni-icons type="right" size="16" color="#ccc"></uni-icons>
+          </view>
+        </view>
+        <view class="nav-card safety" @click="navToAlert">
+          <view class="nav-content">
+            <uni-icons type="notification-filled" size="36" color="#fff"></uni-icons>
+            <view class="nav-text">
+              <text class="nav-title">预警历史</text>
+              <text class="nav-desc">紧急呼救</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="service-list">
+        <view class="section-header">
+          <text class="section-title">预约服务</text>
+        </view>
+        <view class="service-card" v-for="(item, index) in serviceList" :key="index" @click="openOrderPopup(item)">
+          <view class="service-info">
+            <text class="service-name">{{ item.itemName }}</text>
+            <text class="service-desc">{{ item.itemDescription }}</text>
+            <view class="service-price-wrap">
+              <text class="price-val">￥{{ item.standardPrice || 0 }}</text>
+              <text class="price-unit"> / {{ item.serviceUnit || '次' }}</text>
+            </view>
+          </view>
+          <button class="book-btn">立即预约</button>
+        </view>
+        <view v-if="serviceList.length === 0" class="empty-state">
+           <text>暂无上架的服务项目，去管理后台添加一点吧！</text>
+        </view>
+      </view>
+
+      <!-- SOS 悬浮呼叫按钮 -->
+      <view class="sos-btn" @click="handleSOS">
+        <view class="sos-pulse"></view>
+        <text>SOS</text>
+      </view>
+
+      <!-- 预约弹层 (底部抽屉样式) -->
+      <view class="overlay" v-if="showPopup" @click="closeOrderPopup"></view>
+      <view class="drawer-box" v-if="showPopup" :class="{'drawer-show': showPopup}">
+        <view class="drawer-header">
+          <view class="header-line"></view>
+          <text class="drawer-title">预约服务</text>
+          <view class="close-icon" @click="closeOrderPopup">
+            <uni-icons type="closeempty" size="24" color="#999"></uni-icons>
+          </view>
+        </view>
+        
+        <view class="drawer-body">
+          <view class="service-summary">
+            <view class="summary-left">
+              <text class="item-name">{{ currentService.itemName }}</text>
+              <text class="item-type">{{ currentService.providerName || '专业服务' }}</text>
+            </view>
+            <view class="summary-right">
+              <text class="price-label">预计费用</text>
+              <text class="price-val">￥{{ currentService.standardPrice }}</text>
+            </view>
+          </view>
+
+          <view class="booking-form">
+            <view class="form-item">
+              <view class="item-label">
+                <uni-icons type="calendar" size="18" color="#0081ff"></uni-icons>
+                <text>服务预约日期</text>
               </view>
-            </picker>
-          </view>
-          
-          <view class="form-item">
-            <view class="item-label">
-              <uni-icons type="location-filled" size="18" color="#0081ff"></uni-icons>
-              <text>具体上门地址</text>
+              <picker mode="date" :value="orderForm.serviceTime" @change="bindDateChange">
+                <view class="picker-content">
+                  <text>{{ orderForm.serviceTime || '点击选择日期' }}</text>
+                  <uni-icons type="right" size="16" color="#ccc"></uni-icons>
+                </view>
+              </picker>
             </view>
-            <textarea 
-              class="address-input" 
-              v-model="orderForm.serviceAddress" 
-              placeholder="请输入楼栋、门牌号等详细信息"
-              :auto-height="true"
-            />
-          </view>
+            
+            <view class="form-item">
+              <view class="item-label">
+                <uni-icons type="location-filled" size="18" color="#0081ff"></uni-icons>
+                <text>具体上门地址</text>
+              </view>
+              <textarea 
+                class="address-input" 
+                v-model="orderForm.serviceAddress" 
+                placeholder="请输入楼栋、门牌号等详细信息"
+                :auto-height="true"
+              />
+            </view>
 
-          <view class="form-item">
-            <view class="item-label">
-              <uni-icons type="chat-filled" size="18" color="#0081ff"></uni-icons>
-              <text>特殊要求说明 (选填)</text>
+            <view class="form-item">
+              <view class="item-label">
+                <uni-icons type="chat-filled" size="18" color="#0081ff"></uni-icons>
+                <text>特殊要求说明 (选填)</text>
+              </view>
+              <input 
+                class="memo-input" 
+                type="text" 
+                v-model="orderForm.serviceRequirements" 
+                placeholder="如有轮椅需求、忌口等请注明" 
+              />
             </view>
-            <input 
-              class="memo-input" 
-              type="text" 
-              v-model="orderForm.serviceRequirements" 
-              placeholder="如有轮椅需求、忌口等请注明" 
-            />
           </view>
         </view>
+        
+        <view class="drawer-footer">
+          <button class="booking-btn" @click="submitOrder" :disabled="submitting">
+            {{ submitting ? '正在为您呼叫...' : '立即预约服务' }}
+          </button>
+        </view>
       </view>
-      
-      <view class="drawer-footer">
-        <button class="booking-btn" @click="submitOrder" :disabled="submitting">
-          {{ submitting ? '正在为您呼叫...' : '立即预约服务' }}
-        </button>
-      </view>
-    </view>
 
-    <!-- 预约成功反馈卡片 -->
-    <view class="overlay" v-if="showSuccessCard" @click="closeSuccessCard"></view>
-    <view class="success-card" v-if="showSuccessCard">
-      <view class="success-icon">
-        <uni-icons type="checkbox-filled" size="80" color="#52c41a"></uni-icons>
+      <!-- 预约成功反馈卡片 -->
+      <view class="overlay" v-if="showSuccessCard" @click="closeSuccessCard"></view>
+      <view class="success-card" v-if="showSuccessCard">
+        <view class="success-icon">
+          <uni-icons type="checkbox-filled" size="80" color="#52c41a"></uni-icons>
+        </view>
+        <text class="success-title">预约成功！</text>
+        <text class="success-desc">我们已为您通知专业服务人员，请保持电话畅通。</text>
+        
+        <view class="card-btns">
+          <button class="btn-check" @click="navToOrder">查看订单</button>
+          <button class="btn-close" @click="closeSuccessCard">返回首页</button>
+        </view>
       </view>
-      <text class="success-title">预约成功！</text>
-      <text class="success-desc">我们已为您通知专业服务人员，请保持电话畅通。</text>
-      
-      <view class="card-btns">
-        <button class="btn-check" @click="navToOrder">查看订单</button>
-        <button class="btn-close" @click="closeSuccessCard">返回首页</button>
-      </view>
-    </view>
+    </block>
 
-    <!-- SOS 悬浮呼叫按钮 -->
-    <view class="sos-btn" @click="handleSOS">
-      <view class="sos-pulse"></view>
-      <text>SOS</text>
-    </view>
+    <!-- 服务人员(Worker)视图 -->
+    <block v-else>
+      <view class="header staff-header">
+        <text class="title">助老员工作台</text>
+        <text class="subtitle">让关爱更专业，服务更高效</text>
+      </view>
+      <worker-dashboard ref="workerDashboard"></worker-dashboard>
+    </block>
+
   </view>
 </template>
 
@@ -147,10 +159,15 @@
   import { listServiceItem } from '@/api/service/item'
   import { addServiceOrder } from '@/api/order/serviceOrder'
   import { triggerSOS } from '@/api/safety/alert'
+  import WorkerDashboard from './index/WorkerDashboard.vue'
 
   export default {
+    components: {
+      WorkerDashboard
+    },
     data() {
       return {
+        userType: '',
         serviceList: [],
         currentService: {},
         orderForm: {
@@ -164,9 +181,17 @@
       }
     },
     onShow() {
-      this.getServiceList()
+      this.checkRole()
+      if (this.userType !== 'worker') {
+        this.getServiceList()
+      } else if (this.$refs.workerDashboard) {
+        this.$refs.workerDashboard.loadData();
+      }
     },
     methods: {
+      checkRole() {
+        this.userType = this.$store.state.user.userType || uni.getStorageSync('userType')
+      },
       getServiceList() {
         listServiceItem().then(res => {
           this.serviceList = res.rows || []
@@ -308,6 +333,10 @@
       font-size: 18px;
       opacity: 0.9;
     }
+  }
+
+  .staff-header {
+    background: linear-gradient(135deg, #39b54a, #8dc63f) !important;
   }
 
   .quick-nav {
