@@ -36,7 +36,7 @@
       <!-- 心率卡片 -->
       <view class="data-card hr" @click="goDetail('hr')">
         <view class="card-left">
-          <uni-icons type="pulse" size="40" color="#0081ff"></uni-icons>
+          <uni-icons type="heart" size="40" color="#0081ff"></uni-icons>
           <text class="card-label">心率 (次/分)</text>
         </view>
         <view class="card-right">
@@ -56,10 +56,40 @@
           <text class="status-tag" :class="getBsStatusClass">{{ getBsStatusText }}</text>
         </view>
       </view>
+
+      <!-- 体温卡片 -->
+      <view class="data-card temp" @click="goDetail('temp')">
+        <view class="card-left">
+          <uni-icons type="staff-filled" size="40" color="#8dc63f"></uni-icons>
+          <text class="card-label">体温 (℃)</text>
+        </view>
+        <view class="card-right">
+          <text class="main-value">{{ latestHealth.temperature || '--' }}</text>
+          <text class="status-tag" :class="getTempStatusClass">{{ getTempStatusText }}</text>
+        </view>
+      </view>
+
+      <!-- 血氧卡片 -->
+      <view class="data-card spo2" @click="goDetail('spo2')">
+        <view class="card-left">
+          <uni-icons type="paperplane-filled" size="40" color="#9c27b0"></uni-icons>
+          <text class="card-label">血氧 (%)</text>
+        </view>
+        <view class="card-right">
+          <text class="main-value">{{ latestHealth.bloodOxygen || '--' }}</text>
+          <text class="status-tag" :class="getSpo2StatusClass">{{ getSpo2StatusText }}</text>
+        </view>
+      </view>
     </view>
 
     <!-- 健康服务快捷入口 -->
     <view class="service-nav">
+      <view class="nav-item" @click="navTo('/pages/health/report')">
+        <view class="nav-icon report-icon-bg">
+          <text class="nav-emoji">📊</text>
+        </view>
+        <text class="nav-label">健康报告</text>
+      </view>
       <view class="nav-item" @click="navTo('/pages/health/medication')">
         <view class="nav-icon med-icon-bg">
           <text class="nav-emoji">💊</text>
@@ -145,7 +175,7 @@
         isDebugMode: true, 
         metrics: [
           { name: '血压', key: 'blood_pressure', icon: 'heart-filled' },
-          { name: '心率', key: 'heart_rate', icon: 'pulse' },
+          { name: '心率', key: 'heart_rate', icon: 'heart' },
           { name: '血糖', key: 'blood_sugar', icon: 'fire-filled' },
           { name: '体温', key: 'temperature', icon: 'staff-filled' },
           { name: '血氧', key: 'blood_oxygen', icon: 'paperplane-filled' }
@@ -172,18 +202,52 @@
         this.todayDate = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
       },
       getHealthData() {
-        listHealthRecords({ pageSize: 10 }).then(res => {
+        // 加载近期所有记录，合并各维度的最新值
+        listHealthRecords({ pageSize: 50 }).then(res => {
           const allRows = res.rows || []
-          if (allRows.length > 0) {
-            this.latestHealth = allRows[0] 
-          }
+          if (allRows.length === 0) return
+
+          // 合并逻辑：遍历所有记录，取每个字段的第一个非空值
+          const merged = { dataStatus: 0 }
+          const fields = ['systolicBp', 'diastolicBp', 'heartRate', 'bloodSugar', 'temperature', 'bloodOxygen']
+          fields.forEach(field => {
+            for (const row of allRows) {
+              if (row[field] != null && row[field] !== '' && parseFloat(row[field]) > 0) {
+                merged[field] = row[field]
+                // 如果这条记录有异常状态，保留最高优先级
+                if (row.dataStatus > merged.dataStatus) {
+                  merged.dataStatus = row.dataStatus
+                }
+                break // 找到最新的就停止
+              }
+            }
+          })
+          this.latestHealth = merged
         })
+      },
+      /** 根据 currentRange 计算 beginTime */
+      getBeginTime() {
+        const now = new Date()
+        let d = new Date(now)
+        if (this.currentRange === 'week') d.setDate(d.getDate() - 7)
+        else if (this.currentRange === 'month') d.setMonth(d.getMonth() - 1)
+        else if (this.currentRange === 'quarter') d.setMonth(d.getMonth() - 3)
+        const y = d.getFullYear()
+        const m = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        return `${y}-${m}-${day}`
       },
       getTrendData() {
         this.loadingChart = true
+        const beginTime = this.getBeginTime()
+        // 结束时间为今天
+        const now = new Date()
+        const endTime = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' 23:59:59'
         listHealthRecords({ 
           recordType: this.currentMetric,
-          pageSize: 20 
+          beginTime: beginTime,
+          endTime: endTime,
+          pageSize: 50 
         }).then(res => {
           this.chartData = res.rows || []
           this.generateAdvice()
@@ -217,11 +281,11 @@
         const ctx = uni.createCanvasContext('trendCanvas', this)
         const width = uni.upx2px(600)
         const height = uni.upx2px(350)
-        const paddingLeft = 60 
-        const paddingBottom = 40 
-        const paddingTop = 30
-        const paddingRight = 30
-        
+        const paddingLeft = 70
+        const paddingBottom = 50
+        const paddingTop = 20
+        const paddingRight = 20
+
         const rawPoints = this.chartData.map(row => {
           let val = 0;
           if (this.currentMetric === 'blood_pressure') val = row.systolicBp;
@@ -229,13 +293,14 @@
           else if (this.currentMetric === 'blood_sugar') val = row.bloodSugar;
           else if (this.currentMetric === 'temperature') val = row.temperature;
           else if (this.currentMetric === 'blood_oxygen') val = row.bloodOxygen;
-          
           return {
             val: parseFloat(val) || 0,
+            dateRaw: (row.collectTime || row.createTime || ''),
             date: (row.collectTime || row.createTime || '').split(' ')[0].substring(5),
-            status: row.dataStatus 
+            status: row.dataStatus
           };
-        }).filter(p => p.val > 0).reverse(); 
+        }).filter(p => p.val > 0)
+          .sort((a, b) => a.dateRaw.localeCompare(b.dateRaw)); // 按日期升序：左旧右新
 
         if (rawPoints.length === 0) return
         const dataValues = rawPoints.map(p => p.val);
@@ -246,13 +311,39 @@
         const chartWidth = width - paddingLeft - paddingRight
         const chartHeight = height - paddingTop - paddingBottom
 
+        // 清空画布
+        ctx.clearRect(0, 0, width, height)
+
+        // --- Y 轴刻度（5档） ---
+        ctx.setFontSize(10)
+        ctx.setFillStyle('#999')
+        ctx.setStrokeStyle('#f0f0f0')
+        ctx.setLineWidth(0.5)
+        const ySteps = 4
+        for (let i = 0; i <= ySteps; i++) {
+          const yVal = minVal + (range / ySteps) * i
+          const yPos = height - paddingBottom - (chartHeight / ySteps) * i
+          // 数值标签
+          const label = this.currentMetric === 'blood_sugar' || this.currentMetric === 'temperature'
+            ? yVal.toFixed(1) : Math.round(yVal).toString()
+          ctx.fillText(label, 4, yPos + 4)
+          // 水平参考线
+          ctx.beginPath()
+          ctx.moveTo(paddingLeft, yPos)
+          ctx.lineTo(width - paddingRight, yPos)
+          ctx.stroke()
+        }
+
+        // --- X/Y 主坐标轴 ---
         ctx.setStrokeStyle('#ccc')
         ctx.setLineWidth(1)
+        ctx.beginPath()
         ctx.moveTo(paddingLeft, paddingTop)
-        ctx.lineTo(paddingLeft, height - paddingBottom) 
-        ctx.lineTo(width - paddingRight, height - paddingBottom) 
+        ctx.lineTo(paddingLeft, height - paddingBottom)
+        ctx.lineTo(width - paddingRight, height - paddingBottom)
         ctx.stroke()
 
+        // --- 折线 ---
         ctx.beginPath()
         ctx.setStrokeStyle('#0081ff')
         ctx.setLineWidth(2)
@@ -265,15 +356,24 @@
         })
         ctx.stroke()
 
+        // --- 数据点 + X 轴日期 ---
+        const showEvery = rawPoints.length > 10 ? Math.ceil(rawPoints.length / 6) : 1
         rawPoints.forEach((p, i) => {
           const x = paddingLeft + i * stepX
           const y = height - paddingBottom - ((p.val - minVal) / range) * chartHeight
+          // 数据点
           ctx.beginPath()
           ctx.setFillStyle(p.status == 2 ? '#e54d42' : '#fff')
           ctx.setStrokeStyle(p.status == 2 ? '#e54d42' : '#0081ff')
           ctx.arc(x, y, p.status == 2 ? 5 : 3, 0, 2 * Math.PI)
           ctx.fill()
           ctx.stroke()
+          // X 轴日期标注（间隔显示 避免重叠）
+          if (i % showEvery === 0 || i === rawPoints.length - 1) {
+            ctx.setFillStyle('#999')
+            ctx.setFontSize(9)
+            ctx.fillText(p.date, x - 14, height - paddingBottom + 16)
+          }
         })
         ctx.draw()
       },
@@ -294,7 +394,8 @@
         })
       },
       goDetail(type) {
-        this.$modal.msg("详情功能即将上线")
+        // 跳转到健康报告页并传入默认指标
+        uni.navigateTo({ url: '/pages/health/report?metric=' + type })
       }
     },
     computed: {
@@ -316,7 +417,27 @@
       getHrStatusText() { return this.latestHealth.heartRate ? (this.latestHealth.dataStatus > 0 ? '心率偏快' : '正常') : '无数据' },
       getHrStatusClass() { return this.latestHealth.dataStatus > 0 ? 'warn' : 'normal' },
       getBsStatusText() { return this.latestHealth.bloodSugar ? '正常' : '无数据' },
-      getBsStatusClass() { return 'normal' }
+      getBsStatusClass() { return 'normal' },
+      getTempStatusText() {
+        const t = parseFloat(this.latestHealth.temperature)
+        if (!t) return '无数据'
+        if (t >= 37.3) return '偏高'
+        if (t < 36) return '偏低'
+        return '正常'
+      },
+      getTempStatusClass() {
+        const t = parseFloat(this.latestHealth.temperature)
+        return (t >= 37.3 || t < 36) ? 'warn' : 'normal'
+      },
+      getSpo2StatusText() {
+        const v = this.latestHealth.bloodOxygen
+        if (!v) return '无数据'
+        return v < 95 ? '偏低' : '正常'
+      },
+      getSpo2StatusClass() {
+        const v = this.latestHealth.bloodOxygen
+        return (v && v < 95) ? 'warn' : 'normal'
+      }
     }
   }
 </script>
@@ -391,6 +512,7 @@
     justify-content: center;
     margin-bottom: 12rpx;
   }
+  .report-icon-bg { background: linear-gradient(135deg, #fff3e0, #ffe0b2); }
   .med-icon-bg { background: linear-gradient(135deg, #e8eaf6, #c5cae9); }
   .exam-icon-bg { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); }
   .alert-icon-bg { background: linear-gradient(135deg, #fce4ec, #f8bbd0); }
@@ -399,7 +521,27 @@
 
   .chart-section {
     background-color: #fff; border-radius: 24rpx; padding: 30rpx;
-    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30rpx; .section-title { font-size: 36rpx; font-weight: bold; } }
+    .section-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 30rpx;
+      .section-title { font-size: 36rpx; font-weight: bold; }
+      .range-selector {
+        display: flex;
+        gap: 12rpx;
+        .range-item {
+          padding: 10rpx 24rpx;
+          border-radius: 30rpx;
+          font-size: 26rpx;
+          color: #666;
+          background: #f5f5f5;
+          transition: all 0.2s;
+          &.active {
+            background: linear-gradient(135deg, #0081ff, #1cbbb4);
+            color: #fff;
+            font-weight: bold;
+          }
+        }
+      }
+    }
     .metric-selector { white-space: nowrap; margin-bottom: 30rpx; .metric-item { display: inline-flex; flex-direction: column; align-items: center; padding: 20rpx 30rpx; margin-right: 20rpx; border-radius: 20rpx; &.active { background-color: #0081ff; .metric-name { color: #fff; } } } }
     .chart-box { height: 450rpx; .chart-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; .trend-canvas { width: 600rpx; height: 350rpx; } .chart-tip { font-size: 20rpx; color: #999; margin-top: 10rpx; } } }
   }

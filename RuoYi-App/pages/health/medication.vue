@@ -225,9 +225,14 @@ export default {
       const data = { ...this.form }
       // 时间字段转换
       if (data.reminderTimeStr) {
+        // 使用本地日期避免 UTC 时区偏差
+        const today = (() => {
+          const d = new Date()
+          return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0')
+        })()
         data.reminderTime = data.startDateStr
           ? data.startDateStr + ' ' + data.reminderTimeStr + ':00'
-          : new Date().toISOString().slice(0, 10) + ' ' + data.reminderTimeStr + ':00'
+          : today + ' ' + data.reminderTimeStr + ':00'
       }
       if (data.startDateStr) {
         data.startDate = data.startDateStr

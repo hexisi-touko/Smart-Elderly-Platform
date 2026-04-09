@@ -77,6 +77,22 @@ public class AppExamController extends BaseController {
      */
     @PutMapping("/cancel/{reservationId}")
     public AjaxResult cancel(@PathVariable Long reservationId) {
+        // 归属校验：确保只能取消自己的预约
+        Long elderlyId = getCurrentElderlyId();
+        if (elderlyId == null) {
+            return error("未找到关联的老人信息");
+        }
+        TPhysicalExamReservation existing = examReservationService.selectTPhysicalExamReservationByReservationId(reservationId);
+        if (existing == null) {
+            return error("预约记录不存在");
+        }
+        if (!elderlyId.equals(existing.getElderlyId())) {
+            return error("无权取消该预约");
+        }
+        if (existing.getReservationStatus() != null && existing.getReservationStatus() >= 2L) {
+            return error("该预约状态不允许取消");
+        }
+
         TPhysicalExamReservation update = new TPhysicalExamReservation();
         update.setReservationId(reservationId);
         update.setReservationStatus(3L); // 3-已取消

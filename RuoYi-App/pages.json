@@ -44,6 +44,12 @@
       }
     },
     {
+      "path": "pages/health/report",
+      "style": {
+        "navigationBarTitleText": "健康报告"
+      }
+    },
+    {
       "path": "pages/safety/alert_detail",
       "style": {
         "navigationBarTitleText": "预警详情"
