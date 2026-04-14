@@ -90,6 +90,13 @@ public class TServiceOrder extends BaseEntity {
     @Excel(name = "服务项目")
     private String itemName;
 
+    /** 服务人员姓名（JOIN查询用） */
+    @Excel(name = "服务人员")
+    private String staffName;
+
+    /** 服务人员电话（JOIN查询用） */
+    private String staffPhone;
+
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
@@ -250,6 +257,22 @@ public class TServiceOrder extends BaseEntity {
         return servicePhotos;
     }
 
+    public void setStaffName(String staffName) {
+        this.staffName = staffName;
+    }
+
+    public String getStaffName() {
+        return staffName;
+    }
+
+    public void setStaffPhone(String staffPhone) {
+        this.staffPhone = staffPhone;
+    }
+
+    public String getStaffPhone() {
+        return staffPhone;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -260,6 +283,8 @@ public class TServiceOrder extends BaseEntity {
                 .append("providerName", getProviderName())
                 .append("serviceItemId", getServiceItemId())
                 .append("itemName", getItemName())
+                .append("staffName", getStaffName())
+                .append("staffPhone", getStaffPhone())
                 .append("orderNo", getOrderNo())
                 .append("orderAmount", getOrderAmount())
                 .append("serviceTime", getServiceTime())

@@ -15,9 +15,9 @@
 | 订单列表 + 取消 + 评价 | ✅ | `work/index.vue`，含状态 Tab 和评价弹窗 |
 | 我的 - 个人信息 / 编辑 / 老人资料 / 监护人资料 | ✅ | `mine/` 下各页面 |
 | SOS 一键呼叫 | ✅ | `AppAlertController` + 首页导航 |
-| 用药提醒 | ❌ | 后端 CRUD 已生成，App 无页面 |
-| 体检预约 | ❌ | 后端 CRUD 已生成，App 无页面 |
-| 健康报告（多周期） | ❌ | 无 |
+| 用药提醒 | ✅ | `health/medication.vue` + `AppMedicationController` |
+| 体检预约 | ✅ | `health/exam.vue` + `AppExamController` |
+| 健康报告（多周期） | ✅ | `health/report.vue`，含周/月/季趋势图 + 统计摘要 |
 | 智能设备 binding | ❌ | 后端 CRUD 已生成，App 无页面 |
 | 精神慰藉 / 文娱 | ❌ | 整个模块 App 端空白 |
 | 监护人视角（远程查看老人数据） | ❌ | 无 |
@@ -34,7 +34,7 @@
 | C 端预警 + SOS | ✅ | `AppAlertController` |
 | C 端评价 | ✅ | `AppEvaluationController` |
 | C 端个人信息 | ✅ | `AppProfileController` |
-| 订单状态流转（接单/服务中/完成） | ❌ | 目前只有下单和取消 |
+| 订单状态流转（接单/服务中/完成） | ✅ | `AppWorkerOrderController` + 员工端抢单/开始/完成（含OSS照片上传） |
 | 用药提醒推送逻辑 | ❌ | 仅 CRUD |
 | 活动报名业务逻辑 | ❌ | 仅 CRUD |
 | 数据可视化 / 统计接口 | ❌ | 无 |
@@ -64,14 +64,14 @@
 
 #### 1.1 健康管理模块完善 (需求 3.3)
 
-| 任务 | 端 | 具体内容 |
-| :--- | :---: | :--- |
-| 健康报告页 | App | 新增 `pages/health/report.vue`，展示周/月健康趋势折线图（ECharts），支持切换血压/心率/血糖 |
-| 用药提醒页 | App | 新增 `pages/health/medication.vue`，展示用药计划列表 + 新增/编辑弹窗 |
-| 用药提醒后端 | 后端 | 新增 `AppMedicationController`，提供 C 端增删改查 + 定时提醒逻辑 |
-| 体检预约页 | App | 新增 `pages/health/exam.vue`，展示可预约体检列表 + 预约/取消操作 |
-| 体检预约后端 | 后端 | 新增 `AppExamController`，C 端预约接口 |
-| 健康看板优化 | App | 在 `health/index.vue` 中增加更多指标卡片（血糖、体温、血氧），适老化大字体改造 |
+| 任务 | 端 | 具体内容 | 状态 |
+| :--- | :---: | :--- | :---: |
+| 健康报告页 | App | `pages/health/report.vue`，含周/月/季折线图 + 5大指标统计 | ✅ |
+| 用药提醒页 | App | `pages/health/medication.vue`，含列表 + 新增/编辑弹窗 | ✅ |
+| 用药提醒后端 | 后端 | `AppMedicationController`，C 端增删改查 | ✅ |
+| 体检预约页 | App | `pages/health/exam.vue`，含预约/取消 + Tab 筛选 | ✅ |
+| 体检预约后端 | 后端 | `AppExamController`，含归属校验 | ✅ |
+| 健康看板优化 | App | 5 个指标卡片（血压/心率/血糖/体温/血氧）+ Canvas 坐标轴 + 时间范围过滤 | ✅ |
 
 #### 1.2 安全应急模块完善 (需求 3.4)
 
@@ -84,12 +84,12 @@
 
 #### 1.3 生活照料模块完善 (需求 3.5)
 
-| 任务 | 端 | 具体内容 |
-| :--- | :---: | :--- |
-| 服务详情页 | App | 新增 `pages/service/detail.vue`，展示服务商信息、评分、服务内容描述 |
-| 订单详情页 | App | 新增 `pages/order/detail.vue`，展示完整订单信息 + 进度时间线 + 服务人员联系方式 |
-| 订单状态流转 | 后端 | 扩展 `TServiceOrderServiceImpl`，增加 `assignStaff` / `startService` / `completeService` 等方法 |
-| 管理端订单调度 | 管理端 | 改造 `views/order/` 页面，增加"指派服务人员"按钮和状态操作按钮 |
+| 任务 | 端 | 具体内容 | 状态 |
+| :--- | :---: | :--- | :---: |
+| 服务详情页 | App | `pages/service/detail.vue`，展示服务信息+服务商+预约弹窗 | ✅ |
+| 订单详情页 | App | `pages/order/detail.vue`，含服务人员卡片+服务记录照片+一键拨打 | ✅ |
+| 订单状态流转 | 后端 | `AppWorkerOrderController` 已实现接单/开始/完成（含OSS照片+服务记录） | ✅ |
+| 管理端订单调度 | 管理端 | 指派员工弹窗 + 开始服务/标记完成按钮 + 状态筛选 | ✅ |
 
 #### Phase 1 预计工作量：约 8-10 个工作日
 
@@ -174,14 +174,14 @@
 | 核心需求章节 | 关键需求点 | 对应 Phase | 当前状态 |
 | :--- | :--- | :---: | :---: |
 | 3.3 健康管理 | 实时健康数据展示 | - | ✅ 已完成 |
-| 3.3 健康管理 | 多周期健康报告 | Phase 1 | ❌ |
-| 3.3 健康管理 | 用药提醒 | Phase 1 | ❌ |
-| 3.3 健康管理 | 体检预约 | Phase 1 | ❌ |
+| 3.3 健康管理 | 多周期健康报告 | Phase 1 | ✅ 已完成 |
+| 3.3 健康管理 | 用药提醒 | Phase 1 | ✅ 已完成 |
+| 3.3 健康管理 | 体检预约 | Phase 1 | ✅ 已完成 |
 | 3.4 安全应急 | SOS 一键呼叫 | Phase 1 | 🔧 需优化 |
 | 3.4 安全应急 | 预警处理闭环 | Phase 1 | ❌ |
 | 3.4 安全应急 | 安全区域/电子围栏 | Phase 1 | ❌ |
 | 3.5 生活照料 | 服务预约 | - | ✅ 已完成 |
-| 3.5 生活照料 | 订单全生命周期 | Phase 1 | 🔧 只有下单/取消 |
+| 3.5 生活照料 | 订单全生命周期 | Phase 1 | ✅ 已完成 |
 | 3.5 生活照料 | 服务评价 | - | ✅ 已完成 |
 | 2.2 子女/监护人 | 远程查看老人状态 | Phase 2 | ❌ |
 | 2.2 子女/监护人 | 异常预警通知 | Phase 2 | ❌ |

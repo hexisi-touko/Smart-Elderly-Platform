@@ -25,6 +25,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="isDeleted"    column="is_deleted"    />
         <result property="serviceRecord"    column="service_record"    />
         <result property="servicePhotos"    column="service_photos"    />
+        <result property="staffName"    column="staff_name"    />
+        <result property="staffPhone"    column="staff_phone"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
     </resultMap>
@@ -34,11 +36,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                so.provider_id, sp.provider_name, so.service_item_id, si.item_name,
                so.order_no, so.order_amount, so.service_time, so.service_address,
                so.service_requirements, so.order_status, so.accept_time, so.start_time,
-               so.complete_time, so.service_record, so.service_photos, so.cancel_reason, so.is_deleted, so.create_time, so.update_time
+               so.complete_time, so.service_record, so.service_photos, so.cancel_reason, so.is_deleted, so.create_time, so.update_time,
+               ss.staff_name, ss.phone as staff_phone
         from t_service_order so
         left join t_elderly e on so.elderly_id = e.elderly_id
         left join t_service_provider sp on so.provider_id = sp.provider_id
         left join t_service_item si on so.service_item_id = si.item_id
+        left join t_order_staff os on so.order_id = os.order_id and os.is_primary = 1
+        left join t_service_staff ss on os.staff_id = ss.staff_id
     </sql>
 
     <select id="selectTServiceOrderList" parameterType="TServiceOrder" resultMap="TServiceOrderResult">

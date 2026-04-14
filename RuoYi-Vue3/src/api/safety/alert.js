@@ -42,3 +42,29 @@ export function delAlert(alertId) {
     method: 'delete'
   })
 }
+
+// 接警响应
+export function respondAlert(data) {
+  return request({
+    url: '/safety/alert/respond',
+    method: 'put',
+    data: data
+  })
+}
+
+// 完成处置
+export function completeAlert(data) {
+  return request({
+    url: '/safety/alert/complete',
+    method: 'put',
+    data: data
+  })
+}
+
+// 关闭预警
+export function closeAlert(alertId) {
+  return request({
+    url: '/safety/alert/close/' + alertId,
+    method: 'put'
+  })
+}

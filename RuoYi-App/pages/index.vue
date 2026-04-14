@@ -27,6 +27,15 @@
             </view>
           </view>
         </view>
+        <view class="nav-card zone-nav" @click="navToZone">
+          <view class="nav-content">
+            <uni-icons type="location-filled" size="36" color="#fff"></uni-icons>
+            <view class="nav-text">
+              <text class="nav-title">安全区域</text>
+              <text class="nav-desc">电子围栏</text>
+            </view>
+          </view>
+        </view>
       </view>
 
       <view class="service-list">

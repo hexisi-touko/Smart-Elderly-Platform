@@ -32,6 +32,9 @@ public class TSafetyAlertServiceImpl implements ITSafetyAlertService {
     @Autowired
     private ITGuardianService tGuardianService;
 
+    @Autowired
+    private com.ruoyi.system.service.ISysNoticeService sysNoticeService;
+
 
     /**
      * 查询安全预警管理
@@ -112,8 +115,10 @@ public class TSafetyAlertServiceImpl implements ITSafetyAlertService {
         elderlyParams.setUserId(userId);
         List<TElderly> elderlyList = tElderlyService.selectTElderlyList(elderlyParams);
 
+        String elderlyName = "老人";
         if (elderlyList != null && !elderlyList.isEmpty()) {
             tSafetyAlert.setElderlyId(elderlyList.get(0).getElderlyId());
+            elderlyName = elderlyList.get(0).getName();
         } else {
             TGuardian guardianParams = new TGuardian();
             guardianParams.setUserId(userId);
@@ -121,6 +126,10 @@ public class TSafetyAlertServiceImpl implements ITSafetyAlertService {
             if (guardianList != null && !guardianList.isEmpty()) {
                 if (tSafetyAlert.getElderlyId() == null) {
                     throw new ServiceException("监护人上报预警失败：未指定老人ID");
+                }
+                TElderly e = tElderlyService.selectTElderlyByElderlyId(tSafetyAlert.getElderlyId());
+                if (e != null) {
+                    elderlyName = e.getName();
                 }
             } else {
                 throw new ServiceException("上报失败：未找到您的角色档案，请先完善身份资料");
@@ -132,6 +141,23 @@ public class TSafetyAlertServiceImpl implements ITSafetyAlertService {
         tSafetyAlert.setAlertStatus(0L); // 0-待处理
         tSafetyAlert.setCreateTime(DateUtils.getNowDate());
 
-        return tSafetyAlertMapper.insertTSafetyAlert(tSafetyAlert);
+        int result = tSafetyAlertMapper.insertTSafetyAlert(tSafetyAlert);
+
+        // 3. 触发系统通知，告知监护人
+        try {
+            com.ruoyi.system.domain.SysNotice notice = new com.ruoyi.system.domain.SysNotice();
+            notice.setNoticeTitle("【紧急】安全预警通知");
+            notice.setNoticeType("1"); // 1为通知
+            String alertType = tSafetyAlert.getAlertType() != null ? tSafetyAlert.getAlertType() : "安全预警";
+            notice.setNoticeContent("您关联的老人【" + elderlyName + "】触发了【" + alertType + "】，请及时关注并跟进处理进度！");
+            notice.setStatus("0"); // 正常
+            notice.setCreateBy("系统自动发送");
+            notice.setCreateTime(DateUtils.getNowDate());
+            sysNoticeService.insertNotice(notice);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 }

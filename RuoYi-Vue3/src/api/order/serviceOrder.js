@@ -42,3 +42,21 @@ export function delServiceOrder(orderId) {
     method: 'delete'
   })
 }
+
+// 指派服务人员
+export function assignStaff(data) {
+  return request({
+    url: '/order/serviceOrder/assign',
+    method: 'put',
+    data: data
+  })
+}
+
+// 变更订单状态
+export function changeOrderStatus(data) {
+  return request({
+    url: '/order/serviceOrder/changeStatus',
+    method: 'put',
+    data: data
+  })
+}

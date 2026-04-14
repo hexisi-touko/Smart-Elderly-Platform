@@ -138,8 +138,14 @@
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="280">
         <template #default="scope">
+          <el-button link type="danger" icon="Bell" @click="handleRespond(scope.row)"
+            v-if="scope.row.alertStatus == 0" v-hasPermi="['safety:alert:edit']">接警</el-button>
+          <el-button link type="warning" icon="CircleCheck" @click="handleComplete(scope.row)"
+            v-if="scope.row.alertStatus == 1" v-hasPermi="['safety:alert:edit']">完成处置</el-button>
+          <el-button link type="info" icon="CircleClose" @click="handleClose(scope.row)"
+            v-if="scope.row.alertStatus == 2" v-hasPermi="['safety:alert:edit']">关闭</el-button>
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['safety:alert:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['safety:alert:remove']">删除</el-button>
         </template>
@@ -224,12 +230,60 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 接警响应弹窗 -->
+    <el-dialog title="接警响应" v-model="respondOpen" width="450px" append-to-body>
+      <el-form label-width="100px">
+        <el-form-item label="处理人">
+          <el-select
+            v-model="respondForm.handlerId"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="请输入服务人员姓名搜索"
+            :remote-method="remoteSearchStaff"
+            :loading="staffLoading"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in staffOptions"
+              :key="item.staffId"
+              :label="item.staffName + ' (' + (item.phone || '无手机号') + ')'"
+              :value="item.staffId"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="处理人角色">
+          <el-select v-model="respondForm.handlerRole" placeholder="请选择">
+            <el-option v-for="dict in handler_role" :key="dict.value" :label="dict.label" :value="dict.value" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button type="primary" @click="submitRespond">确认接警</el-button>
+        <el-button @click="respondOpen = false">取消</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 完成处置弹窗 -->
+    <el-dialog title="完成处置" v-model="completeOpen" width="450px" append-to-body>
+      <el-form label-width="100px">
+        <el-form-item label="处理结果" required>
+          <el-input v-model="completeForm.handleResult" type="textarea" :rows="4" placeholder="请输入处置结果说明" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button type="primary" @click="submitComplete">确认完成</el-button>
+        <el-button @click="completeOpen = false">取消</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup name="Alert">
-import { listAlert, getAlert, delAlert, addAlert, updateAlert } from "@/api/safety/alert"
+import { listAlert, getAlert, delAlert, addAlert, updateAlert, respondAlert, completeAlert, closeAlert } from "@/api/safety/alert"
 import { listElderly } from "@/api/elderly/elderly"
+import { listServiceStaff } from "@/api/service/serviceStaff"
 
 const { proxy } = getCurrentInstance()
 const { alert_status, alert_type, handler_role } = proxy.useDict('alert_status', 'alert_type', 'handler_role')
@@ -246,6 +300,8 @@ const title = ref("")
 const daterangeAlertTime = ref([])
 const elderlyOptions = ref([])
 const elderlyLoading = ref(false)
+const staffOptions = ref([])
+const staffLoading = ref(false)
 
 const data = reactive({
   form: {},
@@ -350,6 +406,19 @@ function remoteSearchElderly(query) {
   }
 }
 
+/** 远程搜索服务人员 */
+function remoteSearchStaff(query) {
+  if (query) {
+    staffLoading.value = true
+    listServiceStaff({ staffName: query, pageNum: 1, pageSize: 20 }).then(res => {
+      staffOptions.value = res.rows
+      staffLoading.value = false
+    })
+  } else {
+    staffOptions.value = []
+  }
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -430,6 +499,49 @@ function handleExport() {
   proxy.download('safety/alert/export', {
     ...queryParams.value
   }, `alert_${new Date().getTime()}.xlsx`)
+}
+
+/** ====== 预警处理流程 ====== */
+const respondOpen = ref(false)
+const respondForm = reactive({ alertId: null, handlerId: null, handlerRole: null })
+const completeOpen = ref(false)
+const completeForm = reactive({ alertId: null, handleResult: '' })
+
+function handleRespond(row) {
+  respondForm.alertId = row.alertId
+  respondForm.handlerId = null
+  respondForm.handlerRole = null
+  respondOpen.value = true
+}
+function submitRespond() {
+  respondAlert(respondForm).then(() => {
+    proxy.$modal.msgSuccess('接警成功')
+    respondOpen.value = false
+    getList()
+  })
+}
+
+function handleComplete(row) {
+  completeForm.alertId = row.alertId
+  completeForm.handleResult = ''
+  completeOpen.value = true
+}
+function submitComplete() {
+  if (!completeForm.handleResult) { proxy.$modal.msgWarning('请输入处置结果'); return }
+  completeAlert(completeForm).then(() => {
+    proxy.$modal.msgSuccess('处置完成')
+    completeOpen.value = false
+    getList()
+  })
+}
+
+function handleClose(row) {
+  proxy.$modal.confirm('确认关闭该预警？').then(() => {
+    closeAlert(row.alertId).then(() => {
+      proxy.$modal.msgSuccess('已关闭')
+      getList()
+    })
+  }).catch(() => {})
 }
 
 getList()

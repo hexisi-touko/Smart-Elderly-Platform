@@ -56,6 +56,18 @@
       }
     },
     {
+      "path": "pages/safety/zone",
+      "style": {
+        "navigationBarTitleText": "安全区域"
+      }
+    },
+    {
+      "path": "pages/service/detail",
+      "style": {
+        "navigationBarTitleText": "服务详情"
+      }
+    },
+    {
       "path": "pages/work/index",
       "style": {
         "navigationBarTitleText": "我的订单"

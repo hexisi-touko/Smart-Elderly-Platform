@@ -17,7 +17,9 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.order.domain.TServiceOrder;
+import com.ruoyi.order.domain.TOrderStaff;
 import com.ruoyi.order.service.ITServiceOrderService;
+import com.ruoyi.order.service.ITOrderStaffService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;
 
@@ -33,6 +35,9 @@ public class TServiceOrderController extends BaseController
 {
     @Autowired
     private ITServiceOrderService tServiceOrderService;
+
+    @Autowired
+    private ITOrderStaffService tOrderStaffService;
 
     /**
      * 查询服务订单列表
@@ -100,5 +105,53 @@ public class TServiceOrderController extends BaseController
     public AjaxResult remove(@PathVariable Long[] orderIds)
     {
         return toAjax(tServiceOrderService.deleteTServiceOrderByOrderIds(orderIds));
+    }
+
+    /**
+     * 指派服务人员
+     */
+    @PreAuthorize("@ss.hasPermi('order:serviceOrder:edit')")
+    @Log(title = "订单指派", businessType = BusinessType.UPDATE)
+    @PutMapping("/assign")
+    public AjaxResult assignStaff(@RequestBody java.util.Map<String, Long> params)
+    {
+        Long orderId = params.get("orderId");
+        Long staffId = params.get("staffId");
+        if (orderId == null || staffId == null) {
+            return error("订单ID和服务人员ID不能为空");
+        }
+        TOrderStaff orderStaff = new TOrderStaff();
+        orderStaff.setOrderId(orderId);
+        orderStaff.setStaffId(staffId);
+        orderStaff.setIsPrimary(1L);
+        tOrderStaffService.insertTOrderStaff(orderStaff);
+
+        TServiceOrder update = new TServiceOrder();
+        update.setOrderId(orderId);
+        update.setOrderStatus(1L);
+        update.setAcceptTime(new java.util.Date());
+        return toAjax(tServiceOrderService.updateTServiceOrder(update));
+    }
+
+    /**
+     * 变更订单状态（开始服务/标记完成）
+     */
+    @PreAuthorize("@ss.hasPermi('order:serviceOrder:edit')")
+    @Log(title = "订单状态变更", businessType = BusinessType.UPDATE)
+    @PutMapping("/changeStatus")
+    public AjaxResult changeStatus(@RequestBody TServiceOrder order)
+    {
+        if (order.getOrderId() == null || order.getOrderStatus() == null) {
+            return error("订单ID和目标状态不能为空");
+        }
+        TServiceOrder update = new TServiceOrder();
+        update.setOrderId(order.getOrderId());
+        update.setOrderStatus(order.getOrderStatus());
+        if (order.getOrderStatus() == 2L) {
+            update.setStartTime(new java.util.Date());
+        } else if (order.getOrderStatus() == 3L) {
+            update.setCompleteTime(new java.util.Date());
+        }
+        return toAjax(tServiceOrderService.updateTServiceOrder(update));
     }
 }

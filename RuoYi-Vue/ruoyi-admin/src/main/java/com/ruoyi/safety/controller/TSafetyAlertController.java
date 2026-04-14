@@ -101,4 +101,57 @@ public class TSafetyAlertController extends BaseController
     {
         return toAjax(tSafetyAlertService.deleteTSafetyAlertByAlertIds(alertIds));
     }
+
+    /**
+     * 接警响应（待响应 → 处理中）
+     */
+    @PreAuthorize("@ss.hasPermi('safety:alert:edit')")
+    @Log(title = "接警响应", businessType = BusinessType.UPDATE)
+    @PutMapping("/respond")
+    public AjaxResult respond(@RequestBody TSafetyAlert alert)
+    {
+        if (alert.getAlertId() == null) {
+            return error("预警ID不能为空");
+        }
+        TSafetyAlert update = new TSafetyAlert();
+        update.setAlertId(alert.getAlertId());
+        update.setAlertStatus(1L); // 处理中
+        update.setResponseTime(new java.util.Date());
+        update.setHandlerId(alert.getHandlerId());
+        update.setHandlerRole(alert.getHandlerRole());
+        return toAjax(tSafetyAlertService.updateTSafetyAlert(update));
+    }
+
+    /**
+     * 完成处置（处理中 → 已完成）
+     */
+    @PreAuthorize("@ss.hasPermi('safety:alert:edit')")
+    @Log(title = "完成处置", businessType = BusinessType.UPDATE)
+    @PutMapping("/complete")
+    public AjaxResult complete(@RequestBody TSafetyAlert alert)
+    {
+        if (alert.getAlertId() == null) {
+            return error("预警ID不能为空");
+        }
+        TSafetyAlert update = new TSafetyAlert();
+        update.setAlertId(alert.getAlertId());
+        update.setAlertStatus(2L); // 已完成
+        update.setCompleteTime(new java.util.Date());
+        update.setHandleResult(alert.getHandleResult());
+        return toAjax(tSafetyAlertService.updateTSafetyAlert(update));
+    }
+
+    /**
+     * 关闭预警（已完成 → 已关闭）
+     */
+    @PreAuthorize("@ss.hasPermi('safety:alert:edit')")
+    @Log(title = "关闭预警", businessType = BusinessType.UPDATE)
+    @PutMapping("/close/{alertId}")
+    public AjaxResult closeAlert(@PathVariable Long alertId)
+    {
+        TSafetyAlert update = new TSafetyAlert();
+        update.setAlertId(alertId);
+        update.setAlertStatus(3L); // 已关闭
+        return toAjax(tSafetyAlertService.updateTSafetyAlert(update));
+    }
 }
